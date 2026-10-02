@@ -16,7 +16,6 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
-import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
@@ -75,7 +74,12 @@ function ProgressRing({
           { backgroundColor: colors.card },
         ]}
       >
-        <Text style={stylesProgressRing.text}>
+        <Text
+          style={[
+            stylesProgressRing.text,
+            { color: colors.foreground },
+          ]}
+        >
           {Math.round(percent * 100)}%
         </Text>
       </View>
@@ -109,9 +113,9 @@ const stylesProgressRing = StyleSheet.create({
     fontSize: 27,
     lineHeight: 32,
     fontWeight: "800",
-    color: "#111111",
   },
 });
+
 function StatCard({
   value,
   label,
@@ -205,7 +209,8 @@ export default function DashboardScreen() {
                 {getGreeting()}, Ajay 👋
               </Text>
               <Text style={styles.heroTitle}>
-                Have a productive{"\n"}day ahead.
+                Have a productive{"
+"}day ahead.
               </Text>
               <Text style={styles.date}>{formatToday()}</Text>
             </View>
@@ -360,7 +365,8 @@ export default function DashboardScreen() {
             <Text style={styles.emptyTitle}>You’re all caught up!</Text>
 
             <Text style={styles.emptyText}>
-              No tasks are due today.{"\n"}Enjoy your free time or add a new task.
+              No tasks are due today.{"
+"}Enjoy your free time or add a new task.
             </Text>
           </View>
         ) : (
@@ -421,7 +427,8 @@ export default function DashboardScreen() {
           </View>
 
           <Text style={styles.quoteText}>
-            Small steps every day{"\n"}lead to big results.
+            Small steps every day{"
+"}lead to big results.
           </Text>
         </View>
       </ScrollView>
@@ -439,13 +446,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       flex: 1,
       backgroundColor: colors.background,
     },
-
     content: {
       paddingHorizontal: 21,
       paddingTop: topInset,
       paddingBottom: 132,
     },
-
     hero: {
       height: compact ? 246 : 270,
       position: "relative",
@@ -453,7 +458,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       marginHorizontal: -21,
       paddingHorizontal: 21,
     },
-
     heroImage: {
       position: "absolute",
       width: compact ? 420 : 470,
@@ -461,26 +465,22 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       right: compact ? -62 : -42,
       bottom: compact ? -28 : -20,
     },
-
     heroTop: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "flex-start",
       paddingTop: compact ? 22 : 29,
     },
-
     heroText: {
       flex: 1,
       paddingRight: 12,
     },
-
     greeting: {
       fontSize: 17,
       lineHeight: 23,
       fontWeight: "600",
       color: colors.mutedForeground,
     },
-
     heroTitle: {
       marginTop: 9,
       fontSize: 39,
@@ -489,7 +489,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       letterSpacing: -0.9,
       color: colors.foreground,
     },
-
     date: {
       marginTop: 11,
       fontSize: 18,
@@ -497,12 +496,10 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-
     headerActions: {
       flexDirection: "row",
       gap: 12,
     },
-
     headerButton: {
       width: 58,
       height: 58,
@@ -516,7 +513,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       shadowOffset: { width: 0, height: 5 },
       elevation: 3,
     },
-
     progressCard: {
       minHeight: 255,
       marginTop: -2,
@@ -534,19 +530,16 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       shadowOffset: { width: 0, height: 4 },
       elevation: 1,
     },
-
     progressCopy: {
       flex: 1,
       paddingRight: 18,
     },
-
     progressTitle: {
       fontSize: 20,
       lineHeight: 25,
       fontWeight: "700",
       color: colors.foreground,
     },
-
     progressCount: {
       marginTop: 19,
       fontSize: 51,
@@ -555,7 +548,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       letterSpacing: -1.4,
       color: colors.foreground,
     },
-
     progressSubtitle: {
       marginTop: 2,
       fontSize: 20,
@@ -563,14 +555,12 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-
     progressBarRow: {
       marginTop: 26,
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
     },
-
     progressBarTrack: {
       flex: 1,
       height: 16,
@@ -578,26 +568,22 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       backgroundColor: colors.muted,
       overflow: "hidden",
     },
-
     progressBarFill: {
       height: "100%",
       borderRadius: 999,
     },
-
     progressPercent: {
       width: 42,
       fontSize: 17,
       fontWeight: "600",
       color: colors.mutedForeground,
     },
-
     statsRow: {
       flexDirection: "row",
       gap: 14,
       marginTop: 31,
       marginBottom: 39,
     },
-
     statCard: {
       flex: 1,
       height: compact ? 174 : 208,
@@ -607,7 +593,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       justifyContent: "flex-start",
       minWidth: 0,
     },
-
     statIcon: {
       width: compact ? 54 : 66,
       height: compact ? 54 : 66,
@@ -616,14 +601,12 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       justifyContent: "center",
       marginBottom: compact ? 14 : 18,
     },
-
     statValue: {
       fontSize: compact ? 30 : 35,
       lineHeight: compact ? 35 : 40,
       fontWeight: "800",
       color: colors.foreground,
     },
-
     statLabel: {
       marginTop: 2,
       fontSize: compact ? 16 : 19,
@@ -631,21 +614,18 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-
     sectionHeader: {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "space-between",
       marginBottom: 17,
     },
-
     sectionTitle: {
       fontSize: 27,
       lineHeight: 33,
       fontWeight: "800",
       color: colors.foreground,
     },
-
     sectionSubtitle: {
       marginTop: 2,
       fontSize: 18,
@@ -653,14 +633,12 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-
     viewAll: {
       fontSize: 18,
       lineHeight: 24,
       fontWeight: "700",
       color: colors.accent,
     },
-
     emptyCard: {
       minHeight: 425,
       borderRadius: 22,
@@ -672,21 +650,18 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       paddingHorizontal: 24,
       overflow: "hidden",
     },
-
     emptyImage: {
       width: "94%",
       height: 225,
       marginTop: -8,
       marginBottom: 2,
     },
-
     emptyTitle: {
       fontSize: 26,
       lineHeight: 32,
       fontWeight: "800",
       color: colors.foreground,
     },
-
     emptyText: {
       marginTop: 12,
       textAlign: "center",
@@ -695,22 +670,18 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-
     stateText: {
       fontSize: 16,
       color: colors.mutedForeground,
     },
-
     errorText: {
       fontSize: 16,
       color: colors.destructive,
       textAlign: "center",
     },
-
     taskList: {
       gap: 10,
     },
-
     taskCard: {
       minHeight: 72,
       borderWidth: 1,
@@ -722,29 +693,24 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       paddingHorizontal: 16,
       gap: 12,
     },
-
     taskDot: {
       width: 11,
       height: 11,
       borderRadius: 6,
     },
-
     taskCopy: {
       flex: 1,
     },
-
     taskTitle: {
       fontSize: 16,
       fontWeight: "700",
       color: colors.foreground,
     },
-
     taskMeta: {
       marginTop: 3,
       fontSize: 13,
       color: colors.mutedForeground,
     },
-
     motivationCard: {
       height: 184,
       marginTop: 39,
@@ -756,7 +722,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       justifyContent: "center",
       paddingLeft: 37,
     },
-
     motivationImage: {
       position: "absolute",
       width: "100%",
@@ -764,7 +729,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       right: 0,
       top: 0,
     },
-
     quoteIcon: {
       width: 54,
       height: 54,
@@ -774,7 +738,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       justifyContent: "center",
       marginBottom: 15,
     },
-
     quoteMark: {
       marginTop: -7,
       fontSize: 39,
@@ -782,14 +745,12 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       fontWeight: "800",
       color: colors.accent,
     },
-
     quoteText: {
       fontSize: 23,
       lineHeight: 31,
       fontWeight: "800",
       color: colors.foreground,
     },
-
     pressed: {
       opacity: 0.72,
     },
