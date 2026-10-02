@@ -4,7 +4,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
 function isToday(dateString: string): boolean {
   const date = new Date(`${dateString}T00:00:00`);
@@ -27,7 +29,7 @@ function formatDate(dateString: string): string {
   });
 }
 
-function TaskPreview({ task }: { task: Task }) {
+function TaskPreview({ task, colors }: { task: Task; colors: ThemeColors }) {
   return (
     <View style={styles.taskCard}>
       <View style={styles.taskContent}>
@@ -75,6 +77,8 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const { tasks, loading, error, refreshTasks } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   useFocusEffect(
     useCallback(() => {
@@ -197,10 +201,10 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   subtitle: {
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
