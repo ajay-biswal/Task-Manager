@@ -1,18 +1,31 @@
-import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, Switch, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppButton } from "@/components/ui/AppButton";
+import { BottomNavigation } from "@/components/BottomNavigation";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { tasks, clearTasks } = useTasks();
   const { isDark, colors, toggleTheme } = useTheme();
   const [exporting, setExporting] = useState(false);
+  const styles = createStyles(colors);
 
   async function handleExportTasks() {
     if (tasks.length === 0) {
@@ -22,16 +35,13 @@ export default function SettingsScreen() {
 
     try {
       setExporting(true);
-
       await exportTasksToCsv(tasks);
-
       Alert.alert(
         "Export complete",
         `${tasks.length} task(s) were exported successfully.`,
       );
     } catch (error) {
       console.error("Failed to export tasks:", error);
-
       Alert.alert("Export failed", "Unable to export tasks as a CSV file.");
     } finally {
       setExporting(false);
@@ -43,21 +53,16 @@ export default function SettingsScreen() {
       "Clear all tasks",
       "This will permanently delete all tasks from this device.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Clear All",
           style: "destructive",
           onPress: async () => {
             try {
               await clearTasks();
-
               Alert.alert("Tasks cleared", "All tasks have been removed.");
             } catch (error) {
               console.error("Failed to clear tasks:", error);
-
               Alert.alert("Error", "Unable to clear tasks.");
             }
           },
@@ -67,168 +72,270 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.content}>
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top + spacing.sm,
+            paddingBottom: 110 + insets.bottom,
+          },
+        ]}
+      >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.foreground }]}>
-            Settings
-          </Text>
-
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            Manage your TaskFlow preferences.
-          </Text>
+          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.subtitle}>Manage your TaskFlow preferences.</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-            Appearance
-          </Text>
+          <Text style={styles.sectionTitle}>Appearance</Text>
 
-          <View style={[styles.settingRow, { borderColor: colors.border }]}>
-            <View style={styles.settingContent}>
-              <Text style={[styles.settingTitle, { color: colors.foreground }]}>
-                Dark mode
-              </Text>
+          <View style={styles.row}>
+            <View style={styles.rowIcon}>
+              <AppIcon
+                name={{ ios: "moon.fill", android: "dark_mode", web: "dark_mode" }}
+                size={20}
+                color={colors.accent}
+              />
+            </View>
 
-              <Text
-                style={[
-                  styles.settingDescription,
-                  { color: colors.mutedForeground },
-                ]}
-              >
+            <View style={styles.rowContent}>
+              <Text style={styles.rowTitle}>Dark mode</Text>
+              <Text style={styles.rowDescription}>
                 Use a darker appearance throughout TaskFlow.
               </Text>
             </View>
 
-            <Switch value={isDark} onValueChange={toggleTheme} />
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{ false: colors.border, true: colors.accent }}
+              thumbColor={colors.card}
+            />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-            Data
-          </Text>
+          <Text style={styles.sectionTitle}>Data</Text>
 
-          <AppButton
-            title={exporting ? "Exporting..." : "Export Tasks as CSV"}
+          <Pressable
             onPress={handleExportTasks}
-            loading={exporting}
             disabled={exporting}
-          />
+            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
+          >
+            <View style={styles.actionIcon}>
+              <AppIcon
+                name={{
+                  ios: "square.and.arrow.up",
+                  android: "file_download",
+                  web: "file_download",
+                }}
+                size={20}
+                color={colors.foreground}
+              />
+            </View>
+            <View style={styles.rowContent}>
+              <Text style={styles.rowTitle}>
+                {exporting ? "Exporting..." : "Export tasks"}
+              </Text>
+              <Text style={styles.rowDescription}>
+                Share your tasks as a CSV file.
+              </Text>
+            </View>
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={18}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
 
-          <AppButton
-            title="Clear All Tasks"
-            variant="destructive"
+          <Pressable
             onPress={handleClearTasks}
-          />
+            style={({ pressed }) => [
+              styles.actionRow,
+              styles.destructiveRow,
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={[styles.actionIcon, styles.destructiveIcon]}>
+              <AppIcon
+                name={{ ios: "trash", android: "delete", web: "delete" }}
+                size={20}
+                color={colors.destructive}
+              />
+            </View>
+            <View style={styles.rowContent}>
+              <Text style={[styles.rowTitle, styles.destructiveText]}>
+                Clear all tasks
+              </Text>
+              <Text style={styles.rowDescription}>
+                Permanently remove all local tasks.
+              </Text>
+            </View>
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={18}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-            About
-          </Text>
+          <Text style={styles.sectionTitle}>About</Text>
 
-          <View style={[styles.aboutCard, { borderColor: colors.border }]}>
-            <Text style={[styles.appName, { color: colors.foreground }]}>
-              TaskFlow
-            </Text>
+          <View style={styles.aboutCard}>
+            <View style={styles.aboutIcon}>
+              <AppIcon
+                name={{ ios: "checkmark.circle.fill", android: "task_alt", web: "task_alt" }}
+                size={24}
+                color={colors.accent}
+              />
+            </View>
 
-            <Text style={[styles.version, { color: colors.mutedForeground }]}>
-              Local-first task management
-            </Text>
-
-            <Text style={[styles.version, { color: colors.mutedForeground }]}>
-              Version 1.0.0
-            </Text>
+            <View style={styles.rowContent}>
+              <Text style={styles.appName}>TaskFlow</Text>
+              <Text style={styles.rowDescription}>
+                Local-first task management
+              </Text>
+              <Text style={styles.version}>Version 1.0.0</Text>
+            </View>
           </View>
         </View>
+      </ScrollView>
 
-        <View style={styles.backButton}>
-          <AppButton
-            title="Back to Dashboard"
-            variant="secondary"
-            onPress={() => router.back()}
-          />
-        </View>
-      </View>
+      <BottomNavigation />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  content: {
-    padding: spacing.xl,
-    gap: spacing.xxl,
-  },
-
-  header: {
-    gap: spacing.xs,
-  },
-
-  title: {
-    fontSize: typography.xxxl,
-    fontWeight: "700",
-  },
-
-  subtitle: {
-    fontSize: typography.sm,
-  },
-
-  section: {
-    gap: spacing.md,
-  },
-
-  sectionTitle: {
-    fontSize: typography.lg,
-    fontWeight: "600",
-  },
-
-  settingRow: {
-    minHeight: 72,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: spacing.lg,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  settingContent: {
-    flex: 1,
-    marginRight: spacing.lg,
-    gap: spacing.xs,
-  },
-
-  settingTitle: {
-    fontSize: typography.md,
-    fontWeight: "500",
-  },
-
-  settingDescription: {
-    fontSize: typography.xs,
-  },
-
-  aboutCard: {
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: spacing.lg,
-    gap: spacing.xs,
-  },
-
-  appName: {
-    fontSize: typography.md,
-    fontWeight: "600",
-  },
-
-  version: {
-    fontSize: typography.sm,
-  },
-
-  backButton: {
-    marginTop: "auto",
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+    },
+    header: {
+      marginBottom: spacing.xl,
+    },
+    title: {
+      fontSize: 26,
+      lineHeight: 32,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
+    subtitle: {
+      marginTop: spacing.xs,
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
+    section: {
+      marginBottom: spacing.xl,
+    },
+    sectionTitle: {
+      marginBottom: spacing.sm,
+      fontSize: typography.sm,
+      fontWeight: "700",
+      color: colors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.6,
+    },
+    row: {
+      minHeight: 78,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+    },
+    actionRow: {
+      minHeight: 74,
+      marginBottom: spacing.sm,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+    },
+    destructiveRow: {
+      borderColor: colors.destructive,
+    },
+    rowIcon: {
+      width: 40,
+      height: 40,
+      marginRight: spacing.md,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.muted,
+    },
+    actionIcon: {
+      width: 40,
+      height: 40,
+      marginRight: spacing.md,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.muted,
+    },
+    destructiveIcon: {
+      backgroundColor: colors.background,
+    },
+    aboutIcon: {
+      width: 46,
+      height: 46,
+      marginRight: spacing.md,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.muted,
+    },
+    rowContent: {
+      flex: 1,
+      gap: 3,
+    },
+    rowTitle: {
+      fontSize: typography.md,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
+    rowDescription: {
+      fontSize: typography.xs,
+      lineHeight: 17,
+      color: colors.mutedForeground,
+    },
+    destructiveText: {
+      color: colors.destructive,
+    },
+    aboutCard: {
+      minHeight: 82,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+    },
+    appName: {
+      fontSize: typography.md,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
+    version: {
+      marginTop: 2,
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
+    },
+    pressed: {
+      opacity: 0.72,
+    },
+  });
+}
