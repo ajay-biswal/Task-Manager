@@ -221,7 +221,8 @@ export default function TaskFormScreen() {
             onPress={() => router.back()}
             hitSlop={10}
             style={styles.iconButton}
-            accessibilityLabel="Close"
+            accessibilityRole="button"
+            accessibilityLabel="Close task form"
           >
             <AppIcon
               name={{ ios: "xmark", android: "close", web: "close" }}
@@ -241,6 +242,7 @@ export default function TaskFormScreen() {
           <View style={styles.fieldGroup}>
             <FieldLabel colors={colors}>Title</FieldLabel>
             <TextInput
+              accessibilityLabel="Task title"
               value={form.title}
               onChangeText={(value) => updateField("title", value)}
               placeholder="What needs to be done?"
@@ -264,6 +266,7 @@ export default function TaskFormScreen() {
           <View style={styles.fieldGroup}>
             <FieldLabel colors={colors}>Description</FieldLabel>
             <TextInput
+              accessibilityLabel="Task description"
               value={form.description}
               onChangeText={(value) => updateField("description", value)}
               placeholder="Add some context (optional)..."
@@ -307,6 +310,9 @@ export default function TaskFormScreen() {
                   <Pressable
                     key={priority}
                     onPress={() => updateField("priority", priority)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={priority.charAt(0) + priority.slice(1).toLowerCase() + " priority"}
+                    accessibilityState={{ selected }}
                     style={[
                       styles.priorityButton,
                       {
@@ -371,6 +377,8 @@ export default function TaskFormScreen() {
             <Pressable
               onPress={() => router.back()}
               disabled={saving}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
               style={({ pressed }) => [
                 styles.cancelButton,
                 { backgroundColor: colors.muted, borderColor: colors.border },
@@ -385,6 +393,8 @@ export default function TaskFormScreen() {
             <Pressable
               onPress={handleSave}
               disabled={saving}
+              accessibilityRole="button"
+              accessibilityLabel={isEditMode ? "Update task" : "Create task"}
               style={({ pressed }) => [
                 styles.createButton,
                 { backgroundColor: colors.accent },
@@ -420,7 +430,12 @@ export default function TaskFormScreen() {
               <Text style={[styles.modalTitle, { color: colors.foreground }]}>
                 {selectField === "category" ? "Category" : "Status"}
               </Text>
-              <Pressable onPress={() => setSelectField(null)} hitSlop={10}>
+              <Pressable
+                onPress={() => setSelectField(null)}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel={selectField === "category" ? "Close category selector" : "Close status selector"}
+              >
                 <AppIcon
                   name={{ ios: "xmark", android: "close", web: "close" }}
                   size={20}
@@ -461,6 +476,9 @@ export default function TaskFormScreen() {
                       }
                       setSelectField(null);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityLabel={display}
+                    accessibilityState={{ selected: current }}
                     style={[
                       styles.modalOption,
                       current && { backgroundColor: colors.muted },
@@ -521,6 +539,8 @@ function SelectField({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={value || placeholder || "Select option"}
       style={[
         styles.selectField,
         { backgroundColor: colors.card, borderColor: colors.border },
@@ -563,6 +583,8 @@ function DateField({
       </Text>
       <Pressable
         onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label + ", " + (value ? formatDate(value) : "Select date")}
         style={[
           styles.dateField,
           { backgroundColor: colors.card, borderColor: error ? colors.destructive : colors.border },
