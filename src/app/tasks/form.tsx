@@ -490,6 +490,7 @@ export default function TaskFormScreen() {
           onValueChange={(event, date) => {
             if (date) {
               updateField(dateField, toISODate(date));
+              setDateField(null);
             }
           }}
           onDismiss={() => setDateField(null)}
