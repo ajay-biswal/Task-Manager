@@ -40,20 +40,20 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Settings</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>Settings</Text>
 
-          <Text style={styles.subtitle}>Manage your TaskFlow preferences.</Text>
+          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Manage your TaskFlow preferences.</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Appearance</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Appearance</Text>
 
-          <View style={styles.settingRow}>
+          <View style={[styles.settingRow, { borderColor: colors.border }]}>
             <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>Dark mode</Text>
+              <Text style={[styles.settingTitle, { color: colors.foreground }]}>Dark mode</Text>
 
               <Text style={[styles.settingDescription, { color: colors.mutedForeground }]}>
                 Use a darker appearance throughout TaskFlow.
@@ -77,10 +77,10 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
 
-          <View style={styles.aboutCard}>
-            <Text style={styles.appName}>TaskFlow</Text>
+          <View style={[styles.aboutCard, { borderColor: colors.border }]}>
+            <Text style={[styles.appName, { color: colors.foreground }]}>TaskFlow</Text>
 
-            <Text style={styles.version}>Local-first task management</Text>
+            <Text style={[styles.version, { color: colors.mutedForeground }]}>Local-first task management</Text>
 
             <Text style={styles.version}>Version 1.0.0</Text>
           </View>
@@ -101,7 +101,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+
   },
 
   content: {
@@ -116,12 +116,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.foreground,
+
   },
 
   subtitle: {
     fontSize: typography.sm,
-    color: colors.mutedForeground,
+
   },
 
   section: {
@@ -131,13 +131,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.lg,
     fontWeight: "600",
-    color: colors.light.foreground,
+
   },
 
   settingRow: {
     minHeight: 72,
     borderWidth: 1,
-    borderColor: colors.border,
+
     borderRadius: 14,
     padding: spacing.lg,
     flexDirection: "row",
@@ -159,12 +159,12 @@ const styles = StyleSheet.create({
 
   settingDescription: {
     fontSize: typography.xs,
-    color: colors.light.mutedForeground,
+
   },
 
   aboutCard: {
     borderWidth: 1,
-    borderColor: colors.light.border,
+
     borderRadius: 14,
     padding: spacing.lg,
     gap: spacing.xs,
