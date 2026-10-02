@@ -10,9 +10,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BottomNavigation } from "@/components/BottomNavigation";
 import { AppIcon } from "@/components/ui/AppIcon";
-import { useTasks } from "@/hooks/useTasks";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
@@ -61,6 +60,10 @@ function formatTaskDate(dateString: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
 export default function CalendarScreen() {
@@ -118,111 +121,141 @@ export default function CalendarScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + spacing.sm, paddingBottom: 110 + insets.bottom },
+          {
+            paddingTop: insets.top + 18,
+            paddingBottom: 130 + insets.bottom,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.topBar}>
+        <View style={styles.header}>
           <Text style={styles.title}>Calendar</Text>
+          <Text style={styles.subtitle}>View and manage your tasks by date.</Text>
+        </View>
 
+        <View style={styles.controls}>
           <Pressable
             onPress={goToToday}
-            style={({ pressed }) => [styles.todayButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.todayButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Go to today"
           >
             <Text style={styles.todayText}>Today</Text>
           </Pressable>
-        </View>
 
-        <View style={styles.monthHeader}>
           <Pressable
             onPress={() => changeMonth(-1)}
-            hitSlop={10}
-            style={styles.arrowButton}
+            style={({ pressed }) => [
+              styles.controlButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
             accessibilityLabel="Previous month"
           >
             <AppIcon
-              name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }}
-              size={20}
-              color={colors.foreground}
+              name={{
+                ios: "chevron.left",
+                android: "chevron_left",
+                web: "chevron_left",
+              }}
+              size={21}
+              color={colors.mutedForeground}
             />
           </Pressable>
 
+          <Pressable
+            onPress={() => changeMonth(1)}
+            style={({ pressed }) => [
+              styles.controlButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Next month"
+          >
+            <AppIcon
+              name={{
+                ios: "chevron.right",
+                android: "chevron_right",
+                web: "chevron_right",
+              }}
+              size={21}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
+        </View>
+
+        <View style={styles.calendarCard}>
           <Text style={styles.monthTitle}>
             {formatMonth(monthDate.getFullYear(), monthDate.getMonth())}
           </Text>
 
-          <Pressable
-            onPress={() => changeMonth(1)}
-            hitSlop={10}
-            style={styles.arrowButton}
-            accessibilityLabel="Next month"
-          >
-            <AppIcon
-              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-              size={20}
-              color={colors.foreground}
-            />
-          </Pressable>
-        </View>
+          <View style={styles.weekHeader}>
+            {WEEKDAYS.map((day) => (
+              <Text key={day} style={styles.weekday}>
+                {day}
+              </Text>
+            ))}
+          </View>
 
-        <View style={styles.weekHeader}>
-          {WEEKDAYS.map((day) => (
-            <Text key={day} style={styles.weekday}>
-              {day}
-            </Text>
-          ))}
-        </View>
+          <View style={styles.calendarGrid}>
+            {days.map((date) => {
+              const dateKey = toDateKey(date);
+              const isCurrentMonth = date.getMonth() === monthDate.getMonth();
+              const isSelected = dateKey === selectedDate;
+              const isToday = dateKey === todayKey;
+              const dayTasks = tasksByDate[dateKey] ?? [];
 
-        <View style={styles.calendarGrid}>
-          {days.map((date) => {
-            const dateKey = toDateKey(date);
-            const isCurrentMonth = date.getMonth() === monthDate.getMonth();
-            const isSelected = dateKey === selectedDate;
-            const isToday = dateKey === todayKey;
-            const dayTasks = tasksByDate[dateKey] ?? [];
-
-            return (
-              <Pressable
-                key={dateKey}
-                onPress={() => setSelectedDate(dateKey)}
-                style={styles.dayCell}
-              >
-                <View
-                  style={[
-                    styles.dayCircle,
-                    isSelected && styles.selectedDayCircle,
+              return (
+                <Pressable
+                  key={dateKey}
+                  onPress={() => setSelectedDate(dateKey)}
+                  style={({ pressed }) => [
+                    styles.dayCell,
+                    pressed && styles.dayPressed,
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${date.toDateString()}`}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.dayNumber,
-                      !isCurrentMonth && styles.outsideMonthText,
-                      isSelected && styles.selectedDayText,
-                      isToday && !isSelected && styles.todayNumber,
+                      styles.dayCircle,
+                      isSelected && styles.selectedDayCircle,
                     ]}
                   >
-                    {date.getDate()}
-                  </Text>
-                </View>
-
-                <View style={styles.dots}>
-                  {dayTasks.slice(0, 3).map((task) => (
-                    <View
-                      key={task.id}
+                    <Text
                       style={[
-                        styles.taskDot,
-                        task.status === "COMPLETED"
-                          ? styles.completedDot
-                          : task.priority === "HIGH"
-                            ? styles.highDot
-                            : styles.pendingDot,
+                        styles.dayNumber,
+                        !isCurrentMonth && styles.outsideMonthText,
+                        isSelected && styles.selectedDayText,
+                        isToday && !isSelected && styles.todayNumber,
                       ]}
-                    />
-                  ))}
-                </View>
-              </Pressable>
-            );
-          })}
+                    >
+                      {date.getDate()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.dots}>
+                    {dayTasks.slice(0, 3).map((task) => (
+                      <View
+                        key={task.id}
+                        style={[
+                          styles.taskDot,
+                          task.status === "COMPLETED"
+                            ? styles.completedDot
+                            : task.priority === "HIGH"
+                              ? styles.highDot
+                              : styles.pendingDot,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View style={styles.selectedSection}>
@@ -231,13 +264,14 @@ export default function CalendarScreen() {
               {formatSelectedDate(selectedDate)}
             </Text>
             <Text style={styles.taskCount}>
-              {selectedTasks.length} {selectedTasks.length === 1 ? "task" : "tasks"}
+              {selectedTasks.length}{" "}
+              {selectedTasks.length === 1 ? "task" : "tasks"}
             </Text>
           </View>
 
           {loading ? (
             <View style={styles.stateContainer}>
-              <ActivityIndicator size="small" color={colors.foreground} />
+              <ActivityIndicator size="small" color={colors.accent} />
               <Text style={styles.stateText}>Loading tasks...</Text>
             </View>
           ) : error ? (
@@ -245,8 +279,12 @@ export default function CalendarScreen() {
           ) : selectedTasks.length === 0 ? (
             <View style={styles.emptyCard}>
               <AppIcon
-                name={{ ios: "calendar", android: "calendar_month", web: "calendar" }}
-                size={24}
+                name={{
+                  ios: "calendar",
+                  android: "calendar_month",
+                  web: "calendar",
+                }}
+                size={28}
                 color={colors.mutedForeground}
               />
               <Text style={styles.emptyTitle}>No tasks for this day</Text>
@@ -264,6 +302,8 @@ export default function CalendarScreen() {
                     styles.taskCard,
                     pressed && styles.pressed,
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open task ${task.title}`}
                 >
                   <View
                     style={[
@@ -275,8 +315,12 @@ export default function CalendarScreen() {
                   >
                     {task.status === "COMPLETED" ? (
                       <AppIcon
-                        name={{ ios: "checkmark", android: "check", web: "check" }}
-                        size={13}
+                        name={{
+                          ios: "checkmark",
+                          android: "check",
+                          web: "check",
+                        }}
+                        size={14}
                         color="#FFFFFF"
                       />
                     ) : null}
@@ -287,7 +331,8 @@ export default function CalendarScreen() {
                       numberOfLines={1}
                       style={[
                         styles.taskTitle,
-                        task.status === "COMPLETED" && styles.completedTaskTitle,
+                        task.status === "COMPLETED" &&
+                          styles.completedTaskTitle,
                       ]}
                     >
                       {task.title}
@@ -314,6 +359,16 @@ export default function CalendarScreen() {
                       {capitalize(task.priority)}
                     </Text>
                   </View>
+
+                  <AppIcon
+                    name={{
+                      ios: "chevron.right",
+                      android: "chevron_right",
+                      web: "chevron_right",
+                    }}
+                    size={20}
+                    color={colors.mutedForeground}
+                  />
                 </Pressable>
               ))}
             </View>
@@ -321,14 +376,12 @@ export default function CalendarScreen() {
         </View>
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNav />
     </View>
   );
 }
 
-function capitalize(value: string): string {
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
+import { useTasks } from "@/hooks/useTasks";
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
@@ -337,60 +390,85 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.background,
     },
     content: {
-      paddingHorizontal: spacing.lg,
+      paddingHorizontal: 22,
     },
-    topBar: {
-      minHeight: 42,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
+    header: {
+      marginBottom: 18,
     },
     title: {
-      fontSize: 24,
-      lineHeight: 30,
-      fontWeight: "700",
+      fontSize: 31,
+      lineHeight: 37,
+      fontWeight: "800",
+      letterSpacing: -0.6,
       color: colors.foreground,
     },
+    subtitle: {
+      marginTop: 2,
+      fontSize: 17,
+      lineHeight: 23,
+      color: colors.mutedForeground,
+    },
+    controls: {
+      position: "absolute",
+      top: 18,
+      right: 22,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
     todayButton: {
-      minWidth: 58,
-      minHeight: 34,
-      paddingHorizontal: spacing.sm,
-      borderRadius: 8,
+      minWidth: 96,
+      height: 56,
+      paddingHorizontal: 18,
+      borderRadius: 17,
       backgroundColor: colors.muted,
       alignItems: "center",
       justifyContent: "center",
     },
     todayText: {
-      fontSize: typography.xs,
+      fontSize: 17,
       fontWeight: "700",
       color: colors.accent,
     },
-    monthHeader: {
-      marginTop: spacing.lg,
-      marginBottom: spacing.md,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    monthTitle: {
-      fontSize: typography.md,
-      fontWeight: "700",
-      color: colors.foreground,
-    },
-    arrowButton: {
-      width: 32,
-      height: 32,
+    controlButton: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: "#000000",
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+    calendarCard: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 22,
+      backgroundColor: colors.card,
+      paddingHorizontal: 18,
+      paddingTop: 24,
+      paddingBottom: 20,
+    },
+    monthTitle: {
+      fontSize: 27,
+      lineHeight: 33,
+      fontWeight: "800",
+      color: colors.foreground,
+      marginBottom: 22,
     },
     weekHeader: {
       flexDirection: "row",
-      marginBottom: spacing.xs,
+      marginBottom: 8,
     },
     weekday: {
       width: "14.2857%",
       textAlign: "center",
-      fontSize: 10,
+      fontSize: 14,
       fontWeight: "600",
       color: colors.mutedForeground,
     },
@@ -400,27 +478,23 @@ function createStyles(colors: ThemeColors) {
     },
     dayCell: {
       width: "14.2857%",
-      height: 52,
+      height: 61,
       alignItems: "center",
       justifyContent: "flex-start",
-      paddingTop: 3,
+      paddingTop: 2,
     },
     dayCircle: {
-      width: 30,
-      height: 30,
-      borderRadius: 15,
+      width: 42,
+      height: 42,
+      borderRadius: 21,
       alignItems: "center",
       justifyContent: "center",
     },
     selectedDayCircle: {
-      width: 30,
-      height: 30,
-      borderRadius: 999,
-      overflow: "hidden",
       backgroundColor: colors.accent,
     },
     dayNumber: {
-      fontSize: typography.xs,
+      fontSize: 17,
       fontWeight: "500",
       color: colors.foreground,
     },
@@ -437,15 +511,16 @@ function createStyles(colors: ThemeColors) {
     },
     dots: {
       height: 8,
+      marginTop: 2,
       flexDirection: "row",
       alignItems: "center",
-      gap: 2,
+      justifyContent: "center",
+      gap: 3,
     },
     taskDot: {
-      width: 4,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.mutedForeground,
+      width: 5,
+      height: 5,
+      borderRadius: 2.5,
     },
     pendingDot: {
       backgroundColor: colors.accent,
@@ -457,47 +532,55 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.success,
     },
     selectedSection: {
-      marginTop: spacing.xl,
+      marginTop: 34,
     },
     selectedHeader: {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "space-between",
-      marginBottom: spacing.md,
+      marginBottom: 18,
+      paddingHorizontal: 2,
     },
     sectionTitle: {
-      fontSize: typography.lg,
-      fontWeight: "700",
+      fontSize: 25,
+      lineHeight: 31,
+      fontWeight: "800",
       color: colors.foreground,
     },
     taskCount: {
-      fontSize: typography.xs,
+      fontSize: 16,
+      fontWeight: "600",
       color: colors.mutedForeground,
     },
     taskList: {
-      gap: spacing.sm,
+      gap: 12,
     },
     taskCard: {
-      minHeight: 68,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
+      minHeight: 112,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 12,
+      borderRadius: 19,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.card,
+      shadowColor: "#000000",
+      shadowOpacity: 0.035,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 2,
     },
     statusCircle: {
-      width: 22,
-      height: 22,
-      borderRadius: 11,
-      marginRight: spacing.sm,
+      width: 39,
+      height: 39,
+      borderRadius: 20,
+      marginRight: 15,
       alignItems: "center",
       justifyContent: "center",
     },
     pendingCircle: {
-      borderWidth: 1.5,
+      borderWidth: 2,
       borderColor: colors.mutedForeground,
     },
     completedCircle: {
@@ -505,12 +588,13 @@ function createStyles(colors: ThemeColors) {
     },
     taskInfo: {
       flex: 1,
-      marginRight: spacing.sm,
-      gap: 2,
+      marginRight: 10,
+      gap: 4,
     },
     taskTitle: {
-      fontSize: typography.sm,
-      fontWeight: "600",
+      fontSize: 18,
+      lineHeight: 23,
+      fontWeight: "700",
       color: colors.foreground,
     },
     completedTaskTitle: {
@@ -518,18 +602,20 @@ function createStyles(colors: ThemeColors) {
       color: colors.mutedForeground,
     },
     taskMeta: {
-      fontSize: typography.xs,
+      fontSize: 15,
+      lineHeight: 20,
       color: colors.mutedForeground,
     },
     priorityBadge: {
-      minWidth: 62,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 5,
-      borderRadius: 8,
+      minWidth: 78,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+      borderRadius: 14,
       alignItems: "center",
+      marginRight: 8,
     },
     highPriority: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.destructive,
     },
     mediumPriority: {
       backgroundColor: colors.muted,
@@ -538,49 +624,56 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.muted,
     },
     priorityText: {
-      fontSize: 10,
+      fontSize: 14,
       fontWeight: "700",
       color: colors.foreground,
     },
     highPriorityText: {
-      color: colors.primaryForeground,
+      color: "#FFFFFF",
     },
     stateContainer: {
-      minHeight: 90,
+      minHeight: 150,
       alignItems: "center",
       justifyContent: "center",
-      gap: spacing.sm,
+      gap: 10,
     },
     stateText: {
-      fontSize: typography.sm,
+      fontSize: 16,
       color: colors.mutedForeground,
     },
     errorText: {
-      fontSize: typography.sm,
+      fontSize: 16,
       color: colors.destructive,
+      paddingHorizontal: 4,
     },
     emptyCard: {
+      minHeight: 145,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 12,
-      padding: spacing.xl,
+      borderRadius: 19,
+      padding: 24,
       alignItems: "center",
+      justifyContent: "center",
       backgroundColor: colors.card,
     },
     emptyTitle: {
-      marginTop: spacing.sm,
-      fontSize: typography.md,
-      fontWeight: "600",
+      marginTop: 10,
+      fontSize: 18,
+      fontWeight: "700",
       color: colors.foreground,
     },
     emptyText: {
-      marginTop: spacing.xs,
-      fontSize: typography.sm,
+      marginTop: 5,
+      fontSize: 15,
+      lineHeight: 21,
       textAlign: "center",
       color: colors.mutedForeground,
     },
     pressed: {
       opacity: 0.75,
+    },
+    dayPressed: {
+      opacity: 0.65,
     },
   });
 }
