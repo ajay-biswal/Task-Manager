@@ -148,7 +148,7 @@ export default function TaskDetailsScreen() {
   if (loading) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.foreground} />
+        <ActivityIndicator size="large" color={colors.accent} />
         <Text style={[styles.stateText, { color: colors.mutedForeground }]}>
           Loading task...
         </Text>
@@ -170,26 +170,30 @@ export default function TaskDetailsScreen() {
   }
 
   const isCompleted = task.status === "COMPLETED";
+  const progress = isCompleted ? 1 : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + spacing.sm },
+          { paddingTop: insets.top + 10 },
         ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
           <Pressable
             onPress={() => router.back()}
-            hitSlop={10}
-            style={styles.iconButton}
+            style={[
+              styles.topIconButton,
+              { backgroundColor: colors.muted, borderColor: colors.border },
+            ]}
+            accessibilityRole="button"
             accessibilityLabel="Back"
           >
             <AppIcon
               name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
-              size={22}
+              size={21}
               color={colors.foreground}
             />
           </Pressable>
@@ -200,95 +204,122 @@ export default function TaskDetailsScreen() {
 
           <Pressable
             onPress={handleEdit}
-            hitSlop={10}
-            style={styles.iconButton}
+            style={[
+              styles.topIconButton,
+              { backgroundColor: colors.muted, borderColor: colors.border },
+            ]}
+            accessibilityRole="button"
             accessibilityLabel="Edit task"
           >
             <AppIcon
               name={{ ios: "pencil", android: "edit", web: "edit" }}
-              size={20}
+              size={18}
               color={colors.foreground}
             />
           </Pressable>
         </View>
 
-        <View style={styles.headerBlock}>
-          <Text style={[styles.title, { color: colors.foreground }]}>
-            {task.title}
-          </Text>
-
-          <View style={styles.badges}>
-            <View
-              style={[
-                styles.priorityBadge,
-                { backgroundColor: getPriorityColor(task.priority, colors) },
-              ]}
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.card, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.summaryMain}>
+            <Text
+              style={[styles.title, { color: colors.foreground }]}
+              numberOfLines={2}
             >
-              <Text style={styles.priorityText}>
-                {capitalize(task.priority)}
-              </Text>
-            </View>
+              {task.title}
+            </Text>
 
-            <View
-              style={[
-                styles.statusBadge,
-                { backgroundColor: colors.muted },
-              ]}
-            >
-              <Text style={[styles.statusText, { color: colors.foreground }]}>
-                {isCompleted ? "Completed" : "Pending"}
-              </Text>
+            <View style={styles.badges}>
+              <View
+                style={[
+                  styles.priorityBadge,
+                  { backgroundColor: getPriorityBackground(task.priority, colors) },
+                ]}
+              >
+                <AppIcon
+                  name={{ ios: "exclamationmark.circle.fill", android: "priority_high", web: "priority_high" }}
+                  size={12}
+                  color={getPriorityTextColor(task.priority, colors)}
+                />
+                <Text
+                  style={[
+                    styles.priorityText,
+                    { color: getPriorityTextColor(task.priority, colors) },
+                  ]}
+                >
+                  {capitalize(task.priority)}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: colors.muted },
+                ]}
+              >
+                <AppIcon
+                  name={{ ios: "clock", android: "schedule", web: "schedule" }}
+                  size={12}
+                  color={colors.mutedForeground}
+                />
+                <Text style={[styles.statusText, { color: colors.mutedForeground }]}>
+                  {isCompleted ? "Completed" : "Pending"}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <View style={styles.progressRing}>
+            <Host style={styles.progressHost} matchContents>
+              <CircularProgressIndicator
+                progress={progress}
+                color={colors.accent}
+                trackColor={colors.muted}
+                strokeWidth={4}
+                strokeCap="round"
+              />
+            </Host>
+            <Text style={[styles.progressText, { color: colors.foreground }]}>
+              {isCompleted ? "100%" : "0%"}
+            </Text>
+          </View>
+        </View>
 
         {task.description ? (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-              Description
-            </Text>
-            <Text style={[styles.description, { color: colors.foreground }]}>
+          <SectionCard icon="description" title="Description" colors={colors}>
+            <Text style={[styles.description, { color: colors.mutedForeground }]}>
               {task.description}
             </Text>
-          </View>
+          </SectionCard>
         ) : null}
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-            Details
-          </Text>
+        <SectionCard icon="list_alt" title="Details" colors={colors}>
+          <DetailRow icon="folder" label="Category" value={task.category} colors={colors} />
+          <DetailRow
+            icon="flag"
+            label="Priority"
+            value={capitalize(task.priority)}
+            valueColor={getPriorityTextColor(task.priority, colors)}
+            colors={colors}
+          />
+          <DetailRow icon="calendar_today" label="Start date" value={formatDate(task.startDate)} colors={colors} />
+          <DetailRow icon="calendar_today" label="Due date" value={formatDate(task.dueDate)} colors={colors} />
+          <DetailRow
+            icon="schedule"
+            label="Status"
+            value={isCompleted ? "Completed" : "Pending"}
+            colors={colors}
+          />
+        </SectionCard>
 
-          <View style={styles.detailList}>
-            <DetailRow label="Category" value={task.category} colors={colors} />
-            <DetailRow label="Priority" value={capitalize(task.priority)} colors={colors} />
-            <DetailRow label="Start date" value={formatDate(task.startDate)} colors={colors} />
-            <DetailRow label="Due date" value={formatDate(task.dueDate)} colors={colors} />
-            <DetailRow label="Status" value={isCompleted ? "Completed" : "Pending"} colors={colors} />
-          </View>
-        </View>
-
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-            Activity
-          </Text>
-
-          <View style={styles.activityList}>
-            <ActivityRow
-              label="Created"
-              value={formatDateTime(task.createdAt)}
-              colors={colors}
-            />
-            <ActivityRow
-              label="Last updated"
-              value={formatDateTime(task.updatedAt)}
-              colors={colors}
-            />
-          </View>
-        </View>
+        <SectionCard icon="history" title="Activity" colors={colors}>
+          <ActivityRow label="Created" value={formatDateTime(task.createdAt)} colors={colors} />
+          <ActivityRow label="Last updated" value={formatDateTime(task.updatedAt)} colors={colors} />
+        </SectionCard>
 
         <View style={styles.actions}>
           <Pressable
@@ -299,6 +330,11 @@ export default function TaskDetailsScreen() {
               pressed && styles.pressed,
             ]}
           >
+            <AppIcon
+              name={{ ios: "checkmark", android: "check", web: "check" }}
+              size={17}
+              color="#FFFFFF"
+            />
             <Text style={styles.primaryButtonText}>
               {isCompleted ? "Mark as Pending" : "Mark as Completed"}
             </Text>
@@ -308,13 +344,15 @@ export default function TaskDetailsScreen() {
             onPress={handleEdit}
             style={({ pressed }) => [
               styles.secondaryButton,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              },
+              { backgroundColor: colors.card, borderColor: colors.border },
               pressed && styles.pressed,
             ]}
           >
+            <AppIcon
+              name={{ ios: "pencil", android: "edit", web: "edit" }}
+              size={16}
+              color={colors.foreground}
+            />
             <Text style={[styles.secondaryButtonText, { color: colors.foreground }]}>
               Edit Task
             </Text>
@@ -325,16 +363,26 @@ export default function TaskDetailsScreen() {
             disabled={deleting}
             style={({ pressed }) => [
               styles.deleteButton,
-              { borderColor: colors.destructive },
+              {
+                backgroundColor: colors.destructive + "12",
+                borderColor: colors.destructive,
+              },
               pressed && styles.pressed,
             ]}
           >
             {deleting ? (
               <ActivityIndicator color={colors.destructive} />
             ) : (
-              <Text style={[styles.deleteText, { color: colors.destructive }]}>
-                Delete Task
-              </Text>
+              <>
+                <AppIcon
+                  name={{ ios: "trash", android: "delete", web: "delete" }}
+                  size={16}
+                  color={colors.destructive}
+                />
+                <Text style={[styles.deleteText, { color: colors.destructive }]}>
+                  Delete Task
+                </Text>
+              </>
             )}
           </Pressable>
         </View>
@@ -343,21 +391,94 @@ export default function TaskDetailsScreen() {
   );
 }
 
+type SectionIcon = {
+  ios: string;
+  android: string;
+  web: string;
+};
+
+function SectionCard({
+  icon,
+  title,
+  colors,
+  children,
+}: {
+  icon: string;
+  title: string;
+  colors: ThemeColors;
+  children: React.ReactNode;
+}) {
+  const iconName: SectionIcon = {
+    ios:
+      icon === "description"
+        ? "doc.text"
+        : icon === "list_alt"
+          ? "list.bullet"
+          : "clock.arrow.circlepath",
+    android: icon,
+    web: icon,
+  };
+
+  return (
+    <View
+      style={[
+        styles.sectionCard,
+        { backgroundColor: colors.card, borderColor: colors.border },
+      ]}
+    >
+      <View style={styles.sectionHeader}>
+        <View style={[styles.sectionIcon, { backgroundColor: colors.muted }]}>
+          <AppIcon name={iconName} size={16} color={colors.accent} />
+        </View>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+          {title}
+        </Text>
+      </View>
+      {children}
+    </View>
+  );
+}
+
 function DetailRow({
+  icon,
   label,
   value,
+  valueColor,
   colors,
 }: {
+  icon: string;
   label: string;
   value: string;
+  valueColor?: string;
   colors: ThemeColors;
 }) {
+  const iconName = {
+    ios:
+      icon === "calendar_today"
+        ? "calendar"
+        : icon === "schedule"
+          ? "clock"
+          : icon === "folder"
+            ? "folder"
+            : "flag",
+    android: icon,
+    web: icon,
+  };
+
   return (
-    <View style={styles.detailRow}>
-      <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>
-        {label}
-      </Text>
-      <Text style={[styles.detailValue, { color: colors.foreground }]}>
+    <View style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+      <View style={styles.detailLeft}>
+        <AppIcon name={iconName} size={15} color={colors.mutedForeground} />
+        <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>
+          {label}
+        </Text>
+      </View>
+      <Text
+        style={[
+          styles.detailValue,
+          { color: valueColor ?? colors.foreground },
+        ]}
+      >
         {value}
       </Text>
     </View>
@@ -389,180 +510,229 @@ function capitalize(value: string): string {
   return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
-function getPriorityColor(priority: Task["priority"], colors: ThemeColors): string {
-  if (priority === "HIGH") {
-    return colors.destructive;
-  }
+function getPriorityTextColor(priority: Task["priority"], colors: ThemeColors): string {
+  if (priority === "HIGH") return colors.destructive;
+  if (priority === "MEDIUM") return "#F59E0B";
+  return colors.accent;
+}
 
-  if (priority === "MEDIUM") {
-    return "#F59E0B";
-  }
-
-  return colors.mutedForeground;
+function getPriorityBackground(priority: Task["priority"], colors: ThemeColors): string {
+  if (priority === "HIGH") return colors.destructive + "18";
+  if (priority === "MEDIUM") return "#F59E0B18";
+  return colors.accent + "18";
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingHorizontal: 14,
+    paddingBottom: 28,
+    gap: 10,
   },
   topBar: {
-    minHeight: 44,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: spacing.lg,
+    marginBottom: 2,
   },
-  iconButton: {
-    width: 36,
-    height: 36,
+  topIconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   screenTitle: {
-    fontSize: typography.md,
+    fontSize: 15,
+    lineHeight: 20,
     fontWeight: "700",
   },
-  headerBlock: {
-    gap: spacing.sm,
+  summaryCard: {
+    minHeight: 78,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  summaryMain: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 10,
+    gap: 7,
   },
   title: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: "700",
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "800",
   },
   badges: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
+    gap: 6,
   },
   priorityBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: 7,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   priorityText: {
-    color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
   },
   statusBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: 7,
+    minHeight: 24,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
-  divider: {
-    height: 1,
-    marginVertical: spacing.lg,
+  progressRing: {
+    width: 58,
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  section: {
-    gap: spacing.sm,
+  progressHost: {
+    width: 58,
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  sectionTitle: {
-    fontSize: typography.md,
+  progressText: {
+    position: "absolute",
+    fontSize: 10,
     fontWeight: "700",
   },
-  description: {
-    fontSize: typography.sm,
-    lineHeight: 21,
+  sectionCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
   },
-  detailList: {
-    gap: spacing.sm,
-    marginTop: spacing.xs,
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sectionIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  description: {
+    fontSize: 11,
+    lineHeight: 17,
+    paddingLeft: 38,
   },
   detailRow: {
+    minHeight: 28,
+    borderBottomWidth: 1,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    gap: spacing.lg,
-    minHeight: 24,
+    gap: 12,
+  },
+  detailLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    flex: 1,
   },
   detailLabel: {
-    fontSize: typography.sm,
+    fontSize: 10,
   },
   detailValue: {
-    flex: 1,
+    fontSize: 10,
+    fontWeight: "600",
     textAlign: "right",
-    fontSize: typography.sm,
-    fontWeight: "500",
-  },
-  activityList: {
-    gap: spacing.xs,
   },
   activityRow: {
+    minHeight: 25,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    gap: spacing.lg,
+    gap: 12,
   },
   activityLabel: {
-    fontSize: typography.xs,
+    fontSize: 9,
   },
   activityValue: {
     flex: 1,
+    fontSize: 9,
     textAlign: "right",
-    fontSize: typography.xs,
+    fontWeight: "500",
   },
   actions: {
-    gap: spacing.sm,
-    marginTop: spacing.md,
+    gap: 7,
+    marginTop: 2,
   },
   primaryButton: {
-    minHeight: 44,
+    minHeight: 40,
     borderRadius: 8,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 7,
   },
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: typography.xs,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "800",
   },
   secondaryButton: {
-    minHeight: 44,
-    borderWidth: 1,
+    minHeight: 40,
     borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 7,
   },
   secondaryButtonText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "700",
   },
   deleteButton: {
-    minHeight: 44,
-    borderWidth: 1,
+    minHeight: 40,
     borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 7,
   },
   deleteText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "700",
   },
-  pressed: {
-    opacity: 0.75,
-  },
+  pressed: { opacity: 0.75 },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
   },
-  stateText: {
-    fontSize: typography.sm,
-  },
-  stateTitle: {
-    fontSize: typography.xl,
-    fontWeight: "700",
-  },
-  link: {
-    fontSize: typography.sm,
-    fontWeight: "600",
-  },
+  stateText: { fontSize: typography.sm },
+  stateTitle: { fontSize: typography.xl, fontWeight: "700" },
+  link: { fontSize: typography.sm, fontWeight: "600" },
 });
