@@ -179,8 +179,7 @@ export default function BulkUploadScreen() {
       if (headerErrors.length > 0) {
         console.log("HEADER ERRORS:", headerErrors);
 
-        Alert.alert("Invalid CSV headers", headerErrors.join("
-"));
+        Alert.alert("Invalid CSV headers", headerErrors.join("\n"));
 
         return;
       }
@@ -210,8 +209,7 @@ export default function BulkUploadScreen() {
       if (validationErrors.length > 0) {
         console.log("VALIDATION ERRORS:", validationErrors);
 
-        Alert.alert("Validation failed", validationErrors.join("
-"));
+        Alert.alert("Validation failed", validationErrors.join("\n"));
 
         return;
       }
@@ -273,8 +271,7 @@ export default function BulkUploadScreen() {
           failedCount > 0 ? `${failedCount} task(s) failed.` : null,
         ]
           .filter(Boolean)
-          .join("
-"),
+          .join("\n"),
       );
     } catch (error) {
       console.error("Failed to read CSV:", error);
@@ -326,8 +323,7 @@ export default function BulkUploadScreen() {
           </Text>
 
           <Text style={styles.rowCount}>
-            {fileContent.split(/\r?
-/).filter(Boolean).length - 1} data rows
+            {fileContent.split(/\r?\n/).filter(Boolean).length - 1} data rows
             detected
           </Text>
         </View>
