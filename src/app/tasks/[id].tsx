@@ -11,7 +11,9 @@ import {
 
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
 
 function formatDate(dateString: string): string {
@@ -25,6 +27,9 @@ function formatDate(dateString: string): string {
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -44,6 +49,8 @@ export default function TaskDetailsScreen() {
   const taskId = typeof params.id === "string" ? params.id : undefined;
 
   const { findTask, removeTask, toggleTask } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [task, setTask] = useState<Task | null>(null);
 
@@ -149,7 +156,7 @@ export default function TaskDetailsScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.light.foreground} />
+        <ActivityIndicator size="large" color={colors.foreground} />
 
         <Text style={styles.stateText}>Loading task...</Text>
       </View>
@@ -245,10 +252,10 @@ export default function TaskDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
     fontSize: typography.xxxl,
     lineHeight: 36,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   statusBadge: {
@@ -273,26 +280,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 999,
-    backgroundColor: colors.light.muted,
+    backgroundColor: colors.muted,
   },
 
   completedBadge: {
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   statusText: {
     fontSize: typography.xs,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   completedStatusText: {
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   descriptionCard: {
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.lg,
     gap: spacing.md,
@@ -300,7 +307,7 @@ const styles = StyleSheet.create({
 
   detailsCard: {
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.lg,
     gap: spacing.lg,
@@ -309,13 +316,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.lg,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   description: {
     fontSize: typography.md,
     lineHeight: 24,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   detailRow: {
@@ -326,7 +333,7 @@ const styles = StyleSheet.create({
 
   detailLabel: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   detailValue: {
@@ -334,7 +341,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: typography.sm,
     fontWeight: "500",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   actions: {
@@ -348,17 +355,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: spacing.xl,
     gap: spacing.md,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   stateText: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   stateTitle: {
     fontSize: typography.xl,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 });
+}
