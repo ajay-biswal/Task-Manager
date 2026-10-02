@@ -212,7 +212,12 @@ export default function DashboardScreen() {
 
             <View style={styles.headerActions}>
               <Pressable
-                onPress={() => router.push("/tasks")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/tasks",
+                    params: { focusSearch: "1" },
+                  })
+                }
                 style={({ pressed }) => [
                   styles.headerButton,
                   pressed && styles.pressed,
