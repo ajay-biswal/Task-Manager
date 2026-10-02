@@ -2,7 +2,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 interface DateFieldProps {
   label: string;
@@ -45,6 +46,7 @@ export function DateField({
   minimumDate,
   onChange,
 }: DateFieldProps) {
+  const { colors } = useTheme();
   const [showPicker, setShowPicker] = useState(false);
 
   const selectedDate = parseDate(value);
@@ -55,20 +57,20 @@ export function DateField({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text>
 
       <Pressable
         onPress={() => setShowPicker(true)}
-        style={[styles.field, error ? styles.fieldError : null]}
+        style={[styles.field, { borderColor: colors.input, backgroundColor: colors.background }, error ? { borderColor: colors.destructive } : null]}
       >
-        <Text style={[styles.value, !value ? styles.placeholder : null]}>
+        <Text style={[styles.value, { color: colors.foreground }, !value ? { color: colors.mutedForeground } : null]}>
           {value ? formatDate(selectedDate) : "Select date"}
         </Text>
 
-        <Text style={styles.icon}>▣</Text>
+        <Text style={[styles.icon, { color: colors.mutedForeground }]}>▣</Text>
       </Pressable>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text> : null}
 
       {showPicker ? (
         <DateTimePicker
@@ -93,42 +95,13 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: typography.sm,
-    fontWeight: "500",
-    color: colors.light.foreground,
-  },
+    fontWeight: "500",  },
 
   field: {
     minHeight: 46,
-    borderWidth: 1,
-    borderColor: colors.light.input,
-    borderRadius: 10,
+    borderWidth: 1,    borderRadius: 10,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.light.background,
-  },
-
-  fieldError: {
-    borderColor: colors.light.destructive,
-  },
-
-  value: {
-    fontSize: typography.md,
-    color: colors.light.foreground,
-  },
-
-  placeholder: {
-    color: colors.light.mutedForeground,
-  },
-
-  icon: {
-    fontSize: 17,
-    color: colors.light.mutedForeground,
-  },
-
-  error: {
-    fontSize: typography.xs,
-    color: colors.light.destructive,
-  },
+    justifyContent: "space-between",  },
 });
