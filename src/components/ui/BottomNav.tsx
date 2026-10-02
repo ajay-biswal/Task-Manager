@@ -52,6 +52,7 @@ export function BottomNav() {
 
         <Pressable
           onPress={() => router.push("/tasks/form")}
+          hitSlop={12}
           style={({ pressed }) => [
             styles.fab,
             pressed && styles.pressed,
