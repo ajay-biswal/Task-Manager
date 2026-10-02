@@ -54,29 +54,84 @@ function ProgressRing({
   colors: ThemeColors;
 }) {
   const styles = createStyles(colors);
-  const clamped = Math.max(0, Math.min(progress, 1));
-  const degrees = clamped * 360;
+  const percent = Math.max(0, Math.min(progress, 1)) * 100;
+  const radius = 65;
+  const borderWidth = 11;
+  const degrees = percent * 3.6;
+  const isOverHalf = percent > 50;
 
-  return (
-    <View style={styles.ring}>
-      <View style={[styles.ringTrack, { borderColor: colors.muted }]} />
+  const renderHalfCircle = (
+    rotateDegrees: number,
+    backgroundColor: string,
+  ) => (
+    <View
+      style={[
+        styles.ringHalfWrap,
+        {
+          width: radius,
+          height: radius * 2,
+        },
+      ]}
+    >
       <View
         style={[
-          styles.ringProgress,
+          styles.ringHalf,
           {
-            borderTopColor: colors.accent,
-            borderRightColor: colors.accent,
-            transform: [{ rotate: `${degrees - 45}deg` }],
+            width: radius,
+            height: radius * 2,
+            borderRadius: radius,
+            backgroundColor,
+            transform: [
+              { translateX: radius / 2 },
+              { rotate: `${rotateDegrees}deg` },
+              { translateX: -radius / 2 },
+            ],
           },
         ]}
       />
-      <View style={styles.ringCenter}>
-        <Text style={styles.ringText}>{Math.round(clamped * 100)}%</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.ring}>
+      <View
+        style={[
+          styles.ringTrack,
+          {
+            width: radius * 2,
+            height: radius * 2,
+            borderRadius: radius,
+            backgroundColor: colors.muted,
+          },
+        ]}
+      />
+
+      {renderHalfCircle(
+        isOverHalf ? 180 : degrees,
+        colors.accent,
+      )}
+
+      {renderHalfCircle(
+        isOverHalf ? degrees : 0,
+        isOverHalf ? colors.accent : colors.muted,
+      )}
+
+      <View
+        style={[
+          styles.ringCenter,
+          {
+            width: (radius - borderWidth) * 2,
+            height: (radius - borderWidth) * 2,
+            borderRadius: radius - borderWidth,
+            backgroundColor: colors.card,
+          },
+        ]}
+      >
+        <Text style={styles.ringText}>{Math.round(percent)}%</Text>
       </View>
     </View>
   );
 }
-
 function StatCard({
   value,
   label,
@@ -558,27 +613,23 @@ function createStyles(colors: ThemeColors, topInset = 0) {
 
     ringTrack: {
       position: "absolute",
-      width: 130,
-      height: 130,
-      borderRadius: 65,
-      borderWidth: 11,
     },
 
-    ringProgress: {
+    ringHalfWrap: {
       position: "absolute",
-      width: 130,
-      height: 130,
-      borderRadius: 65,
-      borderWidth: 11,
-      borderLeftColor: "transparent",
-      borderBottomColor: "transparent",
+      top: 0,
+      left: 0,
+      overflow: "hidden",
+    },
+
+    ringHalf: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      overflow: "hidden",
     },
 
     ringCenter: {
-      width: 94,
-      height: 94,
-      borderRadius: 47,
-      backgroundColor: colors.card,
       alignItems: "center",
       justifyContent: "center",
     },
