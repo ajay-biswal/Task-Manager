@@ -1,4 +1,9 @@
-import { Stack } from "expo-router";
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider as RouterThemeProvider,
+} from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 
 import { initializeDatabase } from "@/database/database";
@@ -73,11 +78,21 @@ function AppNavigator() {
   );
 }
 
+function ThemedNavigator() {
+  const { isDark } = useTheme();
+
+  return (
+    <RouterThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <AppNavigator />
+    </RouterThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <ThemeProvider>
       <SQLiteProvider databaseName="taskflow.db" onInit={initializeDatabase}>
-        <AppNavigator />
+        <ThemedNavigator />
       </SQLiteProvider>
     </ThemeProvider>
   );
