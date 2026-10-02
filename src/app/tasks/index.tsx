@@ -245,7 +245,7 @@ export default function TaskListScreen() {
   }
 
   const listData = groups.flatMap((group) => [
-    { type: "header" as const, id: `header-${group.title}`, title: group.title },
+    { type: "header" as const, id: `header-${group.title}`, title: group.title, tasks: group.tasks },
     ...group.tasks.map((task) => ({
       type: "task" as const,
       id: task.id,
