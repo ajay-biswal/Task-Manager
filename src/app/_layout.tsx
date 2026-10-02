@@ -35,7 +35,7 @@ function AppNavigator() {
       <Stack.Screen
         name="tasks/form"
         options={{
-          title: "Task",
+          headerShown: false,
         }}
       />
     </Stack>
