@@ -17,6 +17,7 @@ import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task, TaskPriority } from "@/types/task";
+import { formatShortDate } from "@/utils/dateUtils";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
 type TaskFilter = "ALL" | "PENDING" | "COMPLETED" | "OVERDUE";
@@ -55,15 +56,6 @@ function getDayGroup(
   }
 
   return "Later";
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(`${dateString}T00:00:00`);
-
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-  });
 }
 
 function getCategoryColor(category: string, colors: ThemeColors): string {
@@ -136,7 +128,7 @@ function TaskRow({
           </Text>
           <Text style={styles.metaSeparator}>·</Text>
           <Text style={[styles.taskMeta, overdue && styles.overdueMeta]} numberOfLines={1}>
-            Due {formatDate(task.dueDate)}
+            Due {formatShortDate(task.dueDate)}
           </Text>
         </View>
       </View>
