@@ -11,7 +11,9 @@ import {
 } from "react-native";
 
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 import type { Task, TaskPriority } from "@/types/task";
 
 type TaskFilter = "ALL" | "PENDING" | "COMPLETED";
@@ -116,6 +118,8 @@ export default function TaskListScreen() {
   const router = useRouter();
 
   const { tasks, loading, error, toggleTask, removeTask, refreshTasks } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   useFocusEffect(
     useCallback(() => {
@@ -200,7 +204,7 @@ export default function TaskListScreen() {
         value={search}
         onChangeText={setSearch}
         placeholder="Search tasks..."
-        placeholderTextColor={colors.light.mutedForeground}
+        placeholderTextColor={colors.mutedForeground}
         style={styles.searchInput}
       />
 
@@ -313,10 +317,10 @@ export default function TaskListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
     paddingHorizontal: spacing.xl,
   },
 
@@ -331,13 +335,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   subtitle: {
     marginTop: spacing.xs,
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   addButton: {
@@ -346,24 +350,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   addButtonText: {
     fontSize: typography.sm,
     fontWeight: "600",
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   searchInput: {
     minHeight: 46,
     borderWidth: 1,
-    borderColor: colors.light.input,
+    borderColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: spacing.md,
     fontSize: typography.md,
-    color: colors.light.foreground,
-    backgroundColor: colors.light.background,
+    color: colors.foreground,
+    backgroundColor: colors.background,
   },
 
   filterRow: {
@@ -376,25 +380,25 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 42,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
 
   selectedFilter: {
-    backgroundColor: colors.light.primary,
-    borderColor: colors.light.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
 
   filterText: {
     fontSize: typography.sm,
     fontWeight: "500",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   selectedFilterText: {
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   sortRow: {
@@ -408,7 +412,7 @@ const styles = StyleSheet.create({
   sortLabel: {
     marginRight: "auto",
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   sortButton: {
@@ -416,21 +420,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: 8,
     justifyContent: "center",
-    backgroundColor: colors.light.muted,
+    backgroundColor: colors.muted,
   },
 
   selectedSort: {
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   sortText: {
     fontSize: typography.xs,
     fontWeight: "500",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   selectedSortText: {
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   listContent: {
@@ -446,11 +450,11 @@ const styles = StyleSheet.create({
     minHeight: 86,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.light.card,
+    backgroundColor: colors.card,
   },
 
   pressed: {
@@ -461,7 +465,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1.5,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 7,
     marginRight: spacing.md,
     alignItems: "center",
@@ -469,14 +473,14 @@ const styles = StyleSheet.create({
   },
 
   checkboxCompleted: {
-    backgroundColor: colors.light.primary,
-    borderColor: colors.light.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
 
   checkmark: {
     fontSize: 15,
     fontWeight: "700",
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   taskContent: {
@@ -487,12 +491,12 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontSize: typography.md,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   completedTitle: {
     textDecorationLine: "line-through",
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   metaRow: {
@@ -504,18 +508,18 @@ const styles = StyleSheet.create({
   category: {
     maxWidth: 90,
     fontSize: typography.xs,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   separator: {
     marginHorizontal: spacing.xs,
     fontSize: typography.xs,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   dueDate: {
     fontSize: typography.xs,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   rightSide: {
@@ -532,25 +536,25 @@ const styles = StyleSheet.create({
   },
 
   highPriority: {
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   mediumPriority: {
-    backgroundColor: colors.light.muted,
+    backgroundColor: colors.muted,
   },
 
   lowPriority: {
-    backgroundColor: colors.light.border,
+    backgroundColor: colors.border,
   },
 
   priorityText: {
     fontSize: typography.xs,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   highPriorityText: {
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   deleteButton: {
@@ -563,7 +567,7 @@ const styles = StyleSheet.create({
   deleteText: {
     fontSize: 22,
     lineHeight: 22,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   stateContainer: {
@@ -574,12 +578,12 @@ const styles = StyleSheet.create({
 
   stateText: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   errorText: {
     fontSize: typography.sm,
-    color: colors.light.destructive,
+    color: colors.destructive,
   },
 
   emptyContainer: {
@@ -591,13 +595,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: typography.lg,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   emptyText: {
     marginTop: spacing.sm,
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
     textAlign: "center",
   },
 });
