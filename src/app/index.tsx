@@ -148,6 +148,13 @@ function StatCard({
 
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
+
+      <AppIcon
+        name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+        size={18}
+        color={colors.mutedForeground}
+        style={styles.statChevron}
+      />
     </View>
   );
 }
@@ -197,16 +204,6 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
-          <View pointerEvents="none" style={styles.heroDecor}>
-            <View style={styles.heroGlow} />
-            <View style={styles.heroOrb} />
-            <View style={styles.heroOrbSmall} />
-            <View style={styles.heroMountainOne} />
-            <View style={styles.heroMountainTwo} />
-            <View style={styles.heroSparkOne} />
-            <View style={styles.heroSparkTwo} />
-          </View>
-
           <View style={styles.heroTop}>
             <View style={styles.heroText}>
               <Text style={styles.greeting}>
@@ -289,6 +286,13 @@ export default function DashboardScreen() {
           </View>
 
           <ProgressRing progress={progress} colors={colors} />
+
+          <AppIcon
+            name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+            size={20}
+            color={colors.mutedForeground}
+            style={styles.progressChevron}
+          />
         </View>
 
         <View style={styles.statsRow}>
@@ -371,8 +375,7 @@ export default function DashboardScreen() {
               No tasks are due today.{"\n"}Enjoy your free time or add a new task.
             </Text>
 
-            {isDark && (
-              <Pressable
+            <Pressable
                 onPress={() => router.push("/tasks/form")}
                 style={({ pressed }) => [
                   styles.emptyAction,
@@ -388,7 +391,7 @@ export default function DashboardScreen() {
                 />
                 <Text style={styles.emptyActionText}>Add a new task</Text>
               </Pressable>
-            )}
+            </Pressable>
           </View>
         ) : (
           <View style={styles.taskList}>
@@ -437,23 +440,19 @@ export default function DashboardScreen() {
         )}
 
         <View style={styles.motivationCard}>
-          <View pointerEvents="none" style={styles.motivationDecor}>
-            <View style={styles.motivationGlow} />
-            <View style={styles.motivationCircleOne} />
-            <View style={styles.motivationCircleTwo} />
-            <View style={styles.motivationWaveOne} />
-            <View style={styles.motivationWaveTwo} />
-            <View style={styles.motivationDotOne} />
-            <View style={styles.motivationDotTwo} />
-          </View>
-
-          <View style={styles.quoteIcon}>
+  <View style={styles.quoteIcon}>
             <Text style={styles.quoteMark}>“</Text>
           </View>
 
           <Text style={styles.quoteText}>
             Small steps every day{"\n"}lead to big results.
           </Text>
+
+          <AppIcon
+            name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+            size={20}
+            color={colors.mutedForeground}
+          />
         </View>
       </ScrollView>
 
@@ -481,82 +480,6 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       overflow: "hidden",
       marginHorizontal: -21,
       paddingHorizontal: 21,
-    },
-    heroDecor: {
-      ...StyleSheet.absoluteFillObject,
-      overflow: "hidden",
-    },
-    heroGlow: {
-      position: "absolute",
-      width: compact ? 230 : 270,
-      height: compact ? 230 : 270,
-      borderRadius: 999,
-      right: compact ? -48 : -22,
-      top: compact ? 28 : 22,
-      backgroundColor: isDark ? "#17345C" : "#DCEBFF",
-      opacity: isDark ? 0.52 : 0.7,
-    },
-    heroOrb: {
-      position: "absolute",
-      width: compact ? 96 : 112,
-      height: compact ? 96 : 112,
-      borderRadius: 999,
-      right: compact ? 46 : 62,
-      top: compact ? 54 : 46,
-      backgroundColor: isDark ? "#294E7B" : "#F7DFA8",
-      opacity: isDark ? 0.8 : 0.82,
-    },
-    heroOrbSmall: {
-      position: "absolute",
-      width: 18,
-      height: 18,
-      borderRadius: 999,
-      right: compact ? 30 : 48,
-      top: compact ? 42 : 34,
-      backgroundColor: colors.accent,
-      opacity: 0.75,
-    },
-    heroMountainOne: {
-      position: "absolute",
-      width: compact ? 250 : 290,
-      height: compact ? 92 : 105,
-      right: compact ? -40 : -20,
-      bottom: -42,
-      borderRadius: 80,
-      backgroundColor: isDark ? "#111F33" : "#E9F1FB",
-      transform: [{ rotate: "-13deg" }],
-      opacity: 0.95,
-    },
-    heroMountainTwo: {
-      position: "absolute",
-      width: compact ? 190 : 230,
-      height: compact ? 76 : 90,
-      right: compact ? 55 : 72,
-      bottom: -36,
-      borderRadius: 70,
-      backgroundColor: isDark ? "#172A45" : "#DDEAF8",
-      transform: [{ rotate: "16deg" }],
-      opacity: 0.9,
-    },
-    heroSparkOne: {
-      position: "absolute",
-      width: 7,
-      height: 7,
-      borderRadius: 2,
-      right: compact ? 145 : 164,
-      top: 52,
-      backgroundColor: colors.accent,
-      transform: [{ rotate: "45deg" }],
-    },
-    heroSparkTwo: {
-      position: "absolute",
-      width: 5,
-      height: 5,
-      borderRadius: 2,
-      right: compact ? 118 : 136,
-      top: 83,
-      backgroundColor: isDark ? "#A7C7F5" : "#8FB8EF",
-      transform: [{ rotate: "45deg" }],
     },
     heroTop: {
       flexDirection: "row",
@@ -609,9 +532,9 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       elevation: 3,
     },
     progressCard: {
-      minHeight: compact ? 202 : 214,
+      minHeight: compact ? 184 : 194,
       marginTop: 0,
-      padding: compact ? 22 : 28,
+      padding: compact ? 20 : 24,
       borderRadius: 22,
       backgroundColor: isDark ? "#10141B" : colors.card,
       borderWidth: 1,
@@ -624,6 +547,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 4 },
       elevation: 1,
+    },
+    progressChevron: {
+      position: "absolute",
+      top: 22,
+      right: 22,
     },
     progressCopy: {
       flex: 1,
@@ -676,8 +604,8 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
     statsRow: {
       flexDirection: "row",
       gap: 14,
-      marginTop: 25,
-      marginBottom: 34,
+      marginTop: 18,
+      marginBottom: 30,
     },
     statCard: {
       flex: 1,
@@ -687,6 +615,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       padding: compact ? 18 : 22,
       justifyContent: "flex-start",
       minWidth: 0,
+      position: "relative",
     },
     statIcon: {
       width: compact ? 54 : 66,
@@ -701,6 +630,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       lineHeight: compact ? 35 : 40,
       fontWeight: "800",
       color: colors.foreground,
+    },
+    statChevron: {
+      position: "absolute",
+      top: compact ? 44 : 48,
+      right: 16,
     },
     statLabel: {
       marginTop: 2,
@@ -826,90 +760,17 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.mutedForeground,
     },
     motivationCard: {
-      height: 156,
-      marginTop: 31,
+      height: 112,
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 22,
       borderRadius: 22,
       overflow: "hidden",
       backgroundColor: isDark ? "#0B1422" : "#F2F7FD",
       borderWidth: 1,
       borderColor: colors.border,
-      justifyContent: "center",
-      paddingLeft: 37,
-    },
-    motivationDecor: {
-      ...StyleSheet.absoluteFillObject,
-      overflow: "hidden",
-    },
-    motivationGlow: {
-      position: "absolute",
-      width: 180,
-      height: 180,
-      borderRadius: 999,
-      right: -38,
-      top: -55,
-      backgroundColor: isDark ? "#153B68" : "#DCEBFF",
-      opacity: 0.72,
-    },
-    motivationCircleOne: {
-      position: "absolute",
-      width: 88,
-      height: 88,
-      borderRadius: 999,
-      right: 34,
-      top: 22,
-      backgroundColor: isDark ? "#244A76" : "#F4D99A",
-      opacity: 0.75,
-    },
-    motivationCircleTwo: {
-      position: "absolute",
-      width: 34,
-      height: 34,
-      borderRadius: 999,
-      right: 112,
-      top: 66,
-      borderWidth: 2,
-      borderColor: isDark ? "#4D78A9" : "#9DBEEA",
-      opacity: 0.7,
-    },
-    motivationWaveOne: {
-      position: "absolute",
-      width: 260,
-      height: 74,
-      right: -72,
-      bottom: -37,
-      borderRadius: 90,
-      backgroundColor: isDark ? "#132A46" : "#D7E6F8",
-      transform: [{ rotate: "-8deg" }],
-      opacity: 0.95,
-    },
-    motivationWaveTwo: {
-      position: "absolute",
-      width: 210,
-      height: 58,
-      right: 12,
-      bottom: -29,
-      borderRadius: 80,
-      backgroundColor: isDark ? "#1A3A60" : "#C8DCF3",
-      transform: [{ rotate: "8deg" }],
-      opacity: 0.88,
-    },
-    motivationDotOne: {
-      position: "absolute",
-      width: 7,
-      height: 7,
-      borderRadius: 999,
-      right: 148,
-      top: 27,
-      backgroundColor: colors.accent,
-    },
-    motivationDotTwo: {
-      position: "absolute",
-      width: 5,
-      height: 5,
-      borderRadius: 999,
-      right: 128,
-      top: 48,
-      backgroundColor: isDark ? "#B7D1F4" : "#8EB6EC",
+      justifyContent: "space-between",
+      paddingHorizontal: 22,
     },
     quoteIcon: {
       width: 54,
@@ -918,7 +779,8 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       backgroundColor: colors.card,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 15,
+      marginBottom: 0,
+      marginRight: 16,
     },
     quoteMark: {
       marginTop: -7,
@@ -928,8 +790,8 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.accent,
     },
     quoteText: {
-      fontSize: 23,
-      lineHeight: 31,
+      fontSize: 18,
+      lineHeight: 24,
       fontWeight: "800",
       color: colors.foreground,
     },
