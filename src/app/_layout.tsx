@@ -59,6 +59,13 @@ function AppNavigator() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="bulk-upload"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
