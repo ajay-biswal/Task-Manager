@@ -288,9 +288,9 @@ export default function DashboardScreen() {
             value={pendingTasks}
             label="Pending"
             icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
-            background="#FFFBF4"
-            iconBackground="#FFF0D7"
-            iconColor="#F59E0B"
+            background={colors.card}
+            iconBackground={colors.muted}
+            iconColor={colors.accent}
             colors={colors}
           />
 
@@ -302,9 +302,9 @@ export default function DashboardScreen() {
               android: "check_circle",
               web: "check_circle",
             }}
-            background="#F4FCF5"
-            iconBackground="#DDF8E2"
-            iconColor="#22C55E"
+            background={colors.card}
+            iconBackground={colors.muted}
+            iconColor={colors.success}
             colors={colors}
           />
 
@@ -316,9 +316,9 @@ export default function DashboardScreen() {
               android: "error",
               web: "error",
             }}
-            background="#FFF6F7"
-            iconBackground="#FFE1E5"
-            iconColor="#EF4444"
+            background={colors.card}
+            iconBackground={colors.muted}
+            iconColor={colors.destructive}
             colors={colors}
           />
         </View>
@@ -665,7 +665,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       minHeight: 425,
       borderRadius: 22,
       borderWidth: 1,
-      borderColor: "#E4ECF7",
+      borderColor: colors.border,
       backgroundColor: colors.card,
       alignItems: "center",
       justifyContent: "center",
@@ -750,9 +750,9 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       marginTop: 39,
       borderRadius: 22,
       overflow: "hidden",
-      backgroundColor: "#EFF6FF",
+      backgroundColor: colors.muted,
       borderWidth: 1,
-      borderColor: "#DCEBFF",
+      borderColor: colors.border,
       justifyContent: "center",
       paddingLeft: 37,
     },
@@ -769,7 +769,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       width: 54,
       height: 54,
       borderRadius: 27,
-      backgroundColor: "#DCEBFF",
+      backgroundColor: colors.card,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 15,
