@@ -1,5 +1,5 @@
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -139,6 +139,8 @@ function TaskRow({
 
 export default function TaskListScreen() {
   const router = useRouter();
+  const { focusSearch } = useLocalSearchParams<{ focusSearch?: string }>();
+  const searchInputRef = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
   const { tasks, loading, error, toggleTask, refreshTasks } = useTasks();
   const { colors } = useTheme();
@@ -147,6 +149,18 @@ export default function TaskListScreen() {
   const [filter, setFilter] = useState<TaskFilter>("ALL");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("DUE_DATE");
+
+  useEffect(() => {
+    if (focusSearch !== "1") {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [focusSearch]);
 
   useFocusEffect(
     useCallback(() => {
@@ -251,6 +265,7 @@ export default function TaskListScreen() {
             />
 
             <TextInput
+              ref={searchInputRef}
               value={search}
               onChangeText={setSearch}
               placeholder="Search tasks..."
