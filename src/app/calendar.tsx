@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { useTasks } from "@/hooks/useTasks";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
@@ -381,7 +382,6 @@ export default function CalendarScreen() {
   );
 }
 
-import { useTasks } from "@/hooks/useTasks";
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
