@@ -30,6 +30,8 @@ function formatDate(dateString: string): string {
 }
 
 function TaskPreview({ task, colors }: { task: Task; colors: ThemeColors }) {
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.taskCard}>
       <View style={styles.taskContent}>
@@ -228,7 +230,7 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   subtitle: {
     marginTop: spacing.xs,
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   settingsButton: {
@@ -243,7 +245,7 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
 
   settingsIcon: {
     fontSize: 20,
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   statsGrid: {
@@ -257,22 +259,22 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
     width: "47%",
     minHeight: 110,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.lg,
     justifyContent: "space-between",
-    backgroundColor: colors.light.card,
+    backgroundColor: colors.card,
   },
 
   statValue: {
     fontSize: typography.xxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   statLabel: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   sectionHeader: {
@@ -285,13 +287,13 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   sectionTitle: {
     fontSize: typography.xl,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   viewAll: {
     fontSize: typography.sm,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   taskList: {
@@ -301,13 +303,13 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   taskCard: {
     minHeight: 90,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.light.card,
+    backgroundColor: colors.card,
   },
 
   taskContent: {
@@ -319,22 +321,22 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   taskTitle: {
     fontSize: typography.md,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   completedTaskTitle: {
     textDecorationLine: "line-through",
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   taskCategory: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   taskDate: {
     fontSize: typography.xs,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   priorityBadge: {
@@ -346,15 +348,15 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   },
 
   highPriority: {
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   mediumPriority: {
-    backgroundColor: colors.light.muted,
+    backgroundColor: colors.muted,
   },
 
   lowPriority: {
-    backgroundColor: colors.light.border,
+    backgroundColor: colors.border,
   },
 
   priorityText: {
@@ -363,20 +365,20 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   },
 
   highPriorityText: {
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   mediumPriorityText: {
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   lowPriorityText: {
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   emptyCard: {
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.xxl,
     alignItems: "center",
@@ -385,14 +387,14 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   emptyTitle: {
     fontSize: typography.lg,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   emptyText: {
     marginTop: spacing.sm,
     textAlign: "center",
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   emptyButton: {
@@ -402,13 +404,13 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
     paddingHorizontal: spacing.xl,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   emptyButtonText: {
     fontSize: typography.sm,
     fontWeight: "600",
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 
   stateContainer: {
@@ -418,12 +420,12 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
 
   stateText: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   errorText: {
     fontSize: typography.sm,
-    color: colors.light.destructive,
+    color: colors.destructive,
   },
 
   addButton: {
@@ -432,12 +434,13 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.light.primary,
+    backgroundColor: colors.primary,
   },
 
   addButtonText: {
     fontSize: typography.md,
     fontWeight: "600",
-    color: colors.light.primaryForeground,
+    color: colors.primaryForeground,
   },
 });
+}
