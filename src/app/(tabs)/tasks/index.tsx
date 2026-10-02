@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
@@ -256,33 +257,30 @@ export default function TaskListScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Tasks</Text>
-            <Text style={styles.subtitle}>
-              {tasks.length} {tasks.length === 1 ? "task" : "tasks"} · Stay consistent
-            </Text>
-          </View>
-
-          <Pressable
-            onPress={() =>
-              Alert.alert("TaskFlow", undefined, [
-                { text: "Add task", onPress: () => router.push("/tasks/form") },
-                { text: "Bulk upload", onPress: () => router.push("/bulk-upload") },
-                { text: "Cancel", style: "cancel" },
-              ])
-            }
-            style={({ pressed }) => [styles.moreButton, pressed && styles.pressed]}
-            accessibilityRole="button"
-            accessibilityLabel="Task options"
-          >
-            <AppIcon
-              name={{ ios: "ellipsis", android: "more_vert", web: "more_vert" }}
-              size={22}
-              color={colors.foreground}
-            />
-          </Pressable>
-        </View>
+        <ScreenHeader
+          title="Tasks"
+          subtitle={tasks.length + " " + (tasks.length === 1 ? "task" : "tasks") + " · Stay consistent"}
+          right={
+            <Pressable
+              onPress={() =>
+                Alert.alert("TaskFlow", undefined, [
+                  { text: "Add task", onPress: () => router.push("/tasks/form") },
+                  { text: "Bulk upload", onPress: () => router.push("/bulk-upload") },
+                  { text: "Cancel", style: "cancel" },
+                ])
+              }
+              style={({ pressed }) => [styles.moreButton, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel="Task options"
+            >
+              <AppIcon
+                name={{ ios: "ellipsis", android: "more_vert", web: "more_vert" }}
+                size={22}
+                color={colors.foreground}
+              />
+            </Pressable>
+          }
+        />
 
         <View style={styles.searchRow}>
           <View style={styles.searchBox}>
