@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 interface AppButtonProps {
   title: string;
@@ -18,6 +19,7 @@ export function AppButton({
   variant = "primary",
 }: AppButtonProps) {
   const isDisabled = disabled || loading;
+  const { colors } = useTheme();
 
   return (
     <Pressable
@@ -26,9 +28,9 @@ export function AppButton({
       style={({ pressed }) => [
         styles.base,
 
-        variant === "primary" && styles.primary,
-        variant === "secondary" && styles.secondary,
-        variant === "destructive" && styles.destructive,
+        variant === "primary" && { backgroundColor: colors.primary },
+        variant === "secondary" && { backgroundColor: colors.background, borderColor: colors.border },
+        variant === "destructive" && { backgroundColor: colors.destructive },
 
         pressed && styles.pressed,
         isDisabled && styles.disabled,
@@ -38,17 +40,17 @@ export function AppButton({
         <ActivityIndicator
           color={
             variant === "primary"
-              ? colors.light.primaryForeground
-              : colors.light.foreground
+              ? colors.primaryForeground
+              : colors.foreground
           }
         />
       ) : (
         <Text
           style={[
             styles.text,
-            variant === "primary" && styles.primaryText,
-            variant === "secondary" && styles.secondaryText,
-            variant === "destructive" && styles.primaryText,
+            variant === "primary" && { color: colors.primaryForeground },
+            variant === "secondary" && { color: colors.foreground },
+            variant === "destructive" && { color: colors.primaryForeground },
           ]}
         >
           {title}
@@ -67,32 +69,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
 
-  primary: {
-    backgroundColor: colors.light.primary,
-  },
-
-  secondary: {
-    backgroundColor: colors.light.background,
-    borderWidth: 1,
-    borderColor: colors.light.border,
-  },
-
-  destructive: {
-    backgroundColor: colors.light.destructive,
-  },
 
   text: {
     fontSize: typography.md,
     fontWeight: "600",
   },
 
-  primaryText: {
-    color: colors.light.primaryForeground,
-  },
-
-  secondaryText: {
-    color: colors.light.foreground,
-  },
 
   pressed: {
     opacity: 0.8,
