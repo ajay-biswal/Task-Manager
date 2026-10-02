@@ -74,7 +74,7 @@ export function BottomNav() {
     return (
       <Pressable
         key={item.route}
-        onPress={() => router.replace(item.route)}
+        onPress={() => router.navigate(item.route)}
         style={({ pressed }) => [
           styles.item,
           pressed && styles.pressed,
