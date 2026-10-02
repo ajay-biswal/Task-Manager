@@ -7,7 +7,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
 import Papa from "papaparse";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 type CsvTaskRow = {
   id?: string;
@@ -67,6 +67,8 @@ function isValidDate(value: string): boolean {
 
 function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
   const errors: string[] = [];
+  const priority = row.priority?.trim().toUpperCase();
+  const status = row.status?.trim().toUpperCase();
 
   if (!row.id?.trim()) {
     errors.push(`Row ${rowNumber}: ID is required`);
@@ -81,8 +83,8 @@ function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
   }
 
   if (
-    row.priority &&
-    !["LOW", "MEDIUM", "HIGH"].includes(row.priority.toUpperCase())
+    priority &&
+    !["LOW", "MEDIUM", "HIGH"].includes(priority)
   ) {
     errors.push(`Row ${rowNumber}: Priority must be LOW, MEDIUM, or HIGH`);
   }
@@ -115,8 +117,8 @@ function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
   }
 
   if (
-    row.status &&
-    !["PENDING", "COMPLETED"].includes(row.status.toUpperCase())
+    status &&
+    !["PENDING", "COMPLETED"].includes(status)
   ) {
     errors.push(`Row ${rowNumber}: Status must be PENDING or COMPLETED`);
   }
@@ -207,14 +209,6 @@ export default function BulkUploadScreen() {
         validationErrors.push(...rowErrors);
       });
 
-      if (results.errors.length > 0) {
-        console.log("CSV PARSE ERRORS:", results.errors);
-
-        Alert.alert("CSV Error", "The CSV file could not be parsed correctly.");
-
-        return;
-      }
-
       if (validationErrors.length > 0) {
         console.log("VALIDATION ERRORS:", validationErrors);
 
@@ -292,7 +286,10 @@ export default function BulkUploadScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Bulk Upload</Text>
 
@@ -363,14 +360,14 @@ export default function BulkUploadScreen() {
         variant="secondary"
         onPress={() => router.back()}
       />
-    </View>
+    </ScrollView>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: colors.background,
     padding: spacing.xxl,
     gap: spacing.xl,
