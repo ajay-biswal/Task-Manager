@@ -38,6 +38,13 @@ function AppNavigator() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="tasks/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
