@@ -132,10 +132,14 @@ export default function BulkUploadScreen() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [csvError, setCsvError] = useState<string | null>(null);
 
   async function handlePickFile() {
     try {
       setLoading(true);
+      setValidationErrors([]);
+      setCsvError(null);
 
       const result = await DocumentPicker.getDocumentAsync({
         type: "*/*",
@@ -169,7 +173,9 @@ export default function BulkUploadScreen() {
       if (results.errors.length > 0) {
         console.log("CSV PARSE ERRORS:", results.errors);
 
-        Alert.alert("CSV Error", "The CSV file could not be parsed correctly.");
+        const message = "The CSV file could not be parsed correctly.";
+        setCsvError(message);
+        Alert.alert("CSV Error", message);
 
         return;
       }
@@ -179,13 +185,16 @@ export default function BulkUploadScreen() {
       if (headerErrors.length > 0) {
         console.log("HEADER ERRORS:", headerErrors);
 
+        setValidationErrors(headerErrors);
         Alert.alert("Invalid CSV headers", headerErrors.join("\n"));
 
         return;
       }
 
       if (results.data.length === 0) {
-        Alert.alert("Empty CSV", "The CSV file does not contain any task rows.");
+        const message = "The CSV file does not contain any task rows.";
+        setCsvError(message);
+        Alert.alert("Empty CSV", message);
 
         return;
       }
@@ -209,6 +218,7 @@ export default function BulkUploadScreen() {
       if (validationErrors.length > 0) {
         console.log("VALIDATION ERRORS:", validationErrors);
 
+        setValidationErrors(validationErrors);
         Alert.alert("Validation failed", validationErrors.join("\n"));
 
         return;
@@ -329,6 +339,25 @@ export default function BulkUploadScreen() {
         </View>
       ) : null}
 
+      {csvError ? (
+        <View style={styles.errorCard}>
+          <Text style={styles.errorTitle}>CSV Error</Text>
+          <Text style={styles.errorText}>{csvError}</Text>
+        </View>
+      ) : null}
+
+      {validationErrors.length > 0 ? (
+        <View style={styles.errorCard}>
+          <Text style={styles.errorTitle}>Validation Errors</Text>
+
+          {validationErrors.map((error, index) => (
+            <Text key={`${error}-${index}`} style={styles.errorText}>
+              • {error}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+
       <AppButton
         title="Back"
         variant="secondary"
@@ -409,6 +438,27 @@ function createStyles(colors: ThemeColors) {
   rowCount: {
     fontSize: typography.sm,
     color: colors.mutedForeground,
+  },
+
+  errorCard: {
+    borderWidth: 1,
+    borderColor: colors.destructive,
+    borderRadius: 18,
+    padding: spacing.xl,
+    gap: spacing.sm,
+    backgroundColor: colors.card,
+  },
+
+  errorTitle: {
+    fontSize: typography.lg,
+    fontWeight: "700",
+    color: colors.destructive,
+  },
+
+  errorText: {
+    fontSize: typography.sm,
+    color: colors.foreground,
+    lineHeight: 20,
   },
 });
 }
