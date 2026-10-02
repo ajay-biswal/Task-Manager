@@ -249,7 +249,7 @@ export default function TaskFormScreen() {
               <TextInput
               accessibilityLabel="Task title"
               returnKeyType="next"
-              maxLength={120}
+              maxLength={100}
               value={form.title}
               onChangeText={(value) => updateField("title", value)}
               placeholder="What needs to be done?"
@@ -448,8 +448,6 @@ export default function TaskFormScreen() {
               />
               <Text style={[styles.bulkText, { color: colors.accent }]}>Bulk Upload</Text>
             </Pressable>
-
-          </View>
         </View>
       </ScrollView>
 
