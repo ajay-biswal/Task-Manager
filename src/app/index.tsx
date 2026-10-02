@@ -270,17 +270,21 @@ export default function DashboardScreen() {
         </View>
 
         <View style={styles.quickActions}>
-          <AppButton
-            title="Calendar"
-            variant="secondary"
-            onPress={() => router.push("/calendar")}
-          />
+          <View style={styles.quickActionButton}>
+            <AppButton
+              title="Calendar"
+              variant="secondary"
+              onPress={() => router.push("/calendar")}
+            />
+          </View>
 
-          <AppButton
-            title="Bulk import"
-            variant="secondary"
-            onPress={() => router.push("/bulk-upload")}
-          />
+          <View style={styles.quickActionButton}>
+            <AppButton
+              title="Bulk import"
+              variant="secondary"
+              onPress={() => router.push("/bulk-upload")}
+            />
+          </View>
         </View>
 
         <Pressable
@@ -604,6 +608,10 @@ function createStyles(colors: ThemeColors) {
     quickActions: {
       flexDirection: "row",
       gap: spacing.md,
+    },
+
+    quickActionButton: {
+      flex: 1,
     },
 
     addButton: {
