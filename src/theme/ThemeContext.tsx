@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import { colors, type ThemeColors } from "@/theme";
 
@@ -10,7 +11,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(false);
 
   const value = useMemo(
