@@ -1,4 +1,3 @@
-import { CircularProgressIndicator, Host } from "@expo/ui/jetpack-compose";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
@@ -172,7 +171,6 @@ export default function TaskDetailsScreen() {
   }
 
   const isCompleted = task.status === "COMPLETED";
-  const progress = isCompleted ? 1 : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -275,20 +273,6 @@ export default function TaskDetailsScreen() {
             </View>
           </View>
 
-          <View style={styles.progressRing}>
-            <Host style={styles.progressHost} matchContents>
-              <CircularProgressIndicator
-                progress={progress}
-                color={colors.accent}
-                trackColor={colors.muted}
-                strokeWidth={4}
-                strokeCap="round"
-              />
-            </Host>
-            <Text style={[styles.progressText, { color: colors.foreground }]}>
-              {isCompleted ? "100%" : "0%"}
-            </Text>
-          </View>
         </View>
 
         {task.description ? (
@@ -602,24 +586,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "600",
-  },
-  progressRing: {
-    width: 68,
-    height: 68,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  progressHost: {
-    width: 68,
-    height: 68,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  progressText: {
-    position: "absolute",
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "800",
   },
   sectionCard: {
     borderRadius: 16,
