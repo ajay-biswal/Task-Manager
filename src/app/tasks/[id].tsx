@@ -1,5 +1,7 @@
+import { CircularProgressIndicator, Host } from "@expo/ui/jetpack-compose";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -406,7 +408,7 @@ function SectionCard({
   icon: string;
   title: string;
   colors: ThemeColors;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const iconName: SectionIcon = {
     ios:
