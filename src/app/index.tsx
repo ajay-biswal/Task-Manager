@@ -1,4 +1,5 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
@@ -73,7 +74,13 @@ function TaskPreview({ task }: { task: Task }) {
 export default function DashboardScreen() {
   const router = useRouter();
 
-  const { tasks, loading, error } = useTasks();
+  const { tasks, loading, error, refreshTasks } = useTasks();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshTasks();
+    }, [refreshTasks]),
+  );
 
   const totalTasks = tasks.length;
 
