@@ -65,7 +65,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Data</Text>
 
           <AppButton
             title="Clear All Tasks"
@@ -75,14 +75,14 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About</Text>
 
           <View style={[styles.aboutCard, { borderColor: colors.border }]}>
             <Text style={[styles.appName, { color: colors.foreground }]}>TaskFlow</Text>
 
             <Text style={[styles.version, { color: colors.mutedForeground }]}>Local-first task management</Text>
 
-            <Text style={styles.version}>Version 1.0.0</Text>
+            <Text style={[styles.version, { color: colors.mutedForeground }]}>Version 1.0.0</Text>
           </View>
         </View>
 
@@ -101,7 +101,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
   },
 
   content: {
@@ -116,12 +115,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-
   },
 
   subtitle: {
     fontSize: typography.sm,
-
   },
 
   section: {
@@ -131,13 +128,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.lg,
     fontWeight: "600",
-
   },
 
   settingRow: {
     minHeight: 72,
     borderWidth: 1,
-
     borderRadius: 14,
     padding: spacing.lg,
     flexDirection: "row",
@@ -154,17 +149,14 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: typography.md,
     fontWeight: "500",
-    color: colors.light.foreground,
   },
 
   settingDescription: {
     fontSize: typography.xs,
-
   },
 
   aboutCard: {
     borderWidth: 1,
-
     borderRadius: 14,
     padding: spacing.lg,
     gap: spacing.xs,
@@ -178,7 +170,6 @@ const styles = StyleSheet.create({
 
   version: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
   },
 
   backButton: {
