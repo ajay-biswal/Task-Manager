@@ -203,6 +203,8 @@ export default function DashboardScreen() {
             resizeMode="contain"
           />
 
+          {isDark && <View pointerEvents="none" style={styles.heroOverlay} />}
+
           <View style={styles.heroTop}>
             <View style={styles.heroText}>
               <Text style={styles.greeting}>
@@ -481,6 +483,10 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       right: compact ? -62 : -42,
       bottom: compact ? -28 : -20,
       opacity: 1,
+    },
+    heroOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0, 0, 0, 0.24)",
     },
     heroTop: {
       flexDirection: "row",
