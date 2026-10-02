@@ -1,6 +1,13 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
@@ -9,7 +16,6 @@ import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
-import type { Task } from "@/types/task";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
 function isToday(dateString: string): boolean {
@@ -23,11 +29,10 @@ function isToday(dateString: string): boolean {
   );
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(`${dateString}T00:00:00`);
-
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
+function formatToday(): string {
+  return new Date().toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
     month: "short",
     year: "numeric",
   });
@@ -36,88 +41,39 @@ function formatDate(dateString: string): string {
 function getGreeting(): string {
   const hour = new Date().getHours();
 
-  if (hour < 12) {
-    return "Good morning";
-  }
-
-  if (hour < 18) {
-    return "Good afternoon";
-  }
-
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
   return "Good evening";
 }
 
-function TaskPreview({
-  task,
+function ProgressRing({
+  progress,
   colors,
-  onPress,
 }: {
-  task: Task;
+  progress: number;
   colors: ThemeColors;
-  onPress: () => void;
 }) {
   const styles = createStyles(colors);
-  const overdue = isTaskOverdue(task);
+  const clamped = Math.max(0, Math.min(progress, 1));
+  const degrees = clamped * 360;
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
-    >
-      <View style={styles.taskStatus}>
-        <View
-          style={[
-            styles.statusCircle,
-            task.status === "COMPLETED"
-              ? styles.completedCircle
-              : styles.pendingCircle,
-          ]}
-        >
-          {task.status === "COMPLETED" ? (
-            <AppIcon
-              name={{ ios: "checkmark", android: "check", web: "check" }}
-              size={13}
-              color="#FFFFFF"
-            />
-          ) : null}
-        </View>
-      </View>
-
-      <View style={styles.taskContent}>
-        <Text
-          style={[
-            styles.taskTitle,
-            task.status === "COMPLETED" && styles.completedTaskTitle,
-          ]}
-          numberOfLines={1}
-        >
-          {task.title}
-        </Text>
-
-        <Text style={styles.taskMeta} numberOfLines={1}>
-          {task.category} · {formatDate(task.dueDate)}
-          {overdue ? " · Overdue" : ""}
-        </Text>
-      </View>
-
+    <View style={styles.ring}>
+      <View style={[styles.ringTrack, { borderColor: colors.muted }]} />
       <View
         style={[
-          styles.priorityBadge,
-          task.priority === "HIGH" && styles.highPriority,
-          task.priority === "MEDIUM" && styles.mediumPriority,
-          task.priority === "LOW" && styles.lowPriority,
+          styles.ringProgress,
+          {
+            borderTopColor: colors.accent,
+            borderRightColor: colors.accent,
+            transform: [{ rotate: `${degrees - 45}deg` }],
+          },
         ]}
-      >
-        <Text
-          style={[
-            styles.priorityText,
-            task.priority === "HIGH" && styles.highPriorityText,
-          ]}
-        >
-          {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
-        </Text>
+      />
+      <View style={styles.ringCenter}>
+        <Text style={styles.ringText}>{Math.round(clamped * 100)}%</Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -125,6 +81,7 @@ function StatCard({
   value,
   label,
   icon,
+  background,
   iconBackground,
   iconColor,
   colors,
@@ -132,6 +89,7 @@ function StatCard({
   value: number;
   label: string;
   icon: { ios: string; android: string; web: string };
+  background: string;
   iconBackground: string;
   iconColor: string;
   colors: ThemeColors;
@@ -139,57 +97,19 @@ function StatCard({
   const styles = createStyles(colors);
 
   return (
-    <View style={styles.statCard}>
-      <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
-        <AppIcon name={icon} size={18} color={iconColor} />
-      </View>
-
-      <View>
-        <Text style={styles.statValue}>{value}</Text>
-        <Text style={styles.statLabel}>{label}</Text>
-      </View>
-    </View>
-  );
-}
-
-function QuickAction({
-  title,
-  icon,
-  onPress,
-  primary = false,
-  colors,
-}: {
-  title: string;
-  icon: { ios: string; android: string; web: string };
-  onPress: () => void;
-  primary?: boolean;
-  colors: ThemeColors;
-}) {
-  const styles = createStyles(colors);
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.quickAction,
-        primary && styles.primaryQuickAction,
-        pressed && styles.pressed,
+    <View
+      style={[
+        styles.statCard,
+        { backgroundColor: background, borderColor: colors.border },
       ]}
     >
-      <AppIcon
-        name={icon}
-        size={17}
-        color={primary ? "#FFFFFF" : colors.foreground}
-      />
-      <Text
-        style={[
-          styles.quickActionText,
-          primary && styles.primaryQuickActionText,
-        ]}
-      >
-        {title}
-      </Text>
-    </Pressable>
+      <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
+        <AppIcon name={icon} size={21} color={iconColor} />
+      </View>
+
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -213,6 +133,8 @@ export default function DashboardScreen() {
   const pendingTasks = tasks.filter((task) => task.status === "PENDING").length;
   const overdueTasks = tasks.filter((task) => isTaskOverdue(task)).length;
 
+  const progress = totalTasks === 0 ? 0 : completedTasks / totalTasks;
+
   const todaysTasks = useMemo(
     () =>
       tasks
@@ -223,10 +145,8 @@ export default function DashboardScreen() {
           }
 
           const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-
           return priorityOrder[a.priority] - priorityOrder[b.priority];
-        })
-        .slice(0, 3),
+        }),
     [tasks],
   );
 
@@ -236,66 +156,128 @@ export default function DashboardScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={styles.headerText}>
-            <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.title}>Your tasks, organized.</Text>
-            <Text style={styles.subtitle}>
-              Stay focused and keep your day moving.
-            </Text>
-          </View>
-
-          <Pressable
-            onPress={() => router.push("/settings")}
-            style={({ pressed }) => [
-              styles.settingsButton,
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Open settings"
-          >
-            <AppIcon
-              name={{ ios: "gearshape", android: "settings", web: "settings" }}
-              size={20}
-              color={colors.foreground}
-            />
-          </Pressable>
-        </View>
-
-        <View style={styles.statsGrid}>
-          <StatCard
-            value={totalTasks}
-            label="Total Tasks"
-            icon={{ ios: "square.stack.3d.up.fill", android: "inventory_2", web: "inventory_2" }}
-            iconBackground={colors.accent + "18"}
-            iconColor={colors.accent}
-            colors={colors}
+        <View style={styles.hero}>
+          <Image
+            source={require("../../assets/dashboard/dashboard-header.png")}
+            style={styles.heroImage}
+            resizeMode="contain"
           />
 
+          <View style={styles.heroTop}>
+            <View style={styles.heroText}>
+              <Text style={styles.greeting}>
+                {getGreeting()}, Ajay 👋
+              </Text>
+              <Text style={styles.heroTitle}>
+                Have a productive{"\n"}day ahead.
+              </Text>
+              <Text style={styles.date}>{formatToday()}</Text>
+            </View>
+
+            <View style={styles.headerActions}>
+              <Pressable
+                onPress={() => router.push("/tasks")}
+                style={({ pressed }) => [
+                  styles.headerButton,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Search tasks"
+              >
+                <AppIcon
+                  name={{ ios: "magnifyingglass", android: "search", web: "search" }}
+                  size={22}
+                  color={colors.foreground}
+                />
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push("/settings")}
+                style={({ pressed }) => [
+                  styles.headerButton,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Open settings"
+              >
+                <AppIcon
+                  name={{ ios: "gearshape", android: "settings", web: "settings" }}
+                  size={22}
+                  color={colors.foreground}
+                />
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.progressCard}>
+          <View style={styles.progressCopy}>
+            <Text style={styles.progressTitle}>Task Progress</Text>
+
+            <Text style={styles.progressCount}>
+              {completedTasks} of {totalTasks}
+            </Text>
+
+            <Text style={styles.progressSubtitle}>tasks completed</Text>
+
+            <View style={styles.progressBarRow}>
+              <View style={styles.progressBarTrack}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${Math.round(progress * 100)}%`,
+                      backgroundColor: colors.accent,
+                    },
+                  ]}
+                />
+              </View>
+
+              <Text style={styles.progressPercent}>
+                {Math.round(progress * 100)}%
+              </Text>
+            </View>
+          </View>
+
+          <ProgressRing progress={progress} colors={colors} />
+        </View>
+
+        <View style={styles.statsRow}>
           <StatCard
             value={pendingTasks}
             label="Pending"
             icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
-            iconBackground="#F59E0B20"
-            iconColor="#D97706"
+            background="#FFFBF4"
+            iconBackground="#FFF0D7"
+            iconColor="#F59E0B"
             colors={colors}
           />
 
           <StatCard
             value={completedTasks}
             label="Completed"
-            icon={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
-            iconBackground="#22C55E20"
-            iconColor="#16A34A"
+            icon={{
+              ios: "checkmark.circle.fill",
+              android: "check_circle",
+              web: "check_circle",
+            }}
+            background="#F4FCF5"
+            iconBackground="#DDF8E2"
+            iconColor="#22C55E"
             colors={colors}
           />
 
           <StatCard
             value={overdueTasks}
             label="Overdue"
-            icon={{ ios: "exclamationmark.circle.fill", android: "error", web: "error" }}
-            iconBackground="#EF444420"
-            iconColor={colors.destructive}
+            icon={{
+              ios: "exclamationmark.circle.fill",
+              android: "error",
+              web: "error",
+            }}
+            background="#FFF6F7"
+            iconBackground="#FFE1E5"
+            iconColor="#EF4444"
             colors={colors}
           />
         </View>
@@ -311,81 +293,95 @@ export default function DashboardScreen() {
           <Pressable
             onPress={() => router.push("/tasks")}
             style={({ pressed }) => pressed && styles.pressed}
+            accessibilityRole="button"
+            accessibilityLabel="View all tasks"
           >
             <Text style={styles.viewAll}>View all</Text>
           </Pressable>
         </View>
 
         {loading ? (
-          <View style={styles.stateCard}>
+          <View style={styles.emptyCard}>
             <Text style={styles.stateText}>Loading your tasks...</Text>
           </View>
         ) : error ? (
-          <View style={styles.stateCard}>
+          <View style={styles.emptyCard}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : todaysTasks.length === 0 ? (
           <View style={styles.emptyCard}>
-            <View style={styles.emptyIcon}>
-              <AppIcon
-                name={{ ios: "checkmark", android: "check", web: "check" }}
-                size={22}
-                color={colors.accent}
-              />
-            </View>
+            <Image
+              source={require("../../assets/dashboard/empty-tasks.png")}
+              style={styles.emptyImage}
+              resizeMode="contain"
+            />
 
-            <Text style={styles.emptyTitle}>You’re all caught up</Text>
+            <Text style={styles.emptyTitle}>You’re all caught up!</Text>
 
             <Text style={styles.emptyText}>
-              No tasks are due today. Add one whenever you’re ready.
+              No tasks are due today.{"\n"}Enjoy your free time or add a new task.
             </Text>
           </View>
         ) : (
           <View style={styles.taskList}>
-            {todaysTasks.map((task) => (
-              <TaskPreview
+            {todaysTasks.slice(0, 3).map((task) => (
+              <Pressable
                 key={task.id}
-                task={task}
-                colors={colors}
                 onPress={() => router.push(`/tasks/${task.id}`)}
-              />
+                style={({ pressed }) => [
+                  styles.taskCard,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.taskDot,
+                    {
+                      backgroundColor:
+                        task.status === "COMPLETED"
+                          ? colors.success
+                          : colors.accent,
+                    },
+                  ]}
+                />
+
+                <View style={styles.taskCopy}>
+                  <Text style={styles.taskTitle} numberOfLines={1}>
+                    {task.title}
+                  </Text>
+                  <Text style={styles.taskMeta} numberOfLines={1}>
+                    {task.category} · {task.priority.toLowerCase()}
+                  </Text>
+                </View>
+
+                <AppIcon
+                  name={{
+                    ios: "chevron.right",
+                    android: "chevron_right",
+                    web: "chevron_right",
+                  }}
+                  size={18}
+                  color={colors.mutedForeground}
+                />
+              </Pressable>
             ))}
           </View>
         )}
 
-        <View style={styles.quickActionsHeader}>
-          <Text style={styles.sectionTitle}>Quick actions</Text>
-        </View>
-
-        <View style={styles.quickActionsGrid}>
-          <QuickAction
-            title="New Task"
-            icon={{ ios: "plus", android: "add", web: "add" }}
-            primary
-            onPress={() => router.push("/tasks/form")}
-            colors={colors}
+        <View style={styles.motivationCard}>
+          <Image
+            source={require("../../assets/dashboard/productivity-banner.png")}
+            style={styles.motivationImage}
+            resizeMode="cover"
           />
 
-          <QuickAction
-            title="Calendar"
-            icon={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }}
-            onPress={() => router.push("/calendar")}
-            colors={colors}
-          />
+          <View style={styles.quoteIcon}>
+            <Text style={styles.quoteMark}>“</Text>
+          </View>
 
-          <QuickAction
-            title="Bulk Import"
-            icon={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
-            onPress={() => router.push("/bulk-upload")}
-            colors={colors}
-          />
-
-          <QuickAction
-            title="Export"
-            icon={{ ios: "square.and.arrow.up", android: "file_download", web: "file_download" }}
-            onPress={() => router.push("/settings")}
-            colors={colors}
-          />
+          <Text style={styles.quoteText}>
+            Small steps every day{"\n"}lead to big results.
+          </Text>
         </View>
       </ScrollView>
 
@@ -402,90 +398,235 @@ function createStyles(colors: ThemeColors, topInset = 0) {
     },
 
     content: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: topInset + spacing.sm,
-      paddingBottom: spacing.md,
+      paddingHorizontal: 21,
+      paddingTop: topInset,
+      paddingBottom: 132,
     },
 
-    header: {
+    hero: {
+      height: 310,
+      position: "relative",
+      overflow: "hidden",
+      marginHorizontal: -21,
+      paddingHorizontal: 21,
+    },
+
+    heroImage: {
+      position: "absolute",
+      width: 480,
+      height: 260,
+      right: -42,
+      bottom: -14,
+    },
+
+    heroTop: {
       flexDirection: "row",
-      alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: spacing.xl,
+      alignItems: "flex-start",
+      paddingTop: 29,
     },
 
-    headerText: {
+    heroText: {
       flex: 1,
-      marginRight: spacing.md,
+      paddingRight: 12,
     },
 
     greeting: {
-      fontSize: typography.md,
+      fontSize: 17,
+      lineHeight: 23,
       fontWeight: "600",
-      color: colors.foreground,
-    },
-
-    title: {
-      marginTop: 2,
-      fontSize: typography.xl,
-      lineHeight: 30,
-      fontWeight: "800",
-      color: colors.foreground,
-    },
-
-    subtitle: {
-      marginTop: 3,
-      fontSize: typography.sm,
-      lineHeight: 20,
       color: colors.mutedForeground,
     },
 
-    settingsButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-      alignItems: "center",
-      justifyContent: "center",
+    heroTitle: {
+      marginTop: 9,
+      fontSize: 39,
+      lineHeight: 45,
+      fontWeight: "800",
+      letterSpacing: -0.9,
+      color: colors.foreground,
     },
 
-    statsGrid: {
+    date: {
+      marginTop: 11,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: "500",
+      color: colors.mutedForeground,
+    },
+
+    headerActions: {
       flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.md,
-      marginBottom: spacing.xl,
+      gap: 12,
     },
 
-    statCard: {
-      width: "47%",
-      minHeight: 96,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
-      padding: spacing.md,
-      justifyContent: "space-between",
+    headerButton: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
       backgroundColor: colors.card,
-    },
-
-    statIcon: {
-      width: 30,
-      height: 30,
-      borderRadius: 9,
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: "#000000",
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 5 },
+      elevation: 3,
     },
 
-    statValue: {
-      fontSize: typography.xl,
+    progressCard: {
+      minHeight: 255,
+      marginTop: -2,
+      padding: 28,
+      borderRadius: 22,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      shadowColor: "#000000",
+      shadowOpacity: 0.035,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 1,
+    },
+
+    progressCopy: {
+      flex: 1,
+      paddingRight: 18,
+    },
+
+    progressTitle: {
+      fontSize: 20,
+      lineHeight: 25,
       fontWeight: "700",
       color: colors.foreground,
     },
 
+    progressCount: {
+      marginTop: 19,
+      fontSize: 51,
+      lineHeight: 56,
+      fontWeight: "800",
+      letterSpacing: -1.4,
+      color: colors.foreground,
+    },
+
+    progressSubtitle: {
+      marginTop: 2,
+      fontSize: 20,
+      lineHeight: 26,
+      fontWeight: "500",
+      color: colors.mutedForeground,
+    },
+
+    progressBarRow: {
+      marginTop: 26,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+    },
+
+    progressBarTrack: {
+      flex: 1,
+      height: 16,
+      borderRadius: 999,
+      backgroundColor: colors.muted,
+      overflow: "hidden",
+    },
+
+    progressBarFill: {
+      height: "100%",
+      borderRadius: 999,
+    },
+
+    progressPercent: {
+      width: 42,
+      fontSize: 17,
+      fontWeight: "600",
+      color: colors.mutedForeground,
+    },
+
+    ring: {
+      width: 130,
+      height: 130,
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    },
+
+    ringTrack: {
+      position: "absolute",
+      width: 130,
+      height: 130,
+      borderRadius: 65,
+      borderWidth: 11,
+    },
+
+    ringProgress: {
+      position: "absolute",
+      width: 130,
+      height: 130,
+      borderRadius: 65,
+      borderWidth: 11,
+      borderLeftColor: "transparent",
+      borderBottomColor: "transparent",
+    },
+
+    ringCenter: {
+      width: 94,
+      height: 94,
+      borderRadius: 47,
+      backgroundColor: colors.card,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    ringText: {
+      fontSize: 27,
+      lineHeight: 32,
+      fontWeight: "800",
+      color: colors.foreground,
+    },
+
+    statsRow: {
+      flexDirection: "row",
+      gap: 14,
+      marginTop: 31,
+      marginBottom: 39,
+    },
+
+    statCard: {
+      flex: 1,
+      height: 208,
+      borderRadius: 22,
+      borderWidth: 1,
+      padding: 25,
+      justifyContent: "flex-start",
+    },
+
+    statIcon: {
+      width: 66,
+      height: 66,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 18,
+    },
+
+    statValue: {
+      fontSize: 35,
+      lineHeight: 40,
+      fontWeight: "800",
+      color: colors.foreground,
+    },
+
     statLabel: {
-      marginTop: 1,
-      fontSize: typography.xs,
+      marginTop: 3,
+      fontSize: 19,
+      lineHeight: 25,
+      fontWeight: "500",
       color: colors.mutedForeground,
     },
 
@@ -493,216 +634,162 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "space-between",
-      marginBottom: spacing.sm,
+      marginBottom: 17,
     },
 
     sectionTitle: {
-      fontSize: typography.md,
-      fontWeight: "700",
+      fontSize: 27,
+      lineHeight: 33,
+      fontWeight: "800",
       color: colors.foreground,
     },
 
     sectionSubtitle: {
       marginTop: 2,
-      fontSize: typography.xs,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: "500",
       color: colors.mutedForeground,
     },
 
     viewAll: {
-      fontSize: typography.xs,
+      fontSize: 18,
+      lineHeight: 24,
       fontWeight: "700",
       color: colors.accent,
     },
 
-    taskList: {
-      gap: spacing.sm,
-    },
-
-    taskCard: {
-      minHeight: 64,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.sm,
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.card,
-    },
-
-    taskStatus: {
-      width: 26,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: spacing.sm,
-    },
-
-    statusCircle: {
-      width: 19,
-      height: 19,
-      borderRadius: 999,
-      borderWidth: 1.5,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-
-    pendingCircle: {
-      borderColor: colors.mutedForeground,
-    },
-
-    completedCircle: {
-      borderColor: colors.success,
-      backgroundColor: colors.success,
-    },
-
-    taskContent: {
-      flex: 1,
-      marginRight: spacing.sm,
-    },
-
-    taskTitle: {
-      fontSize: typography.sm,
-      fontWeight: "600",
-      color: colors.foreground,
-    },
-
-    completedTaskTitle: {
-      textDecorationLine: "line-through",
-      color: colors.mutedForeground,
-    },
-
-    taskMeta: {
-      marginTop: 3,
-      fontSize: typography.xs,
-      color: colors.mutedForeground,
-    },
-
-    priorityBadge: {
-      minWidth: 56,
-      paddingVertical: 4,
-      paddingHorizontal: spacing.sm,
-      borderRadius: 8,
-      alignItems: "center",
-    },
-
-    highPriority: {
-      backgroundColor: colors.primary,
-    },
-
-    mediumPriority: {
-      backgroundColor: colors.muted,
-    },
-
-    lowPriority: {
-      backgroundColor: colors.muted,
-    },
-
-    priorityText: {
-      fontSize: 10,
-      fontWeight: "700",
-      color: colors.foreground,
-    },
-
-    highPriorityText: {
-      color: colors.primaryForeground,
-    },
-
     emptyCard: {
+      minHeight: 425,
+      borderRadius: 22,
       borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
-      padding: spacing.xl,
-      alignItems: "center",
+      borderColor: "#E4ECF7",
       backgroundColor: colors.card,
-    },
-
-    emptyIcon: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
-      backgroundColor: colors.accent + "18",
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: spacing.md,
+      paddingHorizontal: 24,
+      overflow: "hidden",
+    },
+
+    emptyImage: {
+      width: "94%",
+      height: 225,
+      marginTop: -8,
+      marginBottom: 2,
     },
 
     emptyTitle: {
-      fontSize: typography.md,
-      fontWeight: "700",
+      fontSize: 26,
+      lineHeight: 32,
+      fontWeight: "800",
       color: colors.foreground,
     },
 
     emptyText: {
-      marginTop: spacing.xs,
-      maxWidth: 260,
+      marginTop: 12,
       textAlign: "center",
-      fontSize: typography.xs,
-      lineHeight: 18,
+      fontSize: 18,
+      lineHeight: 26,
+      fontWeight: "500",
       color: colors.mutedForeground,
     },
 
-    stateCard: {
-      minHeight: 70,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      alignItems: "center",
-      justifyContent: "center",
-      padding: spacing.lg,
-      backgroundColor: colors.card,
-    },
-
     stateText: {
-      fontSize: typography.sm,
+      fontSize: 16,
       color: colors.mutedForeground,
     },
 
     errorText: {
-      fontSize: typography.sm,
+      fontSize: 16,
       color: colors.destructive,
+      textAlign: "center",
     },
 
-    quickActionsHeader: {
-      marginTop: spacing.xl,
-      marginBottom: spacing.sm,
+    taskList: {
+      gap: 10,
     },
 
-    quickActionsGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.sm,
-    },
-
-    quickAction: {
-      width: "48%",
-      minHeight: 44,
+    taskCard: {
+      minHeight: 72,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 10,
+      borderRadius: 16,
       backgroundColor: colors.card,
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
-      gap: spacing.sm,
+      paddingHorizontal: 16,
+      gap: 12,
     },
 
-    primaryQuickAction: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accent,
+    taskDot: {
+      width: 11,
+      height: 11,
+      borderRadius: 6,
     },
 
-    quickActionText: {
-      fontSize: typography.xs,
-      fontWeight: "600",
+    taskCopy: {
+      flex: 1,
+    },
+
+    taskTitle: {
+      fontSize: 16,
+      fontWeight: "700",
       color: colors.foreground,
     },
 
-    primaryQuickActionText: {
-      color: "#FFFFFF",
+    taskMeta: {
+      marginTop: 3,
+      fontSize: 13,
+      color: colors.mutedForeground,
+    },
+
+    motivationCard: {
+      height: 184,
+      marginTop: 39,
+      borderRadius: 22,
+      overflow: "hidden",
+      backgroundColor: "#EFF6FF",
+      borderWidth: 1,
+      borderColor: "#DCEBFF",
+      justifyContent: "center",
+      paddingLeft: 37,
+    },
+
+    motivationImage: {
+      position: "absolute",
+      width: "100%",
+      height: "100%",
+      right: 0,
+      top: 0,
+    },
+
+    quoteIcon: {
+      width: 54,
+      height: 54,
+      borderRadius: 27,
+      backgroundColor: "#DCEBFF",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 15,
+    },
+
+    quoteMark: {
+      marginTop: -7,
+      fontSize: 39,
+      lineHeight: 45,
+      fontWeight: "800",
+      color: colors.accent,
+    },
+
+    quoteText: {
+      fontSize: 23,
+      lineHeight: 31,
+      fontWeight: "800",
+      color: colors.foreground,
     },
 
     pressed: {
-      opacity: 0.75,
+      opacity: 0.72,
     },
   });
 }
