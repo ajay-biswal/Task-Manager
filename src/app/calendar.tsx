@@ -398,14 +398,15 @@ function createStyles(colors: ThemeColors) {
     },
     header: {
       position: "relative",
-      minHeight: 132,
+      minHeight: 104,
       marginBottom: 18,
     },
     headerText: {
-      paddingTop: 72,
+      paddingTop: 0,
+      paddingRight: 220,
     },
     title: {
-      maxWidth: 210,
+      maxWidth: 190,
       fontSize: 31,
       lineHeight: 37,
       fontWeight: "800",
