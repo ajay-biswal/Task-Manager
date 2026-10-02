@@ -18,6 +18,36 @@ type CsvTaskRow = {
   status?: string;
 };
 
+const REQUIRED_CSV_HEADERS = [
+  "id",
+  "title",
+  "description",
+  "category",
+  "priority",
+  "start_date",
+  "due_date",
+  "status",
+] as const;
+
+function validateCsvHeaders(fields: string[] | undefined): string[] {
+  if (!fields || fields.length === 0) {
+    return ["CSV must contain a header row"];
+  }
+
+  const headers = fields.map((field) => field.trim().toLowerCase());
+  const missingHeaders = REQUIRED_CSV_HEADERS.filter(
+    (header) => !headers.includes(header),
+  );
+
+  if (missingHeaders.length > 0) {
+    return [
+      `Missing required column(s): ${missingHeaders.join(", ")}`,
+    ];
+  }
+
+  return [];
+}
+
 function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
   const errors: string[] = [];
 
@@ -105,6 +135,30 @@ export default function BulkUploadScreen() {
 
       console.log("CSV ROWS:", results.data);
       console.log("CSV ERRORS:", results.errors);
+
+      if (results.errors.length > 0) {
+        console.log("CSV PARSE ERRORS:", results.errors);
+
+        Alert.alert("CSV Error", "The CSV file could not be parsed correctly.");
+
+        return;
+      }
+
+      const headerErrors = validateCsvHeaders(results.meta.fields);
+
+      if (headerErrors.length > 0) {
+        console.log("HEADER ERRORS:", headerErrors);
+
+        Alert.alert("Invalid CSV headers", headerErrors.join("\n"));
+
+        return;
+      }
+
+      if (results.data.length === 0) {
+        Alert.alert("Empty CSV", "The CSV file does not contain any task rows.");
+
+        return;
+      }
 
       const validationErrors: string[] = [];
 
