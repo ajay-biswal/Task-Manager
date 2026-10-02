@@ -15,6 +15,7 @@ import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
 import type { Task, TaskPriority } from "@/types/task";
+import { isTaskOverdue } from "@/utils/taskUtils";
 
 type TaskFilter = "ALL" | "PENDING" | "COMPLETED";
 
@@ -49,6 +50,7 @@ function TaskCard({
 }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+  const overdue = isTaskOverdue(task);
 
   return (
     <Pressable
@@ -87,6 +89,13 @@ function TaskCard({
           <Text style={styles.separator}>•</Text>
 
           <Text style={styles.dueDate}>Due {formatDate(task.dueDate)}</Text>
+
+          {overdue ? (
+            <>
+              <Text style={styles.separator}>•</Text>
+              <Text style={styles.overdueText}>OVERDUE</Text>
+            </>
+          ) : null}
         </View>
       </View>
 
@@ -524,6 +533,12 @@ function createStyles(colors: ThemeColors) {
   dueDate: {
     fontSize: typography.xs,
     color: colors.mutedForeground,
+  },
+
+  overdueText: {
+    fontSize: typography.xs,
+    fontWeight: "700",
+    color: colors.destructive,
   },
 
   rightSide: {
