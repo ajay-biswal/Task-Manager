@@ -1,19 +1,21 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppButton } from "@/components/ui/AppButton";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { useTasks } from "@/hooks/useTasks";
+import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
-import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
 
 function formatDate(dateString: string): string {
@@ -21,41 +23,32 @@ function formatDate(dateString: string): string {
 
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  const { colors } = useTheme();
-  const styles = createStyles(colors);
-
-  return (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-
-      <Text style={styles.detailValue}>{value}</Text>
-    </View>
-  );
+function formatDateTime(dateString: string): string {
+  return new Date(dateString).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function TaskDetailsScreen() {
   const router = useRouter();
-
-  const params = useLocalSearchParams<{
-    id?: string;
-  }>();
-
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ id?: string }>();
   const taskId = typeof params.id === "string" ? params.id : undefined;
 
   const { findTask, removeTask, toggleTask } = useTasks();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
 
   const [task, setTask] = useState<Task | null>(null);
-
   const [loading, setLoading] = useState(true);
-
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -110,10 +103,10 @@ export default function TaskDetailsScreen() {
 
     try {
       await toggleTask(task.id, nextStatus);
-
       setTask({
-      ...task,
+        ...task,
         status: nextStatus,
+        updatedAt: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Failed to update task status:", error);
@@ -127,23 +120,19 @@ export default function TaskDetailsScreen() {
     }
 
     Alert.alert("Delete task", `Delete "${task.title}"?`, [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
+      { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
           try {
             setDeleting(true);
-
             await removeTask(task.id);
-
             router.back();
           } catch (error) {
             console.error("Failed to delete task:", error);
             setDeleting(false);
+            Alert.alert("Delete failed", "Unable to delete the task.");
           }
         },
       },
@@ -151,228 +140,429 @@ export default function TaskDetailsScreen() {
   }
 
   function handleEdit() {
-    if (!task) {
-      return;
+    if (task) {
+      router.push(`/tasks/form?id=${task.id}`);
     }
-
-    router.push(`/tasks/form?id=${task.id}`);
   }
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.foreground} />
-
-        <Text style={styles.stateText}>Loading task...</Text>
+        <Text style={[styles.stateText, { color: colors.mutedForeground }]}>
+          Loading task...
+        </Text>
       </View>
     );
   }
 
   if (!task) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.stateTitle}>Task not found</Text>
-
-        <AppButton title="Go Back" onPress={() => router.back()} />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.stateTitle, { color: colors.foreground }]}>
+          Task not found
+        </Text>
+        <Pressable onPress={() => router.back()}>
+          <Text style={[styles.link, { color: colors.accent }]}>Go back</Text>
+        </Pressable>
       </View>
     );
   }
 
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>{task.title}</Text>
+  const isCompleted = task.status === "COMPLETED";
 
-        <View
-          style={[
-            styles.statusBadge,
-            task.status === "COMPLETED" && styles.completedBadge,
-          ]}
-        >
-          <Text
-            style={[
-              styles.statusText,
-              task.status === "COMPLETED" && styles.completedStatusText,
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + spacing.sm },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={10}
+            style={styles.iconButton}
+            accessibilityLabel="Back"
+          >
+            <AppIcon
+              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+              size={22}
+              color={colors.foreground}
+            />
+          </Pressable>
+
+          <Text style={[styles.screenTitle, { color: colors.foreground }]}>
+            Task
+          </Text>
+
+          <Pressable
+            onPress={handleEdit}
+            hitSlop={10}
+            style={styles.iconButton}
+            accessibilityLabel="Edit task"
+          >
+            <AppIcon
+              name={{ ios: "pencil", android: "edit", web: "edit" }}
+              size={20}
+              color={colors.foreground}
+            />
+          </Pressable>
+        </View>
+
+        <View style={styles.headerBlock}>
+          <Text style={[styles.title, { color: colors.foreground }]}>
+            {task.title}
+          </Text>
+
+          <View style={styles.badges}>
+            <View
+              style={[
+                styles.priorityBadge,
+                { backgroundColor: getPriorityColor(task.priority, colors) },
+              ]}
+            >
+              <Text style={styles.priorityText}>
+                {capitalize(task.priority)}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: colors.muted },
+              ]}
+            >
+              <Text style={[styles.statusText, { color: colors.foreground }]}>
+                {isCompleted ? "Completed" : "Pending"}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        {task.description ? (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+              Description
+            </Text>
+            <Text style={[styles.description, { color: colors.foreground }]}>
+              {task.description}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            Details
+          </Text>
+
+          <View style={styles.detailList}>
+            <DetailRow label="Category" value={task.category} colors={colors} />
+            <DetailRow label="Priority" value={capitalize(task.priority)} colors={colors} />
+            <DetailRow label="Start date" value={formatDate(task.startDate)} colors={colors} />
+            <DetailRow label="Due date" value={formatDate(task.dueDate)} colors={colors} />
+            <DetailRow label="Status" value={isCompleted ? "Completed" : "Pending"} colors={colors} />
+          </View>
+        </View>
+
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            Activity
+          </Text>
+
+          <View style={styles.activityList}>
+            <ActivityRow
+              label="Created"
+              value={formatDateTime(task.createdAt)}
+              colors={colors}
+            />
+            <ActivityRow
+              label="Last updated"
+              value={formatDateTime(task.updatedAt)}
+              colors={colors}
+            />
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <Pressable
+            onPress={handleToggle}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              { backgroundColor: colors.accent },
+              pressed && styles.pressed,
             ]}
           >
-            {task.status}
-          </Text>
+            <Text style={styles.primaryButtonText}>
+              {isCompleted ? "Mark as Pending" : "Mark as Completed"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleEdit}
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+              },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.secondaryButtonText, { color: colors.foreground }]}>
+              Edit Task
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleDelete}
+            disabled={deleting}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              { borderColor: colors.destructive },
+              pressed && styles.pressed,
+            ]}
+          >
+            {deleting ? (
+              <ActivityIndicator color={colors.destructive} />
+            ) : (
+              <Text style={[styles.deleteText, { color: colors.destructive }]}>
+                Delete Task
+              </Text>
+            )}
+          </Pressable>
         </View>
-      </View>
-
-      {task.description ? (
-        <View style={styles.descriptionCard}>
-          <Text style={styles.sectionTitle}>Description</Text>
-
-          <Text style={styles.description}>{task.description}</Text>
-        </View>
-      ) : null}
-
-      <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Task Details</Text>
-
-        <DetailRow label="Category" value={task.category} />
-
-        <DetailRow label="Priority" value={task.priority} />
-
-        <DetailRow label="Start date" value={formatDate(task.startDate)} />
-
-        <DetailRow label="Due date" value={formatDate(task.dueDate)} />
-
-        <DetailRow
-          label="Created"
-          value={formatDate(task.createdAt.slice(0, 10))}
-        />
-
-        <DetailRow
-          label="Last updated"
-          value={formatDate(task.updatedAt.slice(0, 10))}
-        />
-      </View>
-
-      <View style={styles.actions}>
-        <AppButton
-          title={
-            task.status === "COMPLETED"
-              ? "Mark as Pending"
-              : "Mark as Completed"
-          }
-          onPress={handleToggle}
-        />
-
-        <AppButton title="Edit Task" variant="secondary" onPress={handleEdit} />
-
-        <AppButton
-          title="Delete Task"
-          variant="destructive"
-          loading={deleting}
-          onPress={handleDelete}
-        />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
-function createStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+function DetailRow({
+  label,
+  value,
+  colors,
+}: {
+  label: string;
+  value: string;
+  colors: ThemeColors;
+}) {
+  return (
+    <View style={styles.detailRow}>
+      <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>
+        {label}
+      </Text>
+      <Text style={[styles.detailValue, { color: colors.foreground }]}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function ActivityRow({
+  label,
+  value,
+  colors,
+}: {
+  label: string;
+  value: string;
+  colors: ThemeColors;
+}) {
+  return (
+    <View style={styles.activityRow}>
+      <Text style={[styles.activityLabel, { color: colors.mutedForeground }]}>
+        {label}
+      </Text>
+      <Text style={[styles.activityValue, { color: colors.foreground }]}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0) + value.slice(1).toLowerCase();
+}
+
+function getPriorityColor(priority: Task["priority"], colors: ThemeColors): string {
+  if (priority === "HIGH") {
+    return colors.destructive;
+  }
+
+  if (priority === "MEDIUM") {
+    return "#F59E0B";
+  }
+
+  return colors.mutedForeground;
+}
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
-
   content: {
-    padding: spacing.xl,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxxl,
-    gap: spacing.lg,
   },
-
-  header: {
-    gap: spacing.md,
+  topBar: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.lg,
   },
-
-  title: {
-    fontSize: typography.xxxl,
-    lineHeight: 36,
-    fontWeight: "700",
-    color: colors.foreground,
+  iconButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
-
-  statusBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-    backgroundColor: colors.muted,
-  },
-
-  completedBadge: {
-    backgroundColor: colors.primary,
-  },
-
-  statusText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
-
-  completedStatusText: {
-    color: colors.primaryForeground,
-  },
-
-  descriptionCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-
-  detailsCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-
-  sectionTitle: {
-    fontSize: typography.lg,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
-
-  description: {
+  screenTitle: {
     fontSize: typography.md,
-    lineHeight: 24,
-    color: colors.mutedForeground,
+    fontWeight: "700",
   },
-
+  headerBlock: {
+    gap: spacing.sm,
+  },
+  title: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "700",
+  },
+  badges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  priorityBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: 7,
+  },
+  priorityText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  statusBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: 7,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  divider: {
+    height: 1,
+    marginVertical: spacing.lg,
+  },
+  section: {
+    gap: spacing.sm,
+  },
+  sectionTitle: {
+    fontSize: typography.md,
+    fontWeight: "700",
+  },
+  description: {
+    fontSize: typography.sm,
+    lineHeight: 21,
+  },
+  detailList: {
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: spacing.lg,
+    minHeight: 24,
   },
-
   detailLabel: {
     fontSize: typography.sm,
-    color: colors.mutedForeground,
   },
-
   detailValue: {
     flex: 1,
     textAlign: "right",
     fontSize: typography.sm,
     fontWeight: "500",
-    color: colors.foreground,
   },
-
+  activityList: {
+    gap: spacing.xs,
+  },
+  activityRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: spacing.lg,
+  },
+  activityLabel: {
+    fontSize: typography.xs,
+  },
+  activityValue: {
+    flex: 1,
+    textAlign: "right",
+    fontSize: typography.xs,
+  },
   actions: {
-    gap: spacing.md,
+    gap: spacing.sm,
     marginTop: spacing.md,
   },
-
-  centerContainer: {
+  primaryButton: {
+    minHeight: 44,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: typography.xs,
+    fontWeight: "700",
+  },
+  secondaryButton: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  secondaryButtonText: {
+    fontSize: typography.xs,
+    fontWeight: "600",
+  },
+  deleteButton: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteText: {
+    fontSize: typography.xs,
+    fontWeight: "600",
+  },
+  pressed: {
+    opacity: 0.75,
+  },
+  center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: spacing.xl,
     gap: spacing.md,
-    backgroundColor: colors.background,
   },
-
   stateText: {
     fontSize: typography.sm,
-    color: colors.mutedForeground,
   },
-
   stateTitle: {
     fontSize: typography.xl,
+    fontWeight: "700",
+  },
+  link: {
+    fontSize: typography.sm,
     fontWeight: "600",
-    color: colors.foreground,
   },
 });
-}
