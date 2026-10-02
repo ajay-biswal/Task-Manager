@@ -28,7 +28,7 @@ function AppNavigator() {
       <Stack.Screen
         name="index"
         options={{
-          title: "TaskFlow",
+          headerShown: false,
         }}
       />
 
