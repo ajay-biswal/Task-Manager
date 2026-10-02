@@ -132,23 +132,27 @@ export default function CalendarScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={styles.controls}>
-            <Pressable
-              onPress={goToToday}
-              style={({ pressed }) => [
-                styles.todayButton,
-                pressed && styles.pressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Go to today"
-            >
-              <Text style={styles.todayText}>Today</Text>
-            </Pressable>
+          <Text style={styles.title}>Calendar</Text>
 
+          <Pressable
+            onPress={goToToday}
+            style={({ pressed }) => [
+              styles.todayButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Go to today"
+          >
+            <Text style={styles.todayText}>Today</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.calendarCard}>
+          <View style={styles.monthRow}>
             <Pressable
               onPress={() => changeMonth(-1)}
               style={({ pressed }) => [
-                styles.controlButton,
+                styles.monthControl,
                 pressed && styles.pressed,
               ]}
               accessibilityRole="button"
@@ -161,14 +165,18 @@ export default function CalendarScreen() {
                   web: "chevron_left",
                 }}
                 size={21}
-                color={colors.mutedForeground}
+                color={colors.foreground}
               />
             </Pressable>
+
+            <Text style={styles.monthTitle}>
+              {formatMonth(monthDate.getFullYear(), monthDate.getMonth())}
+            </Text>
 
             <Pressable
               onPress={() => changeMonth(1)}
               style={({ pressed }) => [
-                styles.controlButton,
+                styles.monthControl,
                 pressed && styles.pressed,
               ]}
               accessibilityRole="button"
@@ -181,21 +189,10 @@ export default function CalendarScreen() {
                   web: "chevron_right",
                 }}
                 size={21}
-                color={colors.mutedForeground}
+                color={colors.foreground}
               />
             </Pressable>
           </View>
-
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Calendar</Text>
-            <Text style={styles.subtitle}>View and manage your tasks by date.</Text>
-          </View>
-        </View>
-
-        <View style={styles.calendarCard}>
-          <Text style={styles.monthTitle}>
-            {formatMonth(monthDate.getFullYear(), monthDate.getMonth())}
-          </Text>
 
           <View style={styles.weekHeader}>
             {WEEKDAYS.map((day) => (
@@ -397,37 +394,20 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 22,
     },
     header: {
-      position: "relative",
-      minHeight: 104,
-      marginBottom: 18,
-    },
-    headerText: {
-      paddingTop: 0,
-      paddingRight: 220,
+      minHeight: 76,
+      marginBottom: 4,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
     },
     title: {
-      maxWidth: 190,
       fontSize: 31,
       lineHeight: 37,
       fontWeight: "800",
       letterSpacing: -0.6,
       color: colors.foreground,
     },
-    subtitle: {
-      maxWidth: 300,
-      marginTop: 2,
-      fontSize: 17,
-      lineHeight: 23,
-      color: colors.mutedForeground,
-    },
-    controls: {
-      position: "absolute",
-      top: 0,
-      right: 0,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-    },
+
     todayButton: {
       minWidth: 96,
       height: 56,
@@ -458,20 +438,28 @@ function createStyles(colors: ThemeColors) {
       elevation: 3,
     },
     calendarCard: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 22,
-      backgroundColor: colors.card,
-      paddingHorizontal: 18,
-      paddingTop: 24,
-      paddingBottom: 20,
+      paddingHorizontal: 2,
+      paddingTop: 4,
+      paddingBottom: 8,
+    },
+    monthRow: {
+      height: 54,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 12,
+    },
+    monthControl: {
+      width: 44,
+      height: 44,
+      alignItems: "center",
+      justifyContent: "center",
     },
     monthTitle: {
-      fontSize: 27,
-      lineHeight: 33,
+      fontSize: 25,
+      lineHeight: 31,
       fontWeight: "800",
       color: colors.foreground,
-      marginBottom: 22,
     },
     weekHeader: {
       flexDirection: "row",
