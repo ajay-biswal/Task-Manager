@@ -197,13 +197,15 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
-          <Image
-            source={require("../../assets/dashboard/dashboard-header.png")}
-            style={styles.heroImage}
-            resizeMode="contain"
-          />
-
-          {isDark && <View pointerEvents="none" style={styles.heroOverlay} />}
+          <View pointerEvents="none" style={styles.heroDecor}>
+            <View style={styles.heroGlow} />
+            <View style={styles.heroOrb} />
+            <View style={styles.heroOrbSmall} />
+            <View style={styles.heroMountainOne} />
+            <View style={styles.heroMountainTwo} />
+            <View style={styles.heroSparkOne} />
+            <View style={styles.heroSparkTwo} />
+          </View>
 
           <View style={styles.heroTop}>
             <View style={styles.heroText}>
@@ -435,11 +437,15 @@ export default function DashboardScreen() {
         )}
 
         <View style={styles.motivationCard}>
-          <Image
-            source={require("../../assets/dashboard/productivity-banner.png")}
-            style={styles.motivationImage}
-            resizeMode="cover"
-          />
+          <View pointerEvents="none" style={styles.motivationDecor}>
+            <View style={styles.motivationGlow} />
+            <View style={styles.motivationCircleOne} />
+            <View style={styles.motivationCircleTwo} />
+            <View style={styles.motivationWaveOne} />
+            <View style={styles.motivationWaveTwo} />
+            <View style={styles.motivationDotOne} />
+            <View style={styles.motivationDotTwo} />
+          </View>
 
           <View style={styles.quoteIcon}>
             <Text style={styles.quoteMark}>“</Text>
@@ -476,17 +482,81 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       marginHorizontal: -21,
       paddingHorizontal: 21,
     },
-    heroImage: {
-      position: "absolute",
-      width: compact ? 420 : 470,
-      height: compact ? 228 : 255,
-      right: compact ? -62 : -42,
-      bottom: compact ? -28 : -20,
-      opacity: 1,
-    },
-    heroOverlay: {
+    heroDecor: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: "rgba(0, 0, 0, 0.24)",
+      overflow: "hidden",
+    },
+    heroGlow: {
+      position: "absolute",
+      width: compact ? 230 : 270,
+      height: compact ? 230 : 270,
+      borderRadius: 999,
+      right: compact ? -48 : -22,
+      top: compact ? 28 : 22,
+      backgroundColor: isDark ? "#17345C" : "#DCEBFF",
+      opacity: isDark ? 0.52 : 0.7,
+    },
+    heroOrb: {
+      position: "absolute",
+      width: compact ? 96 : 112,
+      height: compact ? 96 : 112,
+      borderRadius: 999,
+      right: compact ? 46 : 62,
+      top: compact ? 54 : 46,
+      backgroundColor: isDark ? "#294E7B" : "#F7DFA8",
+      opacity: isDark ? 0.8 : 0.82,
+    },
+    heroOrbSmall: {
+      position: "absolute",
+      width: 18,
+      height: 18,
+      borderRadius: 999,
+      right: compact ? 30 : 48,
+      top: compact ? 42 : 34,
+      backgroundColor: colors.accent,
+      opacity: 0.75,
+    },
+    heroMountainOne: {
+      position: "absolute",
+      width: compact ? 250 : 290,
+      height: compact ? 92 : 105,
+      right: compact ? -40 : -20,
+      bottom: -42,
+      borderRadius: 80,
+      backgroundColor: isDark ? "#111F33" : "#E9F1FB",
+      transform: [{ rotate: "-13deg" }],
+      opacity: 0.95,
+    },
+    heroMountainTwo: {
+      position: "absolute",
+      width: compact ? 190 : 230,
+      height: compact ? 76 : 90,
+      right: compact ? 55 : 72,
+      bottom: -36,
+      borderRadius: 70,
+      backgroundColor: isDark ? "#172A45" : "#DDEAF8",
+      transform: [{ rotate: "16deg" }],
+      opacity: 0.9,
+    },
+    heroSparkOne: {
+      position: "absolute",
+      width: 7,
+      height: 7,
+      borderRadius: 2,
+      right: compact ? 145 : 164,
+      top: 52,
+      backgroundColor: colors.accent,
+      transform: [{ rotate: "45deg" }],
+    },
+    heroSparkTwo: {
+      position: "absolute",
+      width: 5,
+      height: 5,
+      borderRadius: 2,
+      right: compact ? 118 : 136,
+      top: 83,
+      backgroundColor: isDark ? "#A7C7F5" : "#8FB8EF",
+      transform: [{ rotate: "45deg" }],
     },
     heroTop: {
       flexDirection: "row",
@@ -766,13 +836,80 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       justifyContent: "center",
       paddingLeft: 37,
     },
-    motivationImage: {
+    motivationDecor: {
+      ...StyleSheet.absoluteFillObject,
+      overflow: "hidden",
+    },
+    motivationGlow: {
       position: "absolute",
-      width: "100%",
-      height: "100%",
-      right: 0,
-      top: 0,
-      opacity: 0.96,
+      width: 180,
+      height: 180,
+      borderRadius: 999,
+      right: -38,
+      top: -55,
+      backgroundColor: isDark ? "#153B68" : "#DCEBFF",
+      opacity: 0.72,
+    },
+    motivationCircleOne: {
+      position: "absolute",
+      width: 88,
+      height: 88,
+      borderRadius: 999,
+      right: 34,
+      top: 22,
+      backgroundColor: isDark ? "#244A76" : "#F4D99A",
+      opacity: 0.75,
+    },
+    motivationCircleTwo: {
+      position: "absolute",
+      width: 34,
+      height: 34,
+      borderRadius: 999,
+      right: 112,
+      top: 66,
+      borderWidth: 2,
+      borderColor: isDark ? "#4D78A9" : "#9DBEEA",
+      opacity: 0.7,
+    },
+    motivationWaveOne: {
+      position: "absolute",
+      width: 260,
+      height: 74,
+      right: -72,
+      bottom: -37,
+      borderRadius: 90,
+      backgroundColor: isDark ? "#132A46" : "#D7E6F8",
+      transform: [{ rotate: "-8deg" }],
+      opacity: 0.95,
+    },
+    motivationWaveTwo: {
+      position: "absolute",
+      width: 210,
+      height: 58,
+      right: 12,
+      bottom: -29,
+      borderRadius: 80,
+      backgroundColor: isDark ? "#1A3A60" : "#C8DCF3",
+      transform: [{ rotate: "8deg" }],
+      opacity: 0.88,
+    },
+    motivationDotOne: {
+      position: "absolute",
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+      right: 148,
+      top: 27,
+      backgroundColor: colors.accent,
+    },
+    motivationDotTwo: {
+      position: "absolute",
+      width: 5,
+      height: 5,
+      borderRadius: 999,
+      right: 128,
+      top: 48,
+      backgroundColor: isDark ? "#B7D1F4" : "#8EB6EC",
     },
     quoteIcon: {
       width: 54,
