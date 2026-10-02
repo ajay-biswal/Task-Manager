@@ -244,6 +244,7 @@ export default function TaskFormScreen() {
             <TextInput
               accessibilityLabel="Task title"
               returnKeyType="next"
+              maxLength={120}
               value={form.title}
               onChangeText={(value) => updateField("title", value)}
               placeholder="What needs to be done?"
@@ -269,6 +270,7 @@ export default function TaskFormScreen() {
             <TextInput
               accessibilityLabel="Task description"
               returnKeyType="done"
+              maxLength={500}
               value={form.description}
               onChangeText={(value) => updateField("description", value)}
               placeholder="Add some context (optional)..."
