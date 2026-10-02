@@ -1,15 +1,42 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Alert, StyleSheet, Switch, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
+import { exportTasksToCsv } from "@/services/taskExport";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { clearTasks } = useTasks();
+  const { tasks, clearTasks } = useTasks();
   const { isDark, colors, toggleTheme } = useTheme();
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExportTasks() {
+    if (tasks.length === 0) {
+      Alert.alert("No tasks", "There are no tasks to export.");
+      return;
+    }
+
+    try {
+      setExporting(true);
+
+      await exportTasksToCsv(tasks);
+
+      Alert.alert(
+        "Export complete",
+        `${tasks.length} task(s) were exported successfully.`,
+      );
+    } catch (error) {
+      console.error("Failed to export tasks:", error);
+
+      Alert.alert("Export failed", "Unable to export tasks as a CSV file.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function handleClearTasks() {
     Alert.alert(
@@ -43,19 +70,32 @@ export default function SettingsScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.foreground }]}>Settings</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>
+            Settings
+          </Text>
 
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Manage your TaskFlow preferences.</Text>
+          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+            Manage your TaskFlow preferences.
+          </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Appearance</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            Appearance
+          </Text>
 
           <View style={[styles.settingRow, { borderColor: colors.border }]}>
             <View style={styles.settingContent}>
-              <Text style={[styles.settingTitle, { color: colors.foreground }]}>Dark mode</Text>
+              <Text style={[styles.settingTitle, { color: colors.foreground }]}>
+                Dark mode
+              </Text>
 
-              <Text style={[styles.settingDescription, { color: colors.mutedForeground }]}>
+              <Text
+                style={[
+                  styles.settingDescription,
+                  { color: colors.mutedForeground },
+                ]}
+              >
                 Use a darker appearance throughout TaskFlow.
               </Text>
             </View>
@@ -65,7 +105,16 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Data</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            Data
+          </Text>
+
+          <AppButton
+            title={exporting ? "Exporting..." : "Export Tasks as CSV"}
+            onPress={handleExportTasks}
+            loading={exporting}
+            disabled={exporting}
+          />
 
           <AppButton
             title="Clear All Tasks"
@@ -75,14 +124,22 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>About</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            About
+          </Text>
 
           <View style={[styles.aboutCard, { borderColor: colors.border }]}>
-            <Text style={[styles.appName, { color: colors.foreground }]}>TaskFlow</Text>
+            <Text style={[styles.appName, { color: colors.foreground }]}>
+              TaskFlow
+            </Text>
 
-            <Text style={[styles.version, { color: colors.mutedForeground }]}>Local-first task management</Text>
+            <Text style={[styles.version, { color: colors.mutedForeground }]}>
+              Local-first task management
+            </Text>
 
-            <Text style={[styles.version, { color: colors.mutedForeground }]}>Version 1.0.0</Text>
+            <Text style={[styles.version, { color: colors.mutedForeground }]}>
+              Version 1.0.0
+            </Text>
           </View>
         </View>
 
