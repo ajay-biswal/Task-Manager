@@ -242,7 +242,28 @@ export default function TaskFormScreen() {
             </Text>
           </View>
 
-          <View style={styles.headerSpacer} />
+          <Pressable
+            onPress={() => router.push("/bulk-upload")}
+            disabled={saving}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Bulk upload tasks"
+            style={({ pressed }) => [
+              styles.bulkHeaderButton,
+              { backgroundColor: colors.card, borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppIcon
+              name={{
+                ios: "square.and.arrow.down",
+                android: "upload_file",
+                web: "upload_file",
+              }}
+              size={20}
+              color={colors.accent}
+            />
+          </Pressable>
         </View>
 
         <View style={styles.form}>
@@ -621,55 +642,12 @@ export default function TaskFormScreen() {
             {saving ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <>
-                <AppIcon
-                  name={{ ios: "checkmark", android: "check", web: "check" }}
-                  size={21}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.primaryButtonText}>
-                  {isEditMode ? "Update Task" : "Create Task"}
-                </Text>
-              </>
+              <Text style={styles.primaryButtonText}>
+                {isEditMode ? "Update Task" : "Create Task"}
+              </Text>
             )}
           </Pressable>
 
-          <Pressable
-            onPress={() => router.push("/bulk-upload")}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel="Bulk upload tasks"
-            style={({ pressed }) => [
-              styles.bulkRow,
-              { backgroundColor: colors.card, borderColor: colors.border },
-              pressed && styles.pressed,
-            ]}
-          >
-            <View style={[styles.bulkIcon, { backgroundColor: colors.accent + "12" }]}>
-              <AppIcon
-                name={{
-                  ios: "square.and.arrow.down",
-                  android: "upload_file",
-                  web: "upload_file",
-                }}
-                size={19}
-                color={colors.accent}
-              />
-            </View>
-            <View style={styles.bulkCopy}>
-              <Text style={[styles.bulkTitle, { color: colors.foreground }]}>
-                Bulk Upload
-              </Text>
-              <Text style={[styles.bulkSubtitle, { color: colors.mutedForeground }]}>
-                Import multiple tasks from CSV
-              </Text>
-            </View>
-            <AppIcon
-              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-              size={19}
-              color={colors.mutedForeground}
-            />
-          </Pressable>
         </View>
       </ScrollView>
 
@@ -911,8 +889,13 @@ const styles = StyleSheet.create({
     marginLeft: 14,
   },
 
-  headerSpacer: {
+  bulkHeaderButton: {
     width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   title: {
@@ -1189,40 +1172,9 @@ const styles = StyleSheet.create({
 
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "800",
-  },
-
-  bulkRow: {
-    minHeight: 70,
-    borderRadius: 15,
-    borderWidth: 1,
-    paddingHorizontal: 13,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 11,
-  },
-
-  bulkIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  bulkCopy: {
-    flex: 1,
-  },
-
-  bulkTitle: {
-    fontSize: 13,
-    fontWeight: "800",
-  },
-
-  bulkSubtitle: {
-    marginTop: 2,
-    fontSize: 11,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "900",
   },
 
   error: {
