@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
 import { BottomNav } from "@/components/ui/BottomNav";
@@ -196,7 +197,8 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { tasks, loading, error, refreshTasks } = useTasks();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(colors, insets.top);
 
   useFocusEffect(
     useCallback(() => {
@@ -237,7 +239,10 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.title}>Here’s your task overview</Text>
+            <Text style={styles.title}>Your tasks, organized.</Text>
+            <Text style={styles.subtitle}>
+              Stay focused and keep your day moving.
+            </Text>
           </View>
 
           <Pressable
@@ -389,7 +394,7 @@ export default function DashboardScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, topInset = 0) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -398,7 +403,7 @@ function createStyles(colors: ThemeColors) {
 
     content: {
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.md,
+      paddingTop: topInset + spacing.sm,
       paddingBottom: spacing.md,
     },
 
@@ -415,14 +420,23 @@ function createStyles(colors: ThemeColors) {
     },
 
     greeting: {
-      fontSize: typography.lg,
-      fontWeight: "700",
+      fontSize: typography.md,
+      fontWeight: "600",
       color: colors.foreground,
     },
 
     title: {
-      marginTop: spacing.xs,
-      fontSize: typography.xs,
+      marginTop: 2,
+      fontSize: typography.xl,
+      lineHeight: 30,
+      fontWeight: "800",
+      color: colors.foreground,
+    },
+
+    subtitle: {
+      marginTop: 3,
+      fontSize: typography.sm,
+      lineHeight: 20,
       color: colors.mutedForeground,
     },
 
