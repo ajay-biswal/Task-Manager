@@ -34,11 +34,17 @@ function startOfDay(date = new Date()): Date {
   return value;
 }
 
-function getDayGroup(dateString: string): "Today" | "Tomorrow" | "Later" {
+function getDayGroup(
+  dateString: string,
+): "Overdue" | "Today" | "Tomorrow" | "Later" {
   const dueDate = new Date(`${dateString}T00:00:00`);
   const today = startOfDay();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (dueDate.getTime() < today.getTime()) {
+    return "Overdue";
+  }
 
   if (dueDate.getTime() === today.getTime()) {
     return "Today";
@@ -218,12 +224,15 @@ export default function TaskListScreen() {
   }, [tasks, filter, search, sortBy]);
 
   const groups = useMemo(() => {
-    const result: Array<{ title: "Today" | "Tomorrow" | "Later"; tasks: Task[] }> =
-      [
-        { title: "Today", tasks: [] },
-        { title: "Tomorrow", tasks: [] },
-        { title: "Later", tasks: [] },
-      ];
+    const result: Array<{
+      title: "Overdue" | "Today" | "Tomorrow" | "Later";
+      tasks: Task[];
+    }> = [
+      { title: "Overdue", tasks: [] },
+      { title: "Today", tasks: [] },
+      { title: "Tomorrow", tasks: [] },
+      { title: "Later", tasks: [] },
+    ];
 
     for (const task of filteredTasks) {
       const group = result.find((item) => item.title === getDayGroup(task.dueDate));
