@@ -6,7 +6,8 @@ import {
     type TextInputProps,
 } from "react-native";
 
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 interface AppInputProps extends TextInputProps {
   label?: string;
@@ -14,17 +15,18 @@ interface AppInputProps extends TextInputProps {
 }
 
 export function AppInput({ label, error, ...props }: AppInputProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text>}
 
       <TextInput
         {...props}
-        placeholderTextColor={colors.light.mutedForeground}
-        style={[styles.input, error && styles.inputError]}
+        placeholderTextColor={colors.mutedForeground}
+        style={[styles.input, { borderColor: colors.input, color: colors.foreground, backgroundColor: colors.background }, error && { borderColor: colors.destructive }]}
       />
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>}
     </View>
   );
 }
@@ -36,27 +38,15 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: typography.sm,
-    fontWeight: "500",
-    color: colors.light.foreground,
-  },
+    fontWeight: "500",  },
 
   input: {
     minHeight: 46,
-    borderWidth: 1,
-    borderColor: colors.light.input,
-    borderRadius: 10,
+    borderWidth: 1,    borderRadius: 10,
     paddingHorizontal: spacing.md,
-    fontSize: typography.md,
-    color: colors.light.foreground,
-    backgroundColor: colors.light.background,
-  },
-
-  inputError: {
-    borderColor: colors.light.destructive,
+    fontSize: typography.md,    backgroundColor: colors.light.background,
   },
 
   error: {
-    fontSize: typography.xs,
-    color: colors.light.destructive,
-  },
+    fontSize: typography.xs,  },
 });
