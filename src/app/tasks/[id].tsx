@@ -252,7 +252,8 @@ export default function TaskDetailsScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
