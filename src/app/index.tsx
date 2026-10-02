@@ -608,7 +608,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
     },
     statCard: {
       flex: 1,
-      height: compact ? 172 : 188,
+      height: compact ? 148 : 188,
       borderRadius: compact ? 19 : 22,
       borderWidth: 1,
       padding: compact ? 18 : 22,
@@ -617,8 +617,8 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       position: "relative",
     },
     statIcon: {
-      width: compact ? 54 : 66,
-      height: compact ? 54 : 66,
+      width: compact ? 50 : 66,
+      height: compact ? 50 : 66,
       borderRadius: compact ? 16 : 18,
       alignItems: "center",
       justifyContent: "center",
@@ -668,7 +668,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.accent,
     },
     emptyCard: {
-      minHeight: isDark ? 384 : 352,
+      minHeight: compact ? 320 : isDark ? 384 : 352,
       borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
@@ -680,7 +680,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
     },
     emptyImage: {
       width: "88%",
-      height: isDark ? 180 : 170,
+      height: compact ? 145 : isDark ? 180 : 170,
       marginTop: -8,
       marginBottom: 2,
       opacity: isDark ? 0.9 : 1,
@@ -759,7 +759,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.mutedForeground,
     },
     motivationCard: {
-      height: 112,
+      height: compact ? 92 : 112,
       flexDirection: "row",
       alignItems: "center",
       marginTop: 22,
