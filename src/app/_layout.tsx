@@ -2,11 +2,13 @@ import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 
 import { initializeDatabase } from "@/database/database";
+import { ThemeProvider } from "@/theme/ThemeContext";
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="taskflow.db" onInit={initializeDatabase}>
-      <Stack>
+    <ThemeProvider>
+      <SQLiteProvider databaseName="taskflow.db" onInit={initializeDatabase}>
+        <Stack>
         <Stack.Screen
           name="index"
           options={{
@@ -20,7 +22,8 @@ export default function RootLayout() {
             title: "Task",
           }}
         />
-      </Stack>
-    </SQLiteProvider>
+        </Stack>
+      </SQLiteProvider>
+    </ThemeProvider>
   );
 }
