@@ -142,6 +142,7 @@ export default function TaskFormScreen() {
         const existingTask = await findTask(taskId);
 
         if (!existingTask) {
+          Alert.alert("Task not found", "This task no longer exists.");
           return;
         }
 
@@ -159,6 +160,7 @@ export default function TaskFormScreen() {
       router.back();
     } catch (error) {
       console.error("Failed to save task:", error);
+      Alert.alert("Save failed", "Unable to save the task. Please try again.");
     } finally {
       setSaving(false);
     }
