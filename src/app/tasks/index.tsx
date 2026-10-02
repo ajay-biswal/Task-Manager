@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
     Alert,
     FlatList,
@@ -115,7 +115,13 @@ function TaskCard({
 export default function TaskListScreen() {
   const router = useRouter();
 
-  const { tasks, loading, error, toggleTask, removeTask } = useTasks();
+  const { tasks, loading, error, toggleTask, removeTask, refreshTasks } = useTasks();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshTasks();
+    }, [refreshTasks]),
+  );
 
   const [filter, setFilter] = useState<TaskFilter>("ALL");
 
