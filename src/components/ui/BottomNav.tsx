@@ -33,8 +33,8 @@ export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors, isDark);
 
   return (
     <View
@@ -95,7 +95,7 @@ export function BottomNav() {
   }
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, isDark: boolean) {
   return StyleSheet.create({
     wrapper: {
       position: "absolute",
@@ -112,8 +112,8 @@ function createStyles(colors: ThemeColors) {
       paddingTop: 10,
       borderRadius: 42,
       borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
+      borderColor: isDark ? "#202936" : colors.border,
+      backgroundColor: isDark ? "#10141B" : colors.card,
       flexDirection: "row",
       alignItems: "center",
       shadowColor: "#000000",
@@ -159,7 +159,7 @@ function createStyles(colors: ThemeColors) {
       justifyContent: "center",
       backgroundColor: colors.accent,
       borderWidth: 8,
-      borderColor: colors.card,
+      borderColor: isDark ? "#10141B" : colors.card,
       shadowColor: colors.accent,
       shadowOpacity: 0.28,
       shadowRadius: 15,
