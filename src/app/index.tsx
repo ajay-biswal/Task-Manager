@@ -209,8 +209,7 @@ export default function DashboardScreen() {
                 {getGreeting()}, Ajay 👋
               </Text>
               <Text style={styles.heroTitle}>
-                Have a productive{"
-"}day ahead.
+                Have a productive{"\n"}day ahead.
               </Text>
               <Text style={styles.date}>{formatToday()}</Text>
             </View>
@@ -365,8 +364,7 @@ export default function DashboardScreen() {
             <Text style={styles.emptyTitle}>You’re all caught up!</Text>
 
             <Text style={styles.emptyText}>
-              No tasks are due today.{"
-"}Enjoy your free time or add a new task.
+              No tasks are due today.{"\n"}Enjoy your free time or add a new task.
             </Text>
           </View>
         ) : (
@@ -427,8 +425,7 @@ export default function DashboardScreen() {
           </View>
 
           <Text style={styles.quoteText}>
-            Small steps every day{"
-"}lead to big results.
+            Small steps every day{"\n"}lead to big results.
           </Text>
         </View>
       </ScrollView>
