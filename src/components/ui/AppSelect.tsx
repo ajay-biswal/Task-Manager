@@ -21,6 +21,7 @@ export function AppSelect({
   error,
   onChange,
 }: AppSelectProps) {
+  const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
 
   function handleSelect(option: string) {
@@ -30,20 +31,41 @@ export function AppSelect({
 
   return (
     <View style={styles.container}>
-      {label ? <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text> : null}
+      {label ? (
+        <Text style={[styles.label, { color: colors.foreground }]}>
+          {label}
+        </Text>
+      ) : null}
 
       <Pressable
         onPress={() => setVisible(true)}
-        style={[styles.trigger, { borderColor: colors.input, backgroundColor: colors.background }, error ? { borderColor: colors.destructive } : null]}
+        style={[
+          styles.trigger,
+          {
+            borderColor: error ? colors.destructive : colors.input,
+            backgroundColor: colors.background,
+          },
+        ]}
       >
-        <Text style={[styles.value, { color: colors.foreground }, !value ? { color: colors.mutedForeground } : null]}>
+        <Text
+          style={[
+            styles.value,
+            { color: value ? colors.foreground : colors.mutedForeground },
+          ]}
+        >
           {value || placeholder}
         </Text>
 
-        <Text style={[styles.chevron, { color: colors.mutedForeground }]}>▼</Text>
+        <Text style={[styles.chevron, { color: colors.mutedForeground }]}>
+          ▼
+        </Text>
       </Pressable>
 
-      {error ? <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text> : null}
+      {error ? (
+        <Text style={[styles.error, { color: colors.destructive }]}>
+          {error}
+        </Text>
+      ) : null}
 
       <Modal
         visible={visible}
@@ -52,12 +74,26 @@ export function AppSelect({
         onRequestClose={() => setVisible(false)}
       >
         <View style={styles.overlay}>
-          <View style={[styles.modal, { backgroundColor: colors.background }]}>
+          <View
+            style={[
+              styles.modal,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
+            ]}
+          >
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.foreground }]}>{label ?? "Select"}</Text>
+              <Text style={[styles.modalTitle, { color: colors.foreground }]}>
+                {label ?? "Select"}
+              </Text>
 
               <Pressable onPress={() => setVisible(false)} hitSlop={10}>
-                <Text style={[styles.closeButton, { color: colors.mutedForeground }]}>×</Text>
+                <Text
+                  style={[styles.closeButton, { color: colors.mutedForeground }]}
+                >
+                  ×
+                </Text>
               </Pressable>
             </View>
 
@@ -77,13 +113,25 @@ export function AppSelect({
                     <Text
                       style={[
                         styles.optionText,
-                        selected ? styles.selectedOptionText : null, { color: colors.foreground },
+                        {
+                          color: colors.foreground,
+                        },
+                        selected && styles.selectedOptionText,
                       ]}
                     >
                       {option}
                     </Text>
 
-                    {selected ? <Text style={[styles.checkmark, { color: colors.foreground }]}>✓</Text> : null}
+                    {selected ? (
+                      <Text
+                        style={[
+                          styles.checkmark,
+                          { color: colors.foreground },
+                        ]}
+                      >
+                        ✓
+                      </Text>
+                    ) : null}
                   </Pressable>
                 );
               })}
@@ -102,20 +150,31 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: typography.sm,
-    fontWeight: "500",  },
+    fontWeight: "500",
+  },
 
   trigger: {
     minHeight: 46,
-    borderWidth: 1,    borderRadius: 10,
+    borderWidth: 1,
+    borderRadius: 10,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",  },
+    justifyContent: "space-between",
+  },
 
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.45)",
     justifyContent: "flex-end",
+  },
+
+  modal: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    padding: spacing.xl,
+    paddingBottom: spacing.xxxl,
   },
 
   modalHeader: {
@@ -127,11 +186,13 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     fontSize: typography.lg,
-    fontWeight: "600",  },
+    fontWeight: "600",
+  },
 
   closeButton: {
     fontSize: 28,
-    lineHeight: 28,  },
+    lineHeight: 28,
+  },
 
   options: {
     gap: spacing.sm,
@@ -146,15 +207,27 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  selectedOption: {  },
-
   optionText: {
-    fontSize: typography.md,  },
+    fontSize: typography.md,
+  },
 
   selectedOptionText: {
     fontWeight: "600",
   },
 
   checkmark: {
-    fontSize: typography.lg,  },
+    fontSize: typography.lg,
+  },
+
+  error: {
+    fontSize: typography.xs,
+  },
+
+  value: {
+    fontSize: typography.md,
+  },
+
+  chevron: {
+    fontSize: 12,
+  },
 });
