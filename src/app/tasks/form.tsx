@@ -239,8 +239,11 @@ export default function TaskFormScreen() {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.sectionCard}>
-            <FieldLabel colors={colors}>Title</FieldLabel>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.labelRow}>
+              <FieldLabel colors={colors}>Title</FieldLabel>
+              <Text style={[styles.counter, { color: colors.mutedForeground }]}>{form.title.length}/100</Text>
+            </View>
             <View style={[styles.inputShell, { backgroundColor: colors.card, borderColor: errors.title ? colors.destructive : colors.border }]}>
               <AppIcon name={{ ios: "doc.text", android: "description", web: "description" }} size={20} color={colors.mutedForeground} />
               <TextInput
@@ -261,8 +264,11 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.sectionCard}>
-            <FieldLabel colors={colors}>Description</FieldLabel>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.labelRow}>
+              <FieldLabel colors={colors}>Description</FieldLabel>
+              <Text style={[styles.counter, { color: colors.mutedForeground }]}>{form.description.length}/500</Text>
+            </View>
             <View style={[styles.inputShell, styles.descriptionShell, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <AppIcon name={{ ios: "text.alignleft", android: "format_align_left", web: "format_align_left" }} size={20} color={colors.mutedForeground} />
               <TextInput
@@ -280,7 +286,7 @@ export default function TaskFormScreen() {
             </View>
           </View>
 
-          <View style={styles.sectionCard}>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <FieldLabel colors={colors}>Category</FieldLabel>
             <View style={styles.optionRow}>
               {[
@@ -313,7 +319,7 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.sectionCard}>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <FieldLabel colors={colors}>Priority</FieldLabel>
             <View style={styles.priorityRow}>
               {priorities.map((priority) => {
@@ -357,7 +363,7 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.sectionCard}>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <FieldLabel colors={colors}>Schedule</FieldLabel>
 
             <View style={styles.dateRow}>
@@ -388,7 +394,7 @@ export default function TaskFormScreen() {
             </Pressable>
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <FieldLabel colors={colors}>Status</FieldLabel>
             <SelectField
               value={form.status === "PENDING" ? "Pending" : "Completed"}
@@ -397,55 +403,54 @@ export default function TaskFormScreen() {
             />
           </View>
 
+          <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={isEditMode ? "Update task" : "Create task"}
+            style={({ pressed }) => [
+              styles.createButton,
+              { backgroundColor: colors.accent },
+              pressed && styles.pressed,
+            ]}
+          >
+            {saving ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <>
+                <AppIcon
+                  name={{ ios: "checkmark", android: "check", web: "check" }}
+                  size={20}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.createText}>
+                  {isEditMode ? "Update Task" : "Create Task"}
+                </Text>
+              </>
+            )}
+          </Pressable>
+
           {!isEditMode ? (
             <Pressable
               onPress={() => router.push("/bulk-upload")}
               disabled={saving}
               accessibilityRole="button"
               accessibilityLabel="Bulk upload tasks"
-              style={({ pressed }) => [styles.bulkButton, { backgroundColor: colors.card, borderColor: colors.border }, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.bulkButton,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                pressed && styles.pressed,
+              ]}
             >
-              <AppIcon name={{ ios: "square.and.arrow.down", android: "upload_file", web: "upload_file" }} size={20} color={colors.accent} />
+              <AppIcon
+                name={{ ios: "square.and.arrow.down", android: "upload_file", web: "upload_file" }}
+                size={19}
+                color={colors.accent}
+              />
               <Text style={[styles.bulkText, { color: colors.accent }]}>Bulk Upload</Text>
             </Pressable>
           ) : null}
 
-          <View style={styles.actions}>
-            <Pressable
-              onPress={() => router.back()}
-              disabled={saving}
-              accessibilityRole="button"
-              accessibilityLabel="Cancel"
-              style={({ pressed }) => [
-                styles.cancelButton,
-                { backgroundColor: colors.muted, borderColor: colors.border },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[styles.cancelText, { color: colors.foreground }]}>
-                Cancel
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={handleSave}
-              disabled={saving}
-              accessibilityRole="button"
-              accessibilityLabel={isEditMode ? "Update task" : "Create task"}
-              style={({ pressed }) => [
-                styles.createButton,
-                { backgroundColor: colors.accent },
-                pressed && styles.pressed,
-              ]}
-            >
-              {saving ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.createText}>
-                  {isEditMode ? "Update Task" : "Create Task"}
-                </Text>
-              )}
-            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -697,8 +702,19 @@ const styles = StyleSheet.create({
 
   sectionCard: {
     gap: spacing.sm,
-    padding: spacing.xs,
+    padding: spacing.md,
     borderRadius: 14,
+    borderWidth: 1,
+  },
+
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  counter: {
+    fontSize: 10,
   },
 
   label: {
@@ -857,7 +873,6 @@ const styles = StyleSheet.create({
   },
 
   actions: {
-    flexDirection: "row",
     gap: spacing.sm,
     marginTop: spacing.xs,
   },
