@@ -13,7 +13,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { useTasks } from "@/hooks/useTasks";
-import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
@@ -33,7 +32,10 @@ function getMonthDays(year: number, month: number): Date[] {
   const mondayOffset = (firstDay.getDay() + 6) % 7;
   const start = new Date(year, month, 1 - mondayOffset);
 
-  return Array.from({ length: 42 }, (_, index) => {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const totalCells = Math.ceil((mondayOffset + daysInMonth) / 7) * 7;
+
+  return Array.from({ length: totalCells }, (_, index) => {
     const date = new Date(start);
     date.setDate(start.getDate() + index);
     return date;
@@ -393,9 +395,12 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 22,
     },
     header: {
+      position: "relative",
+      minHeight: 100,
       marginBottom: 18,
     },
     title: {
+      maxWidth: 210,
       fontSize: 31,
       lineHeight: 37,
       fontWeight: "800",
@@ -403,6 +408,7 @@ function createStyles(colors: ThemeColors) {
       color: colors.foreground,
     },
     subtitle: {
+      maxWidth: 300,
       marginTop: 2,
       fontSize: 17,
       lineHeight: 23,
@@ -410,8 +416,8 @@ function createStyles(colors: ThemeColors) {
     },
     controls: {
       position: "absolute",
-      top: 18,
-      right: 22,
+      top: 0,
+      right: 0,
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
