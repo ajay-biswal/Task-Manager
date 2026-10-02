@@ -1,4 +1,5 @@
 import { CircularProgressIndicator, Host } from "@expo/ui/jetpack-compose";
+import { size } from "@expo/ui/jetpack-compose/modifiers";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
@@ -65,6 +66,7 @@ function ProgressRing({
           trackColor={colors.muted}
           strokeWidth={11}
           strokeCap="round"
+          modifiers={[size(124, 124)]}
         />
       </Host>
 
@@ -89,15 +91,15 @@ function ProgressRing({
 
 const stylesProgressRing = StyleSheet.create({
   container: {
-    width: 130,
-    height: 130,
+    width: 124,
+    height: 124,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
   },
   host: {
-    width: 130,
-    height: 130,
+    width: 124,
+    height: 124,
     alignItems: "center",
     justifyContent: "center",
   },
