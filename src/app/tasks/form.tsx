@@ -429,8 +429,15 @@ export default function TaskFormScreen() {
               </Pressable>
             </View>
 
-            {(selectField === "category" ? categoryOptions : statusOptions).map(
-              (option) => {
+            {(selectField === "category"
+              ? Array.from(
+                  new Set([
+                    ...categoryOptions,
+                    ...(form.category ? [form.category] : []),
+                  ]),
+                )
+              : statusOptions
+            ).map((option) => {
                 const display =
                   option === "PENDING"
                     ? "Pending"
