@@ -442,7 +442,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
     },
 
     hero: {
-      height: 310,
+      height: compact ? 246 : 270,
       position: "relative",
       overflow: "hidden",
       marginHorizontal: -21,
@@ -451,17 +451,17 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
 
     heroImage: {
       position: "absolute",
-      width: 480,
-      height: 260,
-      right: -42,
-      bottom: -14,
+      width: compact ? 420 : 470,
+      height: compact ? 228 : 255,
+      right: compact ? -62 : -42,
+      bottom: compact ? -28 : -20,
     },
 
     heroTop: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      paddingTop: 29,
+      paddingTop: compact ? 22 : 29,
     },
 
     heroText: {
