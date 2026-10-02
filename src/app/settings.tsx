@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: typography.md,
     fontWeight: "600",
-    color: colors.light.foreground,
   },
 
   version: {
