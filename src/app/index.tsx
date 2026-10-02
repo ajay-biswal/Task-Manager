@@ -196,11 +196,19 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        <AppButton
-          title="Bulk Upload"
-          variant="secondary"
-          onPress={() => router.push("/bulk-upload")}
-        />
+        <View style={styles.quickActions}>
+          <AppButton
+            title="Calendar"
+            variant="secondary"
+            onPress={() => router.push("/calendar")}
+          />
+
+          <AppButton
+            title="Bulk Upload"
+            variant="secondary"
+            onPress={() => router.push("/bulk-upload")}
+          />
+        </View>
 
         <Pressable
           onPress={() => router.push("/tasks/form")}
@@ -449,6 +457,11 @@ function createStyles(colors: ThemeColors) {
     errorText: {
       fontSize: typography.sm,
       color: colors.destructive,
+    },
+
+    quickActions: {
+      gap: spacing.md,
+      marginTop: spacing.xxl,
     },
 
     addButton: {
