@@ -22,6 +22,7 @@ import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { TaskFormData, TaskPriority, TaskStatus } from "@/types/task";
+import { formatDate } from "@/utils/dateUtils";
 import { createTaskFromForm } from "@/utils/taskUtils";
 import { type TaskValidationErrors, validateTask } from "@/utils/validation";
 
@@ -59,16 +60,6 @@ function toISODate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
-
-function formatDate(value: string): string {
-  if (!value) return "Select date";
-
-  return parseDate(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 function FieldLabel({
