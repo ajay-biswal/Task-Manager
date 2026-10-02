@@ -391,7 +391,6 @@ export default function DashboardScreen() {
                 />
                 <Text style={styles.emptyActionText}>Add a new task</Text>
               </Pressable>
-            </Pressable>
           </View>
         ) : (
           <View style={styles.taskList}>
