@@ -45,6 +45,13 @@ function AppNavigator() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="calendar"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
