@@ -584,212 +584,80 @@ function DateField({
   );
 }
 
-const styles = createStyles(colors);
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-
-  container: {
-    flex: 1,
-  },
-
-  topBar: {
-    minHeight: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
-  },
-
-  iconButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  screenTitle: {
-    fontSize: typography.md,
-    fontWeight: "700",
-  },
-
-  form: {
-    gap: spacing.md,
-  },
-
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-
-  label: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-  },
-
-  input: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    fontSize: typography.xs,
-  },
-
-  descriptionInput: {
-    minHeight: 82,
-    paddingTop: spacing.sm,
-  },
-
-  selectField: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  selectText: {
-    fontSize: typography.xs,
-  },
-
-  priorityRow: {
-    flexDirection: "row",
-    gap: spacing.xs,
-  },
-
-  priorityButton: {
-    flex: 1,
-    minHeight: 40,
-    borderWidth: 1,
-    borderRadius: 7,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  priorityText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-  },
-
-  dateRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-
-  dateFieldContainer: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-
-  dateLabel: {
-    fontSize: 10,
-  },
-
-  dateField: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.sm,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-
-  dateText: {
-    flex: 1,
-    fontSize: 10,
-  },
-
-  actions: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-
-  cancelButton: {
-    flex: 1,
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  createButton: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  cancelText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-  },
-
-  createText: {
-    fontSize: typography.xs,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-
-  error: {
-    fontSize: 10,
-  },
-
-  pressed: {
-    opacity: 0.75,
-  },
-
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  loadingText: {
-    fontSize: typography.sm,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "flex-end",
-  },
-
-  modal: {
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    borderWidth: 1,
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
-  },
-
-  modalTitle: {
-    fontSize: typography.md,
-    fontWeight: "700",
-  },
-
-  modalOption: {
-    minHeight: 46,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  modalOptionText: {
-    fontSize: typography.sm,
-  },
-  });\n}\n
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xxl,
+    },
+    container: { flex: 1 },
+    topBar: {
+      minHeight: 44,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.md,
+    },
+    iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
+    screenTitle: { fontSize: typography.md, fontWeight: "700" },
+    form: { gap: spacing.md },
+    fieldGroup: { gap: spacing.xs },
+    label: { fontSize: typography.xs, fontWeight: "600" },
+    input: {
+      minHeight: 44, borderWidth: 1, borderRadius: 8,
+      paddingHorizontal: spacing.md, fontSize: typography.xs,
+    },
+    descriptionInput: { minHeight: 82, paddingTop: spacing.sm },
+    selectField: {
+      minHeight: 44, borderWidth: 1, borderRadius: 8,
+      paddingHorizontal: spacing.md, flexDirection: "row", alignItems: "center",
+      justifyContent: "space-between",
+    },
+    selectText: { fontSize: typography.xs },
+    priorityRow: { flexDirection: "row", gap: spacing.xs },
+    priorityButton: {
+      flex: 1, minHeight: 40, borderWidth: 1, borderRadius: 7,
+      alignItems: "center", justifyContent: "center",
+    },
+    priorityText: { fontSize: typography.xs, fontWeight: "600" },
+    dateRow: { flexDirection: "row", gap: spacing.sm },
+    dateFieldContainer: { flex: 1, gap: spacing.xs },
+    dateLabel: { fontSize: 10 },
+    dateField: {
+      minHeight: 44, borderWidth: 1, borderRadius: 8,
+      paddingHorizontal: spacing.sm, flexDirection: "row", alignItems: "center",
+      gap: spacing.xs,
+    },
+    dateText: { flex: 1, fontSize: 10 },
+    actions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.xs },
+    cancelButton: {
+      flex: 1, minHeight: 44, borderWidth: 1, borderRadius: 8,
+      alignItems: "center", justifyContent: "center",
+    },
+    createButton: {
+      flex: 1, minHeight: 44, borderRadius: 8,
+      alignItems: "center", justifyContent: "center",
+    },
+    cancelText: { fontSize: typography.xs, fontWeight: "600" },
+    createText: { fontSize: typography.xs, fontWeight: "700", color: "#FFFFFF" },
+    error: { fontSize: 10 },
+    pressed: { opacity: 0.75 },
+    loadingContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
+    loadingText: { fontSize: typography.sm },
+    modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+    modal: {
+      borderTopLeftRadius: 18, borderTopRightRadius: 18, borderWidth: 1,
+      padding: spacing.lg, paddingBottom: spacing.xxl,
+    },
+    modalHeader: {
+      flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      marginBottom: spacing.md,
+    },
+    modalTitle: { fontSize: typography.md, fontWeight: "700" },
+    modalOption: {
+      minHeight: 46, borderRadius: 8, paddingHorizontal: spacing.md,
+      flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    },
+    modalOptionText: { fontSize: typography.sm },
+  });
+}
