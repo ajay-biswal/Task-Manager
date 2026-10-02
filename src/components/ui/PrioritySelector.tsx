@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 import type { TaskPriority } from "@/types/task";
 
 interface PrioritySelectorProps {
@@ -11,9 +12,10 @@ interface PrioritySelectorProps {
 const priorities: TaskPriority[] = ["LOW", "MEDIUM", "HIGH"];
 
 export function PrioritySelector({ value, onChange }: PrioritySelectorProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Priority</Text>
+      <Text style={[styles.label, { color: colors.foreground }]}>Priority</Text>
 
       <View style={styles.options}>
         {priorities.map((priority) => {
@@ -23,9 +25,9 @@ export function PrioritySelector({ value, onChange }: PrioritySelectorProps) {
             <Pressable
               key={priority}
               onPress={() => onChange(priority)}
-              style={[styles.option, selected && styles.selected]}
+              style={[styles.option, { borderColor: colors.border, backgroundColor: colors.background }, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
             >
-              <Text style={[styles.text, selected && styles.selectedText]}>
+              <Text style={[styles.text, { color: selected ? colors.primaryForeground : colors.foreground }]}>
                 {priority.charAt(0) + priority.slice(1).toLowerCase()}
               </Text>
             </Pressable>
@@ -43,9 +45,7 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: typography.sm,
-    fontWeight: "500",
-    color: colors.light.foreground,
-  },
+    fontWeight: "500",  },
 
   options: {
     flexDirection: "row",
@@ -55,26 +55,11 @@ const styles = StyleSheet.create({
   option: {
     flex: 1,
     minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.light.border,
-    borderRadius: 10,
+    borderWidth: 1,    borderRadius: 10,
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.light.background,
-  },
-
-  selected: {
-    backgroundColor: colors.light.primary,
-    borderColor: colors.light.primary,
-  },
+    justifyContent: "center",  },
 
   text: {
-    fontSize: typography.sm,
-    color: colors.light.foreground,
-    fontWeight: "500",
-  },
-
-  selectedText: {
-    color: colors.light.primaryForeground,
+    fontSize: typography.sm,    fontWeight: "500",
   },
 });
