@@ -1,6 +1,8 @@
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
 import Papa from "papaparse";
@@ -124,6 +126,8 @@ function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
 
 export default function BulkUploadScreen() {
   const { addTask, findTask } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
@@ -334,10 +338,10 @@ export default function BulkUploadScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
     padding: spacing.xxl,
     gap: spacing.xl,
   },
@@ -349,17 +353,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   subtitle: {
     fontSize: typography.md,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   card: {
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 18,
     padding: spacing.xl,
     gap: spacing.lg,
@@ -368,17 +372,17 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: typography.lg,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   cardDescription: {
     fontSize: typography.md,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
     lineHeight: 22,
   },
 
   fileInfo: {
-    backgroundColor: colors.light.muted,
+    backgroundColor: colors.muted,
     borderRadius: 12,
     padding: spacing.md,
     gap: spacing.xs,
@@ -386,23 +390,24 @@ const styles = StyleSheet.create({
 
   fileLabel: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   fileName: {
     fontSize: typography.md,
     fontWeight: "600",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   successText: {
     fontSize: typography.md,
-    color: colors.light.success,
+    color: colors.success,
     fontWeight: "600",
   },
 
   rowCount: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 });
+}
