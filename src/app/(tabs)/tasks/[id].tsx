@@ -262,7 +262,11 @@ export default function TaskDetailsScreen() {
                 ]}
               >
                 <AppIcon
-                  name={{ ios: "clock", android: "schedule", web: "schedule" }}
+                  name={
+                    isCompleted
+                      ? { ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }
+                      : { ios: "clock", android: "schedule", web: "schedule" }
+                  }
                   size={12}
                   color={colors.mutedForeground}
                 />
@@ -317,7 +321,11 @@ export default function TaskDetailsScreen() {
             ]}
           >
             <AppIcon
-              name={{ ios: "checkmark", android: "check", web: "check" }}
+              name={
+                isCompleted
+                  ? { ios: "arrow.uturn.backward", android: "undo", web: "undo" }
+                  : { ios: "checkmark", android: "check", web: "check" }
+              }
               size={17}
               color="#FFFFFF"
             />
