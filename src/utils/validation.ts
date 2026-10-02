@@ -43,7 +43,8 @@ export function validateTask(data: TaskFormData): TaskValidationErrors {
   if (
     data.startDate &&
     data.dueDate &&
-    new Date(data.dueDate) < new Date(data.startDate)
+    new Date(`${data.dueDate}T00:00:00`) <
+      new Date(`${data.startDate}T00:00:00`)
   ) {
     errors.dueDate = "Due date cannot be earlier than start date";
   }
