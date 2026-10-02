@@ -430,8 +430,7 @@ export default function TaskFormScreen() {
             )}
           </Pressable>
 
-          {!isEditMode ? (
-            <Pressable
+          <Pressable
               onPress={() => router.push("/bulk-upload")}
               disabled={saving}
               accessibilityRole="button"
@@ -449,7 +448,6 @@ export default function TaskFormScreen() {
               />
               <Text style={[styles.bulkText, { color: colors.accent }]}>Bulk Upload</Text>
             </Pressable>
-          ) : null}
 
           </View>
         </View>
