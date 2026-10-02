@@ -8,14 +8,17 @@ import {
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { BottomNavigation } from "@/components/BottomNavigation";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { useTasks } from "@/hooks/useTasks";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -27,7 +30,8 @@ function toDateKey(date: Date): string {
 
 function getMonthDays(year: number, month: number): Date[] {
   const firstDay = new Date(year, month, 1);
-  const start = new Date(year, month, 1 - firstDay.getDay());
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const start = new Date(year, month, 1 - mondayOffset);
 
   return Array.from({ length: 42 }, (_, index) => {
     const date = new Date(start);
@@ -44,18 +48,24 @@ function formatMonth(year: number, month: number): string {
 }
 
 function formatSelectedDate(dateKey: string): string {
-  const date = new Date(`${dateKey}T00:00:00`);
-
-  return date.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-IN", {
     month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatTaskDate(dateString: string): string {
+  return new Date(`${dateString}T00:00:00`).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
   });
 }
 
 export default function CalendarScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { tasks, loading, error, refreshTasks } = useTasks();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -82,11 +92,7 @@ export default function CalendarScreen() {
     const grouped: Record<string, Task[]> = {};
 
     for (const task of tasks) {
-      if (!grouped[task.dueDate]) {
-        grouped[task.dueDate] = [];
-      }
-
-      grouped[task.dueDate].push(task);
+      (grouped[task.dueDate] ??= []).push(task);
     }
 
     return grouped;
@@ -110,26 +116,52 @@ export default function CalendarScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + spacing.sm, paddingBottom: 110 + insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.topBar}>
+          <Text style={styles.title}>Calendar</Text>
+
+          <Pressable
+            onPress={goToToday}
+            style={({ pressed }) => [styles.todayButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.todayText}>Today</Text>
+          </Pressable>
+        </View>
+
         <View style={styles.monthHeader}>
-          <Pressable onPress={() => changeMonth(-1)} style={styles.navButton}>
-            <Text style={styles.navText}>‹</Text>
+          <Pressable
+            onPress={() => changeMonth(-1)}
+            hitSlop={10}
+            style={styles.arrowButton}
+            accessibilityLabel="Previous month"
+          >
+            <AppIcon
+              name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }}
+              size={20}
+              color={colors.foreground}
+            />
           </Pressable>
 
-          <View style={styles.monthTitleContainer}>
-            <Text style={styles.monthTitle}>
-              {formatMonth(monthDate.getFullYear(), monthDate.getMonth())}
-            </Text>
+          <Text style={styles.monthTitle}>
+            {formatMonth(monthDate.getFullYear(), monthDate.getMonth())}
+          </Text>
 
-            <Pressable onPress={goToToday}>
-              <Text style={styles.todayButton}>Today</Text>
-            </Pressable>
-          </View>
-
-          <Pressable onPress={() => changeMonth(1)} style={styles.navButton}>
-            <Text style={styles.navText}>›</Text>
+          <Pressable
+            onPress={() => changeMonth(1)}
+            hitSlop={10}
+            style={styles.arrowButton}
+            accessibilityLabel="Next month"
+          >
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={20}
+              color={colors.foreground}
+            />
           </Pressable>
         </View>
 
@@ -153,52 +185,55 @@ export default function CalendarScreen() {
               <Pressable
                 key={dateKey}
                 onPress={() => setSelectedDate(dateKey)}
-                style={[
-                  styles.dayCell,
-                  !isCurrentMonth && styles.outsideMonth,
-                  isSelected && styles.selectedDay,
-                ]}
+                style={styles.dayCell}
               >
-                <Text
+                <View
                   style={[
-                    styles.dayNumber,
-                    !isCurrentMonth && styles.outsideMonthText,
-                    isSelected && styles.selectedDayText,
-                    isToday && !isSelected && styles.todayText,
+                    styles.dayCircle,
+                    isSelected && styles.selectedDayCircle,
                   ]}
                 >
-                  {date.getDate()}
-                </Text>
-
-                {dayTasks.length > 0 ? (
-                  <View
-                    style={[
-                      styles.taskDot,
-                      dayTasks.some((task) => task.status === "PENDING") &&
-                        styles.pendingDot,
-                    ]}
-                  />
-                ) : null}
-
-                {dayTasks.length > 0 ? (
                   <Text
                     style={[
-                      styles.taskCount,
+                      styles.dayNumber,
+                      !isCurrentMonth && styles.outsideMonthText,
                       isSelected && styles.selectedDayText,
+                      isToday && !isSelected && styles.todayNumber,
                     ]}
                   >
-                    {dayTasks.length}
+                    {date.getDate()}
                   </Text>
-                ) : null}
+                </View>
+
+                <View style={styles.dots}>
+                  {dayTasks.slice(0, 3).map((task) => (
+                    <View
+                      key={task.id}
+                      style={[
+                        styles.taskDot,
+                        task.status === "COMPLETED"
+                          ? styles.completedDot
+                          : task.priority === "HIGH"
+                            ? styles.highDot
+                            : styles.pendingDot,
+                      ]}
+                    />
+                  ))}
+                </View>
               </Pressable>
             );
           })}
         </View>
 
         <View style={styles.selectedSection}>
-          <Text style={styles.sectionTitle}>
-            {formatSelectedDate(selectedDate)}
-          </Text>
+          <View style={styles.selectedHeader}>
+            <Text style={styles.sectionTitle}>
+              {formatSelectedDate(selectedDate)}
+            </Text>
+            <Text style={styles.taskCount}>
+              {selectedTasks.length} {selectedTasks.length === 1 ? "task" : "tasks"}
+            </Text>
+          </View>
 
           {loading ? (
             <View style={styles.stateContainer}>
@@ -209,9 +244,14 @@ export default function CalendarScreen() {
             <Text style={styles.errorText}>{error}</Text>
           ) : selectedTasks.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Text style={styles.emptyTitle}>No tasks due</Text>
+              <AppIcon
+                name={{ ios: "calendar", android: "calendar_month", web: "calendar" }}
+                size={24}
+                color={colors.mutedForeground}
+              />
+              <Text style={styles.emptyTitle}>No tasks for this day</Text>
               <Text style={styles.emptyText}>
-                There are no tasks scheduled for this date.
+                Select another date or create a new task.
               </Text>
             </View>
           ) : (
@@ -225,20 +265,35 @@ export default function CalendarScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
+                  <View
+                    style={[
+                      styles.statusCircle,
+                      task.status === "COMPLETED"
+                        ? styles.completedCircle
+                        : styles.pendingCircle,
+                    ]}
+                  >
+                    {task.status === "COMPLETED" ? (
+                      <AppIcon
+                        name={{ ios: "checkmark", android: "check", web: "check" }}
+                        size={13}
+                        color="#FFFFFF"
+                      />
+                    ) : null}
+                  </View>
+
                   <View style={styles.taskInfo}>
                     <Text
                       numberOfLines={1}
                       style={[
                         styles.taskTitle,
-                        task.status === "COMPLETED" &&
-                          styles.completedTaskTitle,
+                        task.status === "COMPLETED" && styles.completedTaskTitle,
                       ]}
                     >
                       {task.title}
                     </Text>
-
                     <Text style={styles.taskMeta}>
-                      {task.category} • Due {task.dueDate}
+                      {task.category} · {formatTaskDate(task.dueDate)}
                     </Text>
                   </View>
 
@@ -253,11 +308,10 @@ export default function CalendarScreen() {
                     <Text
                       style={[
                         styles.priorityText,
-                        task.priority === "HIGH" &&
-                          styles.highPriorityText,
+                        task.priority === "HIGH" && styles.highPriorityText,
                       ]}
                     >
-                      {task.priority}
+                      {capitalize(task.priority)}
                     </Text>
                   </View>
                 </Pressable>
@@ -266,8 +320,14 @@ export default function CalendarScreen() {
           )}
         </View>
       </ScrollView>
+
+      <BottomNavigation />
     </View>
   );
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
 function createStyles(colors: ThemeColors) {
@@ -276,248 +336,247 @@ function createStyles(colors: ThemeColors) {
       flex: 1,
       backgroundColor: colors.background,
     },
-
     content: {
-      padding: spacing.xl,
-      paddingBottom: spacing.xxxl,
+      paddingHorizontal: spacing.lg,
     },
-
-    monthHeader: {
+    topBar: {
+      minHeight: 42,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: spacing.lg,
     },
-
-    monthTitleContainer: {
-      alignItems: "center",
-      gap: spacing.xs,
-    },
-
-    monthTitle: {
-      fontSize: typography.xl,
+    title: {
+      fontSize: 24,
+      lineHeight: 30,
       fontWeight: "700",
       color: colors.foreground,
     },
-
     todayButton: {
-      fontSize: typography.xs,
-      fontWeight: "600",
-      color: colors.mutedForeground,
-    },
-
-    navButton: {
-      width: 42,
-      height: 42,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
+      minWidth: 58,
+      minHeight: 34,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 8,
+      backgroundColor: colors.muted,
       alignItems: "center",
       justifyContent: "center",
     },
-
-    navText: {
-      fontSize: 28,
-      lineHeight: 30,
-      color: colors.foreground,
-    },
-
-    weekHeader: {
-      flexDirection: "row",
-      marginBottom: spacing.sm,
-    },
-
-    weekday: {
-      width: "14.2857%",
-      textAlign: "center",
-      fontSize: typography.xs,
-      fontWeight: "600",
-      color: colors.mutedForeground,
-    },
-
-    calendarGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      borderTopWidth: 1,
-      borderLeftWidth: 1,
-      borderColor: colors.border,
-    },
-
-    dayCell: {
-      width: "14.2857%",
-      height: 62,
-      borderRightWidth: 1,
-      borderBottomWidth: 1,
-      borderColor: colors.border,
-      alignItems: "center",
-      paddingTop: spacing.sm,
-      backgroundColor: colors.card,
-    },
-
-    outsideMonth: {
-      backgroundColor: colors.muted,
-    },
-
-    dayNumber: {
-      fontSize: typography.sm,
-      fontWeight: "500",
-      color: colors.foreground,
-    },
-
-    outsideMonthText: {
-      color: colors.mutedForeground,
-    },
-
     todayText: {
-      fontWeight: "800",
-    },
-
-    selectedDay: {
-      backgroundColor: colors.primary,
-    },
-
-    selectedDayText: {
-      color: colors.primaryForeground,
-    },
-
-    taskDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      marginTop: spacing.xs,
-      backgroundColor: colors.mutedForeground,
-    },
-
-    pendingDot: {
-      backgroundColor: colors.destructive,
-    },
-
-    taskCount: {
-      marginTop: 2,
-      fontSize: 9,
+      fontSize: typography.xs,
       fontWeight: "700",
-      color: colors.mutedForeground,
+      color: colors.accent,
     },
-
-    selectedSection: {
-      marginTop: spacing.xxl,
-    },
-
-    sectionTitle: {
-      fontSize: typography.lg,
-      fontWeight: "600",
-      color: colors.foreground,
+    monthHeader: {
+      marginTop: spacing.lg,
       marginBottom: spacing.md,
-    },
-
-    taskList: {
-      gap: spacing.md,
-    },
-
-    taskCard: {
-      minHeight: 76,
-      padding: spacing.md,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+    },
+    monthTitle: {
+      fontSize: typography.md,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
+    arrowButton: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    weekHeader: {
+      flexDirection: "row",
+      marginBottom: spacing.xs,
+    },
+    weekday: {
+      width: "14.2857%",
+      textAlign: "center",
+      fontSize: 10,
+      fontWeight: "600",
+      color: colors.mutedForeground,
+    },
+    calendarGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    dayCell: {
+      width: "14.2857%",
+      height: 52,
+      alignItems: "center",
+      justifyContent: "flex-start",
+      paddingTop: 3,
+    },
+    dayCircle: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    selectedDayCircle: {
+      backgroundColor: colors.accent,
+    },
+    dayNumber: {
+      fontSize: typography.xs,
+      fontWeight: "500",
+      color: colors.foreground,
+    },
+    outsideMonthText: {
+      color: colors.mutedForeground,
+      opacity: 0.45,
+    },
+    todayNumber: {
+      fontWeight: "800",
+    },
+    selectedDayText: {
+      color: "#FFFFFF",
+      fontWeight: "700",
+    },
+    dots: {
+      height: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 2,
+    },
+    taskDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.mutedForeground,
+    },
+    pendingDot: {
+      backgroundColor: colors.accent,
+    },
+    highDot: {
+      backgroundColor: colors.destructive,
+    },
+    completedDot: {
+      backgroundColor: colors.success,
+    },
+    selectedSection: {
+      marginTop: spacing.xl,
+    },
+    selectedHeader: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
+      marginBottom: spacing.md,
+    },
+    sectionTitle: {
+      fontSize: typography.lg,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
+    taskCount: {
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
+    },
+    taskList: {
+      gap: spacing.sm,
+    },
+    taskCard: {
+      minHeight: 68,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      flexDirection: "row",
+      alignItems: "center",
       backgroundColor: colors.card,
     },
-
-    pressed: {
-      opacity: 0.75,
+    statusCircle: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      marginRight: spacing.sm,
+      alignItems: "center",
+      justifyContent: "center",
     },
-
+    pendingCircle: {
+      borderWidth: 1.5,
+      borderColor: colors.mutedForeground,
+    },
+    completedCircle: {
+      backgroundColor: colors.success,
+    },
     taskInfo: {
       flex: 1,
-      marginRight: spacing.md,
-      gap: spacing.xs,
+      marginRight: spacing.sm,
+      gap: 2,
     },
-
     taskTitle: {
-      fontSize: typography.md,
+      fontSize: typography.sm,
       fontWeight: "600",
       color: colors.foreground,
     },
-
     completedTaskTitle: {
       textDecorationLine: "line-through",
       color: colors.mutedForeground,
     },
-
     taskMeta: {
       fontSize: typography.xs,
       color: colors.mutedForeground,
     },
-
     priorityBadge: {
-      minWidth: 64,
-      paddingVertical: spacing.xs,
+      minWidth: 62,
       paddingHorizontal: spacing.sm,
-      borderRadius: 999,
+      paddingVertical: 5,
+      borderRadius: 8,
       alignItems: "center",
     },
-
     highPriority: {
       backgroundColor: colors.primary,
     },
-
     mediumPriority: {
       backgroundColor: colors.muted,
     },
-
     lowPriority: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.muted,
     },
-
     priorityText: {
-      fontSize: typography.xs,
-      fontWeight: "600",
+      fontSize: 10,
+      fontWeight: "700",
       color: colors.foreground,
     },
-
     highPriorityText: {
       color: colors.primaryForeground,
     },
-
     stateContainer: {
-      minHeight: 100,
+      minHeight: 90,
       alignItems: "center",
       justifyContent: "center",
       gap: spacing.sm,
     },
-
     stateText: {
       fontSize: typography.sm,
       color: colors.mutedForeground,
     },
-
     errorText: {
       fontSize: typography.sm,
       color: colors.destructive,
     },
-
     emptyCard: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 12,
       padding: spacing.xl,
       alignItems: "center",
+      backgroundColor: colors.card,
     },
-
     emptyTitle: {
+      marginTop: spacing.sm,
       fontSize: typography.md,
       fontWeight: "600",
       color: colors.foreground,
     },
-
     emptyText: {
       marginTop: spacing.xs,
       fontSize: typography.sm,
       textAlign: "center",
       color: colors.mutedForeground,
+    },
+    pressed: {
+      opacity: 0.75,
     },
   });
 }
