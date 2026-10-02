@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import { spacing, typography } from "@/theme";
@@ -83,10 +82,10 @@ export default function SettingsScreen() {
           },
         ]}
       >
-        <ScreenHeader
-          title="Settings"
-          subtitle="Manage your TaskFlow preferences."
-        />
+        <View style={styles.header}>
+          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.subtitle}>Manage your TaskFlow preferences.</Text>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
