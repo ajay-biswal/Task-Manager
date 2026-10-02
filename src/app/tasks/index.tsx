@@ -47,6 +47,9 @@ function TaskCard({
   onDelete: () => void;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   return (
     <Pressable
       onPress={onPress}
