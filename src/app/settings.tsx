@@ -3,11 +3,13 @@ import { Alert, StyleSheet, Switch, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { clearTasks } = useTasks();
+  const { isDark, colors, toggleTheme } = useTheme();
 
   function handleClearTasks() {
     Alert.alert(
@@ -53,12 +55,12 @@ export default function SettingsScreen() {
             <View style={styles.settingContent}>
               <Text style={styles.settingTitle}>Dark mode</Text>
 
-              <Text style={styles.settingDescription}>
-                Dark mode will be added in the next step.
+              <Text style={[styles.settingDescription, { color: colors.mutedForeground }]}>
+                Use a darker appearance throughout TaskFlow.
               </Text>
             </View>
 
-            <Switch value={false} disabled />
+            <Switch value={isDark} onValueChange={toggleTheme} />
           </View>
         </View>
 
@@ -99,7 +101,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -114,12 +116,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   subtitle: {
     fontSize: typography.sm,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   section: {
@@ -135,7 +137,7 @@ const styles = StyleSheet.create({
   settingRow: {
     minHeight: 72,
     borderWidth: 1,
-    borderColor: colors.light.border,
+    borderColor: colors.border,
     borderRadius: 14,
     padding: spacing.lg,
     flexDirection: "row",
