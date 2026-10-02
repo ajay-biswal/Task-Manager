@@ -12,3 +12,16 @@ export function createTaskFromForm(data: TaskFormData): Task {
     updatedAt: now,
   };
 }
+
+export function isTaskOverdue(task: Task): boolean {
+  if (task.status !== "PENDING") {
+    return false;
+  }
+
+  const today = new Date();
+  const dueDate = new Date(`${task.dueDate}T00:00:00`);
+
+  today.setHours(0, 0, 0, 0);
+
+  return dueDate < today;
+}
