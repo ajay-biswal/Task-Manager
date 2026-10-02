@@ -398,8 +398,8 @@ function createStyles(colors: ThemeColors) {
 
     content: {
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
-      paddingBottom: spacing.xl,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.md,
     },
 
     header: {
@@ -441,12 +441,12 @@ function createStyles(colors: ThemeColors) {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: spacing.md,
-      marginBottom: spacing.xxl,
+      marginBottom: spacing.xl,
     },
 
     statCard: {
       width: "47%",
-      minHeight: 104,
+      minHeight: 96,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 14,
@@ -479,7 +479,7 @@ function createStyles(colors: ThemeColors) {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "space-between",
-      marginBottom: spacing.md,
+      marginBottom: spacing.sm,
     },
 
     sectionTitle: {
@@ -505,19 +505,19 @@ function createStyles(colors: ThemeColors) {
     },
 
     taskCard: {
-      minHeight: 70,
+      minHeight: 64,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 12,
       paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.md,
+      paddingHorizontal: spacing.sm,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.card,
     },
 
     taskStatus: {
-      width: 30,
+      width: 26,
       alignItems: "center",
       justifyContent: "center",
       marginRight: spacing.sm,
@@ -649,8 +649,8 @@ function createStyles(colors: ThemeColors) {
     },
 
     quickActionsHeader: {
-      marginTop: spacing.xxl,
-      marginBottom: spacing.md,
+      marginTop: spacing.xl,
+      marginBottom: spacing.sm,
     },
 
     quickActionsGrid: {
@@ -661,7 +661,7 @@ function createStyles(colors: ThemeColors) {
 
     quickAction: {
       width: "48%",
-      minHeight: 46,
+      minHeight: 44,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 10,
