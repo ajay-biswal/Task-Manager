@@ -155,10 +155,10 @@ function StatCard({
 export default function DashboardScreen() {
   const router = useRouter();
   const { tasks, loading, error, refreshTasks } = useTasks();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const styles = createStyles(colors, insets.top, width);
+  const styles = createStyles(colors, insets.top, width, isDark);
 
   useFocusEffect(
     useCallback(() => {
@@ -292,9 +292,9 @@ export default function DashboardScreen() {
             value={pendingTasks}
             label="Pending"
             icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
-            background={colors.card}
-            iconBackground={colors.muted}
-            iconColor={colors.accent}
+            background={isDark ? "#1C1A16" : "#FFF9EC"}
+            iconBackground={isDark ? "#332814" : "#FFF0D7"}
+            iconColor={isDark ? "#F59E0B" : "#F59E0B"}
             colors={colors}
           />
 
@@ -306,8 +306,8 @@ export default function DashboardScreen() {
               android: "check_circle",
               web: "check_circle",
             }}
-            background={colors.card}
-            iconBackground={colors.muted}
+            background={isDark ? "#0E2119" : "#F3FBF5"}
+            iconBackground={isDark ? "#0C3320" : "#DDF8E2"}
             iconColor={colors.success}
             colors={colors}
           />
@@ -320,8 +320,8 @@ export default function DashboardScreen() {
               android: "error",
               web: "error",
             }}
-            background={colors.card}
-            iconBackground={colors.muted}
+            background={isDark ? "#29151B" : "#FFF3F5"}
+            iconBackground={isDark ? "#351820" : "#FFE1E5"}
             iconColor={colors.destructive}
             colors={colors}
           />
@@ -366,6 +366,25 @@ export default function DashboardScreen() {
             <Text style={styles.emptyText}>
               No tasks are due today.{"\n"}Enjoy your free time or add a new task.
             </Text>
+
+            {isDark && (
+              <Pressable
+                onPress={() => router.push("/tasks/form")}
+                style={({ pressed }) => [
+                  styles.emptyAction,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Add a new task"
+              >
+                <AppIcon
+                  name={{ ios: "plus", android: "add", web: "add" }}
+                  size={22}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.emptyActionText}>Add a new task</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
           <View style={styles.taskList}>
@@ -435,7 +454,7 @@ export default function DashboardScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
+function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDark = false) {
   const compact = screenWidth < 400;
 
   return StyleSheet.create({
@@ -449,7 +468,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       paddingBottom: 132,
     },
     hero: {
-      height: compact ? 246 : 270,
+      height: compact ? 224 : 238,
       position: "relative",
       overflow: "hidden",
       marginHorizontal: -21,
@@ -461,6 +480,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       height: compact ? 228 : 255,
       right: compact ? -62 : -42,
       bottom: compact ? -28 : -20,
+      opacity: isDark ? 0.72 : 1,
     },
     heroTop: {
       flexDirection: "row",
@@ -511,9 +531,9 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       elevation: 3,
     },
     progressCard: {
-      minHeight: 255,
-      marginTop: -2,
-      padding: 28,
+      minHeight: compact ? 202 : 214,
+      marginTop: 0,
+      padding: compact ? 22 : 28,
       borderRadius: 22,
       backgroundColor: colors.card,
       borderWidth: 1,
@@ -578,15 +598,15 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
     statsRow: {
       flexDirection: "row",
       gap: 14,
-      marginTop: 31,
-      marginBottom: 39,
+      marginTop: 25,
+      marginBottom: 34,
     },
     statCard: {
       flex: 1,
-      height: compact ? 174 : 208,
+      height: compact ? 172 : 188,
       borderRadius: compact ? 19 : 22,
       borderWidth: 1,
-      padding: compact ? 18 : 25,
+      padding: compact ? 18 : 22,
       justifyContent: "flex-start",
       minWidth: 0,
     },
@@ -637,7 +657,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       color: colors.accent,
     },
     emptyCard: {
-      minHeight: 425,
+      minHeight: isDark ? 384 : 352,
       borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
@@ -648,10 +668,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       overflow: "hidden",
     },
     emptyImage: {
-      width: "94%",
-      height: 225,
+      width: "88%",
+      height: isDark ? 180 : 170,
       marginTop: -8,
       marginBottom: 2,
+      opacity: isDark ? 0.9 : 1,
     },
     emptyTitle: {
       fontSize: 26,
@@ -660,12 +681,30 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       color: colors.foreground,
     },
     emptyText: {
-      marginTop: 12,
+      marginTop: 10,
       textAlign: "center",
-      fontSize: 18,
-      lineHeight: 26,
+      fontSize: 17,
+      lineHeight: 24,
       fontWeight: "500",
       color: colors.mutedForeground,
+    },
+    emptyAction: {
+      marginTop: 18,
+      minWidth: 190,
+      height: 48,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+      backgroundColor: colors.accent,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+    },
+    emptyActionText: {
+      fontSize: 16,
+      lineHeight: 20,
+      fontWeight: "700",
+      color: "#FFFFFF",
     },
     stateText: {
       fontSize: 16,
@@ -709,11 +748,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
       color: colors.mutedForeground,
     },
     motivationCard: {
-      height: 184,
-      marginTop: 39,
+      height: 156,
+      marginTop: 31,
       borderRadius: 22,
       overflow: "hidden",
-      backgroundColor: colors.muted,
+      backgroundColor: isDark ? "#0D1727" : "#F2F7FD",
       borderWidth: 1,
       borderColor: colors.border,
       justifyContent: "center",
