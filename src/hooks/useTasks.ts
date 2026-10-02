@@ -2,13 +2,13 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
 
 import {
-    createTask,
-    deleteAllTasks,
-    deleteTask,
-    getTaskById,
-    getTasks,
-    updateTask,
-    updateTaskStatus,
+  createTask,
+  deleteAllTasks,
+  deleteTask,
+  getTaskById,
+  getTasks,
+  updateTask,
+  updateTaskStatus,
 } from "@/database/taskRepository";
 
 import type { Task, TaskStatus } from "@/types/task";
@@ -22,7 +22,6 @@ export function useTasks() {
 
   const loadTasks = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
 
       const result = await getTasks(database);
@@ -30,51 +29,83 @@ export function useTasks() {
     } catch (err) {
       console.error("Failed to load tasks:", err);
       setError("Failed to load tasks.");
-    } finally {
-      setLoading(false);
     }
   }, [database]);
 
   useEffect(() => {
-    loadTasks();
+    async function initialize() {
+      setLoading(true);
+
+      try {
+        await loadTasks();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initialize();
   }, [loadTasks]);
 
   const addTask = useCallback(
     async (task: Task) => {
       await createTask(database, task);
-      await loadTasks();
+
+      setTasks((current) => {
+        const exists = current.some((item) => item.id === task.id);
+
+        if (exists) {
+          return current.map((item) => (item.id === task.id ? task : item));
+        }
+
+        return [...current, task];
+      });
     },
-    [database, loadTasks],
+    [database],
   );
 
   const editTask = useCallback(
     async (task: Task) => {
       await updateTask(database, task);
-      await loadTasks();
+
+      setTasks((current) =>
+        current.map((item) => (item.id === task.id ? task : item)),
+      );
     },
-    [database, loadTasks],
+    [database],
   );
 
   const removeTask = useCallback(
     async (id: string) => {
       await deleteTask(database, id);
-      await loadTasks();
+
+      setTasks((current) => current.filter((item) => item.id !== id));
     },
-    [database, loadTasks],
+    [database],
   );
 
   const toggleTask = useCallback(
     async (id: string, status: TaskStatus) => {
       await updateTaskStatus(database, id, status);
-      await loadTasks();
+
+      setTasks((current) =>
+        current.map((task) =>
+          task.id === id
+            ? {
+                ...task,
+                status,
+                updatedAt: new Date().toISOString(),
+              }
+            : task,
+        ),
+      );
     },
-    [database, loadTasks],
+    [database],
   );
 
   const clearTasks = useCallback(async () => {
     await deleteAllTasks(database);
-    await loadTasks();
-  }, [database, loadTasks]);
+    setTasks([]);
+  }, [database]);
 
   const findTask = useCallback(
     async (id: string) => {
