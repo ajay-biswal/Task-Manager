@@ -1,3 +1,4 @@
+import { CircularProgressIndicator, Host } from "@expo/ui/jetpack-compose";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
@@ -53,85 +54,63 @@ function ProgressRing({
   progress: number;
   colors: ThemeColors;
 }) {
-  const styles = createStyles(colors);
-  const percent = Math.max(0, Math.min(progress, 1)) * 100;
-  const radius = 65;
-  const borderWidth = 11;
-  const degrees = percent * 3.6;
-  const isOverHalf = percent > 50;
-
-  const renderHalfCircle = (
-    rotateDegrees: number,
-    backgroundColor: string,
-  ) => (
-    <View
-      style={[
-        styles.ringHalfWrap,
-        {
-          width: radius,
-          height: radius * 2,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.ringHalf,
-          {
-            width: radius,
-            height: radius * 2,
-            borderRadius: radius,
-            backgroundColor,
-            transform: [
-              { translateX: radius / 2 },
-              { rotate: `${rotateDegrees}deg` },
-              { translateX: -radius / 2 },
-            ],
-          },
-        ]}
-      />
-    </View>
-  );
+  const percent = Math.max(0, Math.min(progress, 1));
 
   return (
-    <View style={styles.ring}>
-      <View
-        style={[
-          styles.ringTrack,
-          {
-            width: radius * 2,
-            height: radius * 2,
-            borderRadius: radius,
-            backgroundColor: colors.muted,
-          },
-        ]}
-      />
-
-      {renderHalfCircle(
-        isOverHalf ? 180 : degrees,
-        colors.accent,
-      )}
-
-      {renderHalfCircle(
-        isOverHalf ? degrees : 0,
-        isOverHalf ? colors.accent : colors.muted,
-      )}
+    <View style={stylesProgressRing.container}>
+      <Host style={stylesProgressRing.host} matchContents>
+        <CircularProgressIndicator
+          progress={percent}
+          color={colors.accent}
+          trackColor={colors.muted}
+          strokeWidth={11}
+          strokeCap="round"
+        />
+      </Host>
 
       <View
         style={[
-          styles.ringCenter,
-          {
-            width: (radius - borderWidth) * 2,
-            height: (radius - borderWidth) * 2,
-            borderRadius: radius - borderWidth,
-            backgroundColor: colors.card,
-          },
+          stylesProgressRing.center,
+          { backgroundColor: colors.card },
         ]}
       >
-        <Text style={styles.ringText}>{Math.round(percent)}%</Text>
+        <Text style={stylesProgressRing.text}>
+          {Math.round(percent * 100)}%
+        </Text>
       </View>
     </View>
   );
 }
+
+const stylesProgressRing = StyleSheet.create({
+  container: {
+    width: 130,
+    height: 130,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  host: {
+    width: 130,
+    height: 130,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  center: {
+    position: "absolute",
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    fontSize: 27,
+    lineHeight: 32,
+    fontWeight: "800",
+    color: "#111111",
+  },
+});
 function StatCard({
   value,
   label,
@@ -601,44 +580,6 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       fontSize: 17,
       fontWeight: "600",
       color: colors.mutedForeground,
-    },
-
-    ring: {
-      width: 130,
-      height: 130,
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-    },
-
-    ringTrack: {
-      position: "absolute",
-    },
-
-    ringHalfWrap: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      overflow: "hidden",
-    },
-
-    ringHalf: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      overflow: "hidden",
-    },
-
-    ringCenter: {
-      alignItems: "center",
-      justifyContent: "center",
-    },
-
-    ringText: {
-      fontSize: 27,
-      lineHeight: 32,
-      fontWeight: "800",
-      color: colors.foreground,
     },
 
     statsRow: {
