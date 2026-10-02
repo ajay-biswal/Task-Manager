@@ -292,8 +292,8 @@ export default function DashboardScreen() {
             value={pendingTasks}
             label="Pending"
             icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
-            background={isDark ? "#1C1A16" : "#FFF9EC"}
-            iconBackground={isDark ? "#332814" : "#FFF0D7"}
+            background={isDark ? "#171713" : "#FFF9EC"}
+            iconBackground={isDark ? "#25220F" : "#FFF0D7"}
             iconColor={isDark ? "#F59E0B" : "#F59E0B"}
             colors={colors}
           />
@@ -306,8 +306,8 @@ export default function DashboardScreen() {
               android: "check_circle",
               web: "check_circle",
             }}
-            background={isDark ? "#0E2119" : "#F3FBF5"}
-            iconBackground={isDark ? "#0C3320" : "#DDF8E2"}
+            background={isDark ? "#0C1D17" : "#F3FBF5"}
+            iconBackground={isDark ? "#0B2B1D" : "#DDF8E2"}
             iconColor={colors.success}
             colors={colors}
           />
@@ -320,8 +320,8 @@ export default function DashboardScreen() {
               android: "error",
               web: "error",
             }}
-            background={isDark ? "#29151B" : "#FFF3F5"}
-            iconBackground={isDark ? "#351820" : "#FFE1E5"}
+            background={isDark ? "#211117" : "#FFF3F5"}
+            iconBackground={isDark ? "#30151D" : "#FFE1E5"}
             iconColor={colors.destructive}
             colors={colors}
           />
@@ -480,7 +480,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       height: compact ? 228 : 255,
       right: compact ? -62 : -42,
       bottom: compact ? -28 : -20,
-      opacity: isDark ? 0.72 : 1,
+      opacity: 1,
     },
     heroTop: {
       flexDirection: "row",
@@ -521,9 +521,9 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       width: 58,
       height: 58,
       borderRadius: 29,
-      backgroundColor: isDark ? "#11151D" : colors.card,
+      backgroundColor: isDark ? "#11151B" : colors.card,
       borderWidth: isDark ? 1 : 0,
-      borderColor: isDark ? "#252D3A" : "transparent",
+      borderColor: isDark ? "#242B35" : "transparent",
       alignItems: "center",
       justifyContent: "center",
       shadowColor: "#000000",
@@ -537,9 +537,9 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       marginTop: 0,
       padding: compact ? 22 : 28,
       borderRadius: 22,
-      backgroundColor: isDark ? "#11151D" : colors.card,
+      backgroundColor: isDark ? "#10141B" : colors.card,
       borderWidth: 1,
-      borderColor: isDark ? "#202936" : colors.border,
+      borderColor: isDark ? "#202833" : colors.border,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
@@ -663,7 +663,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: isDark ? "#0D131C" : colors.card,
+      backgroundColor: isDark ? "#0D1219" : colors.card,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 24,
@@ -754,7 +754,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       marginTop: 31,
       borderRadius: 22,
       overflow: "hidden",
-      backgroundColor: isDark ? "#0D1727" : "#F2F7FD",
+      backgroundColor: isDark ? "#0B1422" : "#F2F7FD",
       borderWidth: 1,
       borderColor: colors.border,
       justifyContent: "center",
@@ -766,7 +766,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       height: "100%",
       right: 0,
       top: 0,
-      opacity: isDark ? 0.82 : 1,
+      opacity: 0.96,
     },
     quoteIcon: {
       width: 54,
