@@ -5,7 +5,7 @@ import { initializeDatabase } from "@/database/database";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
 function AppNavigator() {
-  const { colors } = useTheme();
+  const { isDark, colors } = useTheme();
 
   return (
     <Stack
@@ -17,6 +17,12 @@ function AppNavigator() {
         headerTitleStyle: {
           color: colors.foreground,
         },
+        contentStyle: {
+          backgroundColor: colors.background,
+        },
+        statusBarStyle: isDark ? "light" : "dark",
+        statusBarColor: colors.background,
+        navigationBarColor: colors.background,
       }}
     >
       <Stack.Screen
