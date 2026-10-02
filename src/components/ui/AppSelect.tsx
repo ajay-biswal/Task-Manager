@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
 
 interface AppSelectProps {
   label?: string;
@@ -29,20 +30,20 @@ export function AppSelect({
 
   return (
     <View style={styles.container}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text> : null}
 
       <Pressable
         onPress={() => setVisible(true)}
-        style={[styles.trigger, error ? styles.triggerError : null]}
+        style={[styles.trigger, { borderColor: colors.input, backgroundColor: colors.background }, error ? { borderColor: colors.destructive } : null]}
       >
-        <Text style={[styles.value, !value ? styles.placeholder : null]}>
+        <Text style={[styles.value, { color: colors.foreground }, !value ? { color: colors.mutedForeground } : null]}>
           {value || placeholder}
         </Text>
 
-        <Text style={styles.chevron}>▼</Text>
+        <Text style={[styles.chevron, { color: colors.mutedForeground }]}>▼</Text>
       </Pressable>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text> : null}
 
       <Modal
         visible={visible}
@@ -51,12 +52,12 @@ export function AppSelect({
         onRequestClose={() => setVisible(false)}
       >
         <View style={styles.overlay}>
-          <View style={styles.modal}>
+          <View style={[styles.modal, { backgroundColor: colors.background }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{label ?? "Select"}</Text>
+              <Text style={[styles.modalTitle, { color: colors.foreground }]}>{label ?? "Select"}</Text>
 
               <Pressable onPress={() => setVisible(false)} hitSlop={10}>
-                <Text style={styles.closeButton}>×</Text>
+                <Text style={[styles.closeButton, { color: colors.mutedForeground }]}>×</Text>
               </Pressable>
             </View>
 
@@ -70,19 +71,19 @@ export function AppSelect({
                     onPress={() => handleSelect(option)}
                     style={[
                       styles.option,
-                      selected ? styles.selectedOption : null,
+                      selected ? { backgroundColor: colors.muted } : null,
                     ]}
                   >
                     <Text
                       style={[
                         styles.optionText,
-                        selected ? styles.selectedOptionText : null,
+                        selected ? styles.selectedOptionText : null, { color: colors.foreground },
                       ]}
                     >
                       {option}
                     </Text>
 
-                    {selected ? <Text style={styles.checkmark}>✓</Text> : null}
+                    {selected ? <Text style={[styles.checkmark, { color: colors.foreground }]}>✓</Text> : null}
                   </Pressable>
                 );
               })}
@@ -101,57 +102,20 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: typography.sm,
-    fontWeight: "500",
-    color: colors.light.foreground,
-  },
+    fontWeight: "500",  },
 
   trigger: {
     minHeight: 46,
-    borderWidth: 1,
-    borderColor: colors.light.input,
-    borderRadius: 10,
+    borderWidth: 1,    borderRadius: 10,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.light.background,
-  },
-
-  triggerError: {
-    borderColor: colors.light.destructive,
-  },
-
-  value: {
-    fontSize: typography.md,
-    color: colors.light.foreground,
-  },
-
-  placeholder: {
-    color: colors.light.mutedForeground,
-  },
-
-  chevron: {
-    fontSize: 12,
-    color: colors.light.mutedForeground,
-  },
-
-  error: {
-    fontSize: typography.xs,
-    color: colors.light.destructive,
-  },
+    justifyContent: "space-between",  },
 
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.45)",
     justifyContent: "flex-end",
-  },
-
-  modal: {
-    backgroundColor: colors.light.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: spacing.xl,
-    paddingBottom: spacing.xxxl,
   },
 
   modalHeader: {
@@ -163,15 +127,11 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     fontSize: typography.lg,
-    fontWeight: "600",
-    color: colors.light.foreground,
-  },
+    fontWeight: "600",  },
 
   closeButton: {
     fontSize: 28,
-    lineHeight: 28,
-    color: colors.light.mutedForeground,
-  },
+    lineHeight: 28,  },
 
   options: {
     gap: spacing.sm,
@@ -186,21 +146,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  selectedOption: {
-    backgroundColor: colors.light.muted,
-  },
+  selectedOption: {  },
 
   optionText: {
-    fontSize: typography.md,
-    color: colors.light.foreground,
-  },
+    fontSize: typography.md,  },
 
   selectedOptionText: {
     fontWeight: "600",
   },
 
   checkmark: {
-    fontSize: typography.lg,
-    color: colors.light.foreground,
-  },
+    fontSize: typography.lg,  },
 });
