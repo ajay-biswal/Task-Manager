@@ -14,7 +14,7 @@ export const colors = {
 
     primary: "#18181B",
     primaryForeground: "#FAFAFA",
-    accent: "#6D28D9",
+    accent: "#3B82F6",
 
     destructive: "#DC2626",
     destructiveForeground: "#FFFFFF",
@@ -41,7 +41,7 @@ export const colors = {
 
     primary: "#FAFAFA",
     primaryForeground: "#18181B",
-    accent: "#8B5CF6",
+    accent: "#60A5FA",
 
     destructive: "#EF4444",
     destructiveForeground: "#FFFFFF",
