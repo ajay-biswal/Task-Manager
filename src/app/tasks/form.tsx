@@ -239,9 +239,11 @@ export default function TaskFormScreen() {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.fieldGroup}>
+          <View style={styles.sectionCard}>
             <FieldLabel colors={colors}>Title</FieldLabel>
-            <TextInput
+            <View style={[styles.inputShell, { backgroundColor: colors.card, borderColor: errors.title ? colors.destructive : colors.border }]}>
+              <AppIcon name={{ ios: "doc.text", android: "description", web: "description" }} size={20} color={colors.mutedForeground} />
+              <TextInput
               accessibilityLabel="Task title"
               returnKeyType="next"
               maxLength={120}
@@ -249,15 +251,9 @@ export default function TaskFormScreen() {
               onChangeText={(value) => updateField("title", value)}
               placeholder="What needs to be done?"
               placeholderTextColor={colors.mutedForeground}
-              style={[
-                styles.input,
-                {
-                  color: colors.foreground,
-                  backgroundColor: colors.card,
-                  borderColor: errors.title ? colors.destructive : colors.border,
-                },
-              ]}
-            />
+                style={[styles.input, { color: colors.foreground, backgroundColor: "transparent", borderWidth: 0, flex: 1 }]}
+              />
+            </View>
             {errors.title ? (
               <Text style={[styles.error, { color: colors.destructive }]}>
                 {errors.title}
@@ -265,9 +261,11 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={styles.sectionCard}>
             <FieldLabel colors={colors}>Description</FieldLabel>
-            <TextInput
+            <View style={[styles.inputShell, styles.descriptionShell, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <AppIcon name={{ ios: "text.alignleft", android: "format_align_left", web: "format_align_left" }} size={20} color={colors.mutedForeground} />
+              <TextInput
               accessibilityLabel="Task description"
               returnKeyType="done"
               maxLength={500}
@@ -277,26 +275,37 @@ export default function TaskFormScreen() {
               placeholderTextColor={colors.mutedForeground}
               multiline
               textAlignVertical="top"
-              style={[
-                styles.input,
-                styles.descriptionInput,
-                {
-                  color: colors.foreground,
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
-            />
+                style={[styles.input, styles.descriptionInput, { color: colors.foreground, backgroundColor: "transparent", borderWidth: 0, flex: 1 }]}
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={styles.sectionCard}>
             <FieldLabel colors={colors}>Category</FieldLabel>
-            <SelectField
-              value={form.category}
-              placeholder="Select category"
-              colors={colors}
-              onPress={() => setSelectField("category")}
-            />
+            <View style={styles.optionRow}>
+              {[
+                { label: "Work", icon: { ios: "briefcase.fill", android: "business_center", web: "business_center" } },
+                { label: "Personal", icon: { ios: "house.fill", android: "home", web: "home" } },
+                { label: "Study", icon: { ios: "graduationcap.fill", android: "school", web: "school" } },
+                { label: "Health", icon: { ios: "heart.fill", android: "favorite", web: "favorite" } },
+                { label: "Other", icon: { ios: "ellipsis", android: "more_horiz", web: "more_horiz" } },
+              ].map((item) => {
+                const selected = form.category === item.label;
+                return (
+                  <Pressable
+                    key={item.label}
+                    onPress={() => updateField("category", item.label)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={item.label}
+                    accessibilityState={{ selected }}
+                    style={[styles.categoryOption, { backgroundColor: selected ? colors.accent + "16" : colors.muted, borderColor: selected ? colors.accent : colors.border }]}
+                  >
+                    <AppIcon name={item.icon} size={20} color={selected ? colors.accent : colors.mutedForeground} />
+                    <Text style={[styles.optionText, { color: colors.foreground }]}>{item.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
             {errors.category ? (
               <Text style={[styles.error, { color: colors.destructive }]}>
                 {errors.category}
@@ -304,7 +313,7 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={styles.sectionCard}>
             <FieldLabel colors={colors}>Priority</FieldLabel>
             <View style={styles.priorityRow}>
               {priorities.map((priority) => {
@@ -320,19 +329,21 @@ export default function TaskFormScreen() {
                     style={[
                       styles.priorityButton,
                       {
-                        backgroundColor: selected ? colors.accent : colors.muted,
-                        borderColor: selected ? colors.accent : colors.muted,
+                        backgroundColor: selected ? priorityColor(priority) + "18" : colors.muted,
+                        borderColor: selected ? priorityColor(priority) : colors.border,
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.priorityText,
-                        {
-                          color: selected ? "#FFFFFF" : colors.foreground,
-                        },
-                      ]}
-                    >
+                    <AppIcon
+                      name={priority === "LOW"
+                        ? { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" }
+                        : priority === "MEDIUM"
+                          ? { ios: "equal", android: "drag_handle", web: "drag_handle" }
+                          : { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" }}
+                      size={20}
+                      color={priorityColor(priority)}
+                    />
+                    <Text style={[styles.priorityText, { color: colors.foreground }]}>
                       {priority.charAt(0) + priority.slice(1).toLowerCase()}
                     </Text>
                   </Pressable>
@@ -346,7 +357,7 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={styles.sectionCard}>
             <FieldLabel colors={colors}>Schedule</FieldLabel>
 
             <View style={styles.dateRow}>
@@ -366,6 +377,15 @@ export default function TaskFormScreen() {
                 error={errors.dueDate}
               />
             </View>
+            <Pressable
+              disabled
+              style={[styles.scheduleRow, { backgroundColor: colors.muted, borderColor: colors.border }]}
+            >
+              <AppIcon name={{ ios: "repeat", android: "sync", web: "sync" }} size={20} color={colors.mutedForeground} />
+              <Text style={[styles.scheduleTitle, { color: colors.foreground }]}>Repeat</Text>
+              <Text style={[styles.scheduleValue, { color: colors.mutedForeground }]}>Does not repeat</Text>
+              <AppIcon name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={18} color={colors.mutedForeground} />
+            </Pressable>
           </View>
 
           <View style={styles.fieldGroup}>
@@ -376,6 +396,19 @@ export default function TaskFormScreen() {
               onPress={() => setSelectField("status")}
             />
           </View>
+
+          {!isEditMode ? (
+            <Pressable
+              onPress={() => router.push("/bulk-upload")}
+              disabled={saving}
+              accessibilityRole="button"
+              accessibilityLabel="Bulk upload tasks"
+              style={({ pressed }) => [styles.bulkButton, { backgroundColor: colors.card, borderColor: colors.border }, pressed && styles.pressed]}
+            >
+              <AppIcon name={{ ios: "square.and.arrow.down", android: "upload_file", web: "upload_file" }} size={20} color={colors.accent} />
+              <Text style={[styles.bulkText, { color: colors.accent }]}>Bulk Upload</Text>
+            </Pressable>
+          ) : null}
 
           <View style={styles.actions}>
             <Pressable
@@ -529,6 +562,12 @@ export default function TaskFormScreen() {
   );
 }
 
+function priorityColor(priority: TaskPriority): string {
+  if (priority === "LOW") return "#22C55E";
+  if (priority === "MEDIUM") return "#EAB308";
+  return "#EF4444";
+}
+
 function SelectField({
   value,
   placeholder,
@@ -656,9 +695,31 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
 
+  sectionCard: {
+    gap: spacing.sm,
+    padding: spacing.xs,
+    borderRadius: 14,
+  },
+
   label: {
     fontSize: typography.xs,
     fontWeight: "600",
+  },
+
+  inputShell: {
+    minHeight: 54,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+
+  descriptionShell: {
+    alignItems: "flex-start",
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
 
   input: {
@@ -695,11 +756,70 @@ const styles = StyleSheet.create({
 
   priorityButton: {
     flex: 1,
-    minHeight: 40,
+    minHeight: 74,
     borderWidth: 1,
-    borderRadius: 7,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+    gap: 5,
+  },
+
+  optionRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+
+  categoryOption: {
+    flex: 1,
+    minHeight: 76,
+    borderWidth: 1,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 2,
+  },
+
+  optionText: {
+    fontSize: 9,
+    fontWeight: "600",
+  },
+
+  scheduleRow: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+
+  scheduleTitle: {
+    fontSize: typography.xs,
+    fontWeight: "600",
+  },
+
+  scheduleValue: {
+    flex: 1,
+    textAlign: "right",
+    fontSize: 10,
+  },
+
+  bulkButton: {
+    minHeight: 46,
+    borderWidth: 1,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+
+  bulkText: {
+    fontSize: typography.xs,
+    fontWeight: "700",
   },
 
   priorityText: {
