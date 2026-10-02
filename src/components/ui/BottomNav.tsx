@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
-import { spacing, typography } from "@/theme";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -60,11 +59,7 @@ export function BottomNav() {
           accessibilityRole="button"
           accessibilityLabel="Create new task"
         >
-          <AppIcon
-            name={{ ios: "plus", android: "add", web: "add" }}
-            size={34}
-            color="#FFFFFF"
-          />
+          <Text style={styles.fabPlus}>+</Text>
         </Pressable>
       </View>
     </View>
@@ -170,6 +165,16 @@ function createStyles(colors: ThemeColors) {
       shadowRadius: 15,
       shadowOffset: { width: 0, height: 7 },
       elevation: 10,
+    },
+
+    fabPlus: {
+      width: 40,
+      height: 40,
+      lineHeight: 40,
+      textAlign: "center",
+      fontSize: 38,
+      fontWeight: "300",
+      color: "#FFFFFF",
     },
 
     pressed: {
