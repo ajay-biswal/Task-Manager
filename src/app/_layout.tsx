@@ -15,64 +15,22 @@ function AppNavigator() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: {
-          backgroundColor: colors.background,
-        },
+        headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.foreground,
-        headerTitleStyle: {
-          color: colors.foreground,
-        },
-        contentStyle: {
-          backgroundColor: colors.background,
-        },
+        headerTitleStyle: { color: colors.foreground },
+        contentStyle: { backgroundColor: colors.background },
         statusBarStyle: isDark ? "light" : "dark",
         statusBarColor: colors.background,
         navigationBarColor: colors.background,
       }}
     >
       <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
+        name="(tabs)"
+        options={{ headerShown: false, animation: "none" }}
       />
-
-      <Stack.Screen
-        name="tasks/form"
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="tasks/[id]"
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="calendar"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-
-      <Stack.Screen
-        name="settings"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
-
       <Stack.Screen
         name="bulk-upload"
-        options={{
-          headerShown: false,
-        }}
+        options={{ headerShown: false }}
       />
     </Stack>
   );
