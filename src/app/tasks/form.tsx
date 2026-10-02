@@ -16,7 +16,9 @@ import { AppSelect } from "@/components/ui/AppSelect";
 import { DateField } from "@/components/ui/DateField";
 import { PrioritySelector } from "@/components/ui/PrioritySelector";
 import { useTasks } from "@/hooks/useTasks";
-import { colors, spacing, typography } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { ThemeColors } from "@/theme";
 import type { TaskFormData, TaskStatus } from "@/types/task";
 import { createTaskFromForm } from "@/utils/taskUtils";
 import { type TaskValidationErrors, validateTask } from "@/utils/validation";
@@ -45,6 +47,8 @@ export default function TaskFormScreen() {
   const taskId = typeof params.id === "string" ? params.id : undefined;
 
   const { addTask, editTask, findTask } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [form, setForm] = useState<TaskFormData>(initialForm);
 
@@ -163,7 +167,7 @@ export default function TaskFormScreen() {
   if (loadingTask) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.light.foreground} />
+        <ActivityIndicator size="large" color={colors.foreground} />
         <Text style={styles.loadingText}>Loading task...</Text>
       </View>
     );
@@ -274,10 +278,10 @@ export default function TaskFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   content: {
@@ -293,12 +297,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.xxxl,
     fontWeight: "700",
-    color: colors.light.foreground,
+    color: colors.foreground,
   },
 
   subtitle: {
     fontSize: typography.md,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 
   form: {
@@ -313,7 +317,7 @@ const styles = StyleSheet.create({
   error: {
     marginTop: -spacing.md,
     fontSize: typography.xs,
-    color: colors.light.destructive,
+    color: colors.destructive,
   },
 
   actions: {
@@ -327,11 +331,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
-    backgroundColor: colors.light.background,
+    backgroundColor: colors.background,
   },
 
   loadingText: {
     fontSize: typography.md,
-    color: colors.light.mutedForeground,
+    color: colors.mutedForeground,
   },
 });
+}
