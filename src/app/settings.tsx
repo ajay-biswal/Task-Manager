@@ -219,7 +219,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.lg,
     },
     header: {
-      marginBottom: spacing.xl,
+      marginBottom: spacing.lg,
     },
     title: {
       fontSize: 26,
@@ -236,7 +236,7 @@ function createStyles(colors: ThemeColors) {
       marginBottom: spacing.xl,
     },
     sectionTitle: {
-      marginBottom: spacing.sm,
+      marginBottom: spacing.xs,
       fontSize: typography.sm,
       fontWeight: "700",
       color: colors.mutedForeground,
@@ -265,7 +265,7 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.card,
     },
     destructiveRow: {
-      borderColor: colors.destructive,
+      borderColor: colors.destructive + "55",
     },
     rowIcon: {
       width: 40,
@@ -274,7 +274,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.muted,
+      backgroundColor: colors.accent + "12",
     },
     actionIcon: {
       width: 40,
