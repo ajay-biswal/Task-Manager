@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
@@ -31,11 +31,46 @@ function formatDate(dateString: string): string {
   });
 }
 
-function TaskPreview({ task, colors }: { task: Task; colors: ThemeColors }) {
+function getGreeting(): string {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 18) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
+function TaskPreview({
+  task,
+  colors,
+  onPress,
+}: {
+  task: Task;
+  colors: ThemeColors;
+  onPress: () => void;
+}) {
   const styles = createStyles(colors);
+  const overdue = isTaskOverdue(task);
 
   return (
-    <View style={styles.taskCard}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
+    >
+      <View
+        style={[
+          styles.statusDot,
+          task.status === "COMPLETED"
+            ? styles.completedStatusDot
+            : styles.pendingStatusDot,
+        ]}
+      />
+
       <View style={styles.taskContent}>
         <Text
           style={[
@@ -47,11 +82,11 @@ function TaskPreview({ task, colors }: { task: Task; colors: ThemeColors }) {
           {task.title}
         </Text>
 
-        <Text style={styles.taskCategory} numberOfLines={1}>
-          {task.category}
+        <Text style={styles.taskMeta} numberOfLines={1}>
+          {task.category} · {formatDate(task.dueDate)}
         </Text>
 
-        <Text style={styles.taskDate}>Due {formatDate(task.dueDate)}</Text>
+        {overdue ? <Text style={styles.overdueText}>Overdue</Text> : null}
       </View>
 
       <View
@@ -73,13 +108,12 @@ function TaskPreview({ task, colors }: { task: Task; colors: ThemeColors }) {
           {task.priority}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 export default function DashboardScreen() {
   const router = useRouter();
-
   const { tasks, loading, error, refreshTasks } = useTasks();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -91,18 +125,29 @@ export default function DashboardScreen() {
   );
 
   const totalTasks = tasks.length;
-
   const completedTasks = tasks.filter(
     (task) => task.status === "COMPLETED",
   ).length;
-
   const pendingTasks = tasks.filter((task) => task.status === "PENDING").length;
-
   const todayTasks = tasks.filter((task) => isToday(task.dueDate)).length;
-
   const overdueTasks = tasks.filter((task) => isTaskOverdue(task)).length;
 
-  const recentTasks = tasks.slice(0, 5);
+  const todaysTasks = useMemo(
+    () =>
+      tasks
+        .filter((task) => isToday(task.dueDate))
+        .sort((a, b) => {
+          if (a.status !== b.status) {
+            return a.status === "PENDING" ? -1 : 1;
+          }
+
+          const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        })
+        .slice(0, 4),
+    [tasks],
+  );
 
   return (
     <View style={styles.container}>
@@ -111,15 +156,22 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>TaskFlow</Text>
-
-            <Text style={styles.subtitle}>Manage your tasks efficiently.</Text>
+          <View style={styles.headerText}>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={styles.title}>Your tasks, organized.</Text>
+            <Text style={styles.subtitle}>
+              Stay focused and keep your day moving.
+            </Text>
           </View>
 
           <Pressable
             onPress={() => router.push("/settings")}
-            style={styles.settingsButton}
+            style={({ pressed }) => [
+              styles.settingsButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
           >
             <Text style={styles.settingsIcon}>⚙</Text>
           </Pressable>
@@ -128,73 +180,94 @@ export default function DashboardScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{totalTasks}</Text>
-
-            <Text style={styles.statLabel}>Total</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{completedTasks}</Text>
-
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statLabel}>Total tasks</Text>
           </View>
 
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{pendingTasks}</Text>
-
             <Text style={styles.statLabel}>Pending</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{todayTasks}</Text>
+            <Text style={styles.statValue}>{completedTasks}</Text>
+            <Text style={styles.statLabel}>Completed</Text>
+          </View>
 
-            <Text style={styles.statLabel}>Due Today</Text>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{todayTasks}</Text>
+            <Text style={styles.statLabel}>Due today</Text>
           </View>
 
           <View style={styles.statCard}>
             <Text style={styles.overdueStatValue}>{overdueTasks}</Text>
-
             <Text style={styles.overdueStatLabel}>Overdue</Text>
           </View>
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Tasks</Text>
+          <View>
+            <Text style={styles.sectionTitle}>Today’s tasks</Text>
+            <Text style={styles.sectionSubtitle}>
+              {todayTasks === 0
+                ? "Nothing due today"
+                : `${todayTasks} task${todayTasks === 1 ? "" : "s"} due today`}
+            </Text>
+          </View>
 
-          <Pressable onPress={() => router.push("/tasks")}>
+          <Pressable
+            onPress={() => router.push("/tasks")}
+            style={({ pressed }) => pressed && styles.pressed}
+          >
             <Text style={styles.viewAll}>View all</Text>
           </Pressable>
         </View>
 
         {loading ? (
-          <View style={styles.stateContainer}>
-            <Text style={styles.stateText}>Loading tasks...</Text>
+          <View style={styles.stateCard}>
+            <Text style={styles.stateText}>Loading your tasks...</Text>
           </View>
         ) : error ? (
-          <View style={styles.stateContainer}>
+          <View style={styles.stateCard}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
-        ) : recentTasks.length === 0 ? (
+        ) : todaysTasks.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No tasks yet</Text>
+            <View style={styles.emptyIcon}>
+              <Text style={styles.emptyIconText}>✓</Text>
+            </View>
+
+            <Text style={styles.emptyTitle}>You’re all caught up</Text>
 
             <Text style={styles.emptyText}>
-              Create your first task to get started.
+              No tasks are due today. Add one whenever you’re ready.
             </Text>
 
             <Pressable
               onPress={() => router.push("/tasks/form")}
-              style={styles.emptyButton}
+              style={({ pressed }) => [
+                styles.emptyButton,
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.emptyButtonText}>Create Task</Text>
+              <Text style={styles.emptyButtonText}>Create task</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.taskList}>
-            {recentTasks.map((task) => (
-              <TaskPreview key={task.id} task={task} colors={colors} />
+            {todaysTasks.map((task) => (
+              <TaskPreview
+                key={task.id}
+                task={task}
+                colors={colors}
+                onPress={() => router.push(`/tasks/${task.id}`)}
+              />
             ))}
           </View>
         )}
+
+        <View style={styles.quickActionsHeader}>
+          <Text style={styles.sectionTitle}>Quick actions</Text>
+        </View>
 
         <View style={styles.quickActions}>
           <AppButton
@@ -204,7 +277,7 @@ export default function DashboardScreen() {
           />
 
           <AppButton
-            title="Bulk Upload"
+            title="Bulk import"
             variant="secondary"
             onPress={() => router.push("/bulk-upload")}
           />
@@ -212,9 +285,9 @@ export default function DashboardScreen() {
 
         <Pressable
           onPress={() => router.push("/tasks/form")}
-          style={styles.addButton}
+          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
         >
-          <Text style={styles.addButtonText}>+ Add Task</Text>
+          <Text style={styles.addButtonText}>+ Add new task</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -229,26 +302,41 @@ function createStyles(colors: ThemeColors) {
     },
 
     content: {
-      padding: spacing.xl,
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.lg,
       paddingBottom: spacing.xxxl,
     },
 
     header: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-start",
       justifyContent: "space-between",
       marginBottom: spacing.xxl,
     },
 
+    headerText: {
+      flex: 1,
+      marginRight: spacing.lg,
+    },
+
+    greeting: {
+      fontSize: typography.sm,
+      fontWeight: "600",
+      color: colors.mutedForeground,
+      marginBottom: spacing.xs,
+    },
+
     title: {
-      fontSize: typography.xxxl,
+      fontSize: typography.xxl,
+      lineHeight: 30,
       fontWeight: "700",
       color: colors.foreground,
     },
 
     subtitle: {
-      marginTop: spacing.xs,
+      marginTop: spacing.sm,
       fontSize: typography.sm,
+      lineHeight: 20,
       color: colors.mutedForeground,
     },
 
@@ -258,12 +346,13 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
+      backgroundColor: colors.card,
       alignItems: "center",
       justifyContent: "center",
     },
 
     settingsIcon: {
-      fontSize: 20,
+      fontSize: 19,
       color: colors.foreground,
     },
 
@@ -276,10 +365,10 @@ function createStyles(colors: ThemeColors) {
 
     statCard: {
       width: "47%",
-      minHeight: 110,
+      minHeight: 96,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 16,
       padding: spacing.lg,
       justifyContent: "space-between",
       backgroundColor: colors.card,
@@ -292,7 +381,8 @@ function createStyles(colors: ThemeColors) {
     },
 
     statLabel: {
-      fontSize: typography.sm,
+      fontSize: typography.xs,
+      fontWeight: "500",
       color: colors.mutedForeground,
     },
 
@@ -303,7 +393,7 @@ function createStyles(colors: ThemeColors) {
     },
 
     overdueStatLabel: {
-      fontSize: typography.sm,
+      fontSize: typography.xs,
       fontWeight: "600",
       color: colors.destructive,
     },
@@ -316,9 +406,15 @@ function createStyles(colors: ThemeColors) {
     },
 
     sectionTitle: {
-      fontSize: typography.xl,
-      fontWeight: "600",
+      fontSize: typography.lg,
+      fontWeight: "700",
       color: colors.foreground,
+    },
+
+    sectionSubtitle: {
+      marginTop: spacing.xs,
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
     },
 
     viewAll: {
@@ -328,25 +424,38 @@ function createStyles(colors: ThemeColors) {
     },
 
     taskList: {
-      gap: spacing.md,
+      gap: spacing.sm,
     },
 
     taskCard: {
-      minHeight: 90,
+      minHeight: 78,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 14,
-      padding: spacing.lg,
+      padding: spacing.md,
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
       backgroundColor: colors.card,
+    },
+
+    statusDot: {
+      width: 9,
+      height: 9,
+      borderRadius: 999,
+      marginRight: spacing.md,
+    },
+
+    pendingStatusDot: {
+      backgroundColor: colors.foreground,
+    },
+
+    completedStatusDot: {
+      backgroundColor: colors.success,
     },
 
     taskContent: {
       flex: 1,
       marginRight: spacing.md,
-      gap: spacing.xs,
     },
 
     taskTitle: {
@@ -360,18 +469,21 @@ function createStyles(colors: ThemeColors) {
       color: colors.mutedForeground,
     },
 
-    taskCategory: {
-      fontSize: typography.sm,
-      color: colors.mutedForeground,
-    },
-
-    taskDate: {
+    taskMeta: {
+      marginTop: spacing.xs,
       fontSize: typography.xs,
       color: colors.mutedForeground,
     },
 
+    overdueText: {
+      marginTop: spacing.xs,
+      fontSize: typography.xs,
+      fontWeight: "600",
+      color: colors.destructive,
+    },
+
     priorityBadge: {
-      minWidth: 70,
+      minWidth: 68,
       paddingVertical: spacing.xs,
       paddingHorizontal: spacing.sm,
       borderRadius: 999,
@@ -410,27 +522,46 @@ function createStyles(colors: ThemeColors) {
     emptyCard: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 16,
       padding: spacing.xxl,
       alignItems: "center",
+      backgroundColor: colors.card,
+    },
+
+    emptyIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: spacing.md,
+    },
+
+    emptyIconText: {
+      fontSize: typography.lg,
+      fontWeight: "700",
+      color: colors.foreground,
     },
 
     emptyTitle: {
       fontSize: typography.lg,
-      fontWeight: "600",
+      fontWeight: "700",
       color: colors.foreground,
     },
 
     emptyText: {
       marginTop: spacing.sm,
+      maxWidth: 280,
       textAlign: "center",
       fontSize: typography.sm,
+      lineHeight: 20,
       color: colors.mutedForeground,
     },
 
     emptyButton: {
       marginTop: spacing.lg,
-      minHeight: 44,
+      minHeight: 42,
       borderRadius: 10,
       paddingHorizontal: spacing.xl,
       alignItems: "center",
@@ -444,9 +575,15 @@ function createStyles(colors: ThemeColors) {
       color: colors.primaryForeground,
     },
 
-    stateContainer: {
-      padding: spacing.xxl,
+    stateCard: {
+      minHeight: 78,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
       alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.lg,
+      backgroundColor: colors.card,
     },
 
     stateText: {
@@ -459,15 +596,20 @@ function createStyles(colors: ThemeColors) {
       color: colors.destructive,
     },
 
+    quickActionsHeader: {
+      marginTop: spacing.xxxl,
+      marginBottom: spacing.md,
+    },
+
     quickActions: {
+      flexDirection: "row",
       gap: spacing.md,
-      marginTop: spacing.xxl,
     },
 
     addButton: {
-      marginTop: spacing.xxl,
+      marginTop: spacing.md,
       minHeight: 52,
-      borderRadius: 12,
+      borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.primary,
@@ -475,8 +617,12 @@ function createStyles(colors: ThemeColors) {
 
     addButtonText: {
       fontSize: typography.md,
-      fontWeight: "600",
+      fontWeight: "700",
       color: colors.primaryForeground,
+    },
+
+    pressed: {
+      opacity: 0.8,
     },
   });
 }
