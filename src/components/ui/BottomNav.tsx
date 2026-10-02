@@ -36,6 +36,14 @@ export function BottomNav() {
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors, isDark);
 
+  // Detail and form screens use the full screen so their actions are never
+  // covered by the floating tab bar.
+  const isTaskSubscreen = pathname.startsWith("/tasks/");
+
+  if (isTaskSubscreen) {
+    return null;
+  }
+
   return (
     <View
       pointerEvents="box-none"
