@@ -365,7 +365,7 @@ export default function DashboardScreen() {
         ) : todaysTasks.length === 0 ? (
           <View style={styles.emptyCard}>
             <Image
-              source={require("../../assets/dashboard/empty-tasks.png")}
+              source={require("../../../assets/dashboard/empty-tasks.png")}
               style={styles.emptyImage}
               resizeMode="contain"
             />
