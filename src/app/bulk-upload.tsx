@@ -48,6 +48,21 @@ function validateCsvHeaders(fields: string[] | undefined): string[] {
   return [];
 }
 
+function isValidDate(value: string): boolean {
+  const trimmedValue = value.trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+    return false;
+  }
+
+  const date = new Date(`${trimmedValue}T00:00:00Z`);
+
+  return (
+    !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) === trimmedValue
+  );
+}
+
 function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
   const errors: string[] = [];
 
@@ -72,16 +87,27 @@ function validateCsvRow(row: CsvTaskRow, rowNumber: number): string[] {
 
   if (!row.start_date?.trim()) {
     errors.push(`Row ${rowNumber}: Start date is required`);
+  } else if (!isValidDate(row.start_date)) {
+    errors.push(
+      `Row ${rowNumber}: Start date must use YYYY-MM-DD and be a valid date`,
+    );
   }
 
   if (!row.due_date?.trim()) {
     errors.push(`Row ${rowNumber}: Due date is required`);
+  } else if (!isValidDate(row.due_date)) {
+    errors.push(
+      `Row ${rowNumber}: Due date must use YYYY-MM-DD and be a valid date`,
+    );
   }
 
   if (
     row.start_date &&
     row.due_date &&
-    new Date(row.due_date) < new Date(row.start_date)
+    isValidDate(row.start_date) &&
+    isValidDate(row.due_date) &&
+    new Date(`${row.due_date.trim()}T00:00:00Z`) <
+      new Date(`${row.start_date.trim()}T00:00:00Z`)
   ) {
     errors.push(`Row ${rowNumber}: Due date cannot be earlier than start date`);
   }
