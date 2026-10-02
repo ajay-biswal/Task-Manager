@@ -2,7 +2,8 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { AppButton } from "@/components/ui/AppButton";
+import { AppIcon } from "@/components/ui/AppIcon";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
@@ -62,14 +63,24 @@ function TaskPreview({
       onPress={onPress}
       style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
     >
-      <View
-        style={[
-          styles.statusDot,
-          task.status === "COMPLETED"
-            ? styles.completedStatusDot
-            : styles.pendingStatusDot,
-        ]}
-      />
+      <View style={styles.taskStatus}>
+        <View
+          style={[
+            styles.statusCircle,
+            task.status === "COMPLETED"
+              ? styles.completedCircle
+              : styles.pendingCircle,
+          ]}
+        >
+          {task.status === "COMPLETED" ? (
+            <AppIcon
+              name={{ ios: "checkmark", android: "check", web: "check" }}
+              size={13}
+              color="#FFFFFF"
+            />
+          ) : null}
+        </View>
+      </View>
 
       <View style={styles.taskContent}>
         <Text
@@ -84,9 +95,8 @@ function TaskPreview({
 
         <Text style={styles.taskMeta} numberOfLines={1}>
           {task.category} · {formatDate(task.dueDate)}
+          {overdue ? " · Overdue" : ""}
         </Text>
-
-        {overdue ? <Text style={styles.overdueText}>Overdue</Text> : null}
       </View>
 
       <View
@@ -101,13 +111,83 @@ function TaskPreview({
           style={[
             styles.priorityText,
             task.priority === "HIGH" && styles.highPriorityText,
-            task.priority === "MEDIUM" && styles.mediumPriorityText,
-            task.priority === "LOW" && styles.lowPriorityText,
           ]}
         >
-          {task.priority}
+          {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
         </Text>
       </View>
+    </Pressable>
+  );
+}
+
+function StatCard({
+  value,
+  label,
+  icon,
+  iconBackground,
+  iconColor,
+  colors,
+}: {
+  value: number;
+  label: string;
+  icon: { ios: string; android: string; web: string };
+  iconBackground: string;
+  iconColor: string;
+  colors: ThemeColors;
+}) {
+  const styles = createStyles(colors);
+
+  return (
+    <View style={styles.statCard}>
+      <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
+        <AppIcon name={icon} size={18} color={iconColor} />
+      </View>
+
+      <View>
+        <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </View>
+    </View>
+  );
+}
+
+function QuickAction({
+  title,
+  icon,
+  onPress,
+  primary = false,
+  colors,
+}: {
+  title: string;
+  icon: { ios: string; android: string; web: string };
+  onPress: () => void;
+  primary?: boolean;
+  colors: ThemeColors;
+}) {
+  const styles = createStyles(colors);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.quickAction,
+        primary && styles.primaryQuickAction,
+        pressed && styles.pressed,
+      ]}
+    >
+      <AppIcon
+        name={icon}
+        size={17}
+        color={primary ? "#FFFFFF" : colors.foreground}
+      />
+      <Text
+        style={[
+          styles.quickActionText,
+          primary && styles.primaryQuickActionText,
+        ]}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 }
@@ -129,7 +209,6 @@ export default function DashboardScreen() {
     (task) => task.status === "COMPLETED",
   ).length;
   const pendingTasks = tasks.filter((task) => task.status === "PENDING").length;
-  const todayTasks = tasks.filter((task) => isToday(task.dueDate)).length;
   const overdueTasks = tasks.filter((task) => isTaskOverdue(task)).length;
 
   const todaysTasks = useMemo(
@@ -145,7 +224,7 @@ export default function DashboardScreen() {
 
           return priorityOrder[a.priority] - priorityOrder[b.priority];
         })
-        .slice(0, 4),
+        .slice(0, 3),
     [tasks],
   );
 
@@ -158,10 +237,7 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.title}>Your tasks, organized.</Text>
-            <Text style={styles.subtitle}>
-              Stay focused and keep your day moving.
-            </Text>
+            <Text style={styles.title}>Here’s your task overview</Text>
           </View>
 
           <Pressable
@@ -173,44 +249,57 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityLabel="Open settings"
           >
-            <Text style={styles.settingsIcon}>⚙</Text>
+            <AppIcon
+              name={{ ios: "gearshape", android: "settings", web: "settings" }}
+              size={20}
+              color={colors.foreground}
+            />
           </Pressable>
         </View>
 
         <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{totalTasks}</Text>
-            <Text style={styles.statLabel}>Total tasks</Text>
-          </View>
+          <StatCard
+            value={totalTasks}
+            label="Total Tasks"
+            icon={{ ios: "square.stack.3d.up.fill", android: "inventory_2", web: "inventory_2" }}
+            iconBackground={colors.accent + "18"}
+            iconColor={colors.accent}
+            colors={colors}
+          />
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{pendingTasks}</Text>
-            <Text style={styles.statLabel}>Pending</Text>
-          </View>
+          <StatCard
+            value={pendingTasks}
+            label="Pending"
+            icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
+            iconBackground="#F59E0B20"
+            iconColor="#D97706"
+            colors={colors}
+          />
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{completedTasks}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
+          <StatCard
+            value={completedTasks}
+            label="Completed"
+            icon={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
+            iconBackground="#22C55E20"
+            iconColor="#16A34A"
+            colors={colors}
+          />
 
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{todayTasks}</Text>
-            <Text style={styles.statLabel}>Due today</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.overdueStatValue}>{overdueTasks}</Text>
-            <Text style={styles.overdueStatLabel}>Overdue</Text>
-          </View>
+          <StatCard
+            value={overdueTasks}
+            label="Overdue"
+            icon={{ ios: "exclamationmark.circle.fill", android: "error", web: "error" }}
+            iconBackground="#EF444420"
+            iconColor={colors.destructive}
+            colors={colors}
+          />
         </View>
 
         <View style={styles.sectionHeader}>
           <View>
             <Text style={styles.sectionTitle}>Today’s tasks</Text>
             <Text style={styles.sectionSubtitle}>
-              {todayTasks === 0
-                ? "Nothing due today"
-                : `${todayTasks} task${todayTasks === 1 ? "" : "s"} due today`}
+              {todaysTasks.length} task{todaysTasks.length === 1 ? "" : "s"}
             </Text>
           </View>
 
@@ -233,7 +322,11 @@ export default function DashboardScreen() {
         ) : todaysTasks.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Text style={styles.emptyIconText}>✓</Text>
+              <AppIcon
+                name={{ ios: "checkmark", android: "check", web: "check" }}
+                size={22}
+                color={colors.accent}
+              />
             </View>
 
             <Text style={styles.emptyTitle}>You’re all caught up</Text>
@@ -241,16 +334,6 @@ export default function DashboardScreen() {
             <Text style={styles.emptyText}>
               No tasks are due today. Add one whenever you’re ready.
             </Text>
-
-            <Pressable
-              onPress={() => router.push("/tasks/form")}
-              style={({ pressed }) => [
-                styles.emptyButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.emptyButtonText}>Create task</Text>
-            </Pressable>
           </View>
         ) : (
           <View style={styles.taskList}>
@@ -269,31 +352,39 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Quick actions</Text>
         </View>
 
-        <View style={styles.quickActions}>
-          <View style={styles.quickActionButton}>
-            <AppButton
-              title="Calendar"
-              variant="secondary"
-              onPress={() => router.push("/calendar")}
-            />
-          </View>
+        <View style={styles.quickActionsGrid}>
+          <QuickAction
+            title="New Task"
+            icon={{ ios: "plus", android: "add", web: "add" }}
+            primary
+            onPress={() => router.push("/tasks/form")}
+            colors={colors}
+          />
 
-          <View style={styles.quickActionButton}>
-            <AppButton
-              title="Bulk import"
-              variant="secondary"
-              onPress={() => router.push("/bulk-upload")}
-            />
-          </View>
+          <QuickAction
+            title="Calendar"
+            icon={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }}
+            onPress={() => router.push("/calendar")}
+            colors={colors}
+          />
+
+          <QuickAction
+            title="Bulk Import"
+            icon={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
+            onPress={() => router.push("/bulk-upload")}
+            colors={colors}
+          />
+
+          <QuickAction
+            title="Export"
+            icon={{ ios: "square.and.arrow.up", android: "file_download", web: "file_download" }}
+            onPress={() => router.push("/settings")}
+            colors={colors}
+          />
         </View>
-
-        <Pressable
-          onPress={() => router.push("/tasks/form")}
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
-        >
-          <Text style={styles.addButtonText}>+ Add new task</Text>
-        </Pressable>
       </ScrollView>
+
+      <BottomNav />
     </View>
   );
 }
@@ -306,47 +397,38 @@ function createStyles(colors: ThemeColors) {
     },
 
     content: {
-      paddingHorizontal: spacing.xl,
+      paddingHorizontal: spacing.lg,
       paddingTop: spacing.lg,
-      paddingBottom: spacing.xxxl,
+      paddingBottom: spacing.xl,
     },
 
     header: {
       flexDirection: "row",
-      alignItems: "flex-start",
+      alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: spacing.xxl,
+      marginBottom: spacing.xl,
     },
 
     headerText: {
       flex: 1,
-      marginRight: spacing.lg,
+      marginRight: spacing.md,
     },
 
     greeting: {
-      fontSize: typography.sm,
-      fontWeight: "600",
-      color: colors.mutedForeground,
-      marginBottom: spacing.xs,
-    },
-
-    title: {
-      fontSize: typography.xxl,
-      lineHeight: 30,
+      fontSize: typography.lg,
       fontWeight: "700",
       color: colors.foreground,
     },
 
-    subtitle: {
-      marginTop: spacing.sm,
-      fontSize: typography.sm,
-      lineHeight: 20,
+    title: {
+      marginTop: spacing.xs,
+      fontSize: typography.xs,
       color: colors.mutedForeground,
     },
 
     settingsButton: {
-      width: 44,
-      height: 44,
+      width: 40,
+      height: 40,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
@@ -355,76 +437,67 @@ function createStyles(colors: ThemeColors) {
       justifyContent: "center",
     },
 
-    settingsIcon: {
-      fontSize: 19,
-      color: colors.foreground,
-    },
-
     statsGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: spacing.md,
-      marginBottom: spacing.xxxl,
+      marginBottom: spacing.xxl,
     },
 
     statCard: {
       width: "47%",
-      minHeight: 96,
+      minHeight: 104,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 16,
-      padding: spacing.lg,
+      borderRadius: 14,
+      padding: spacing.md,
       justifyContent: "space-between",
       backgroundColor: colors.card,
     },
 
+    statIcon: {
+      width: 30,
+      height: 30,
+      borderRadius: 9,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
     statValue: {
-      fontSize: typography.xxl,
+      fontSize: typography.xl,
       fontWeight: "700",
       color: colors.foreground,
     },
 
     statLabel: {
+      marginTop: 1,
       fontSize: typography.xs,
-      fontWeight: "500",
       color: colors.mutedForeground,
-    },
-
-    overdueStatValue: {
-      fontSize: typography.xxl,
-      fontWeight: "700",
-      color: colors.destructive,
-    },
-
-    overdueStatLabel: {
-      fontSize: typography.xs,
-      fontWeight: "600",
-      color: colors.destructive,
     },
 
     sectionHeader: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-end",
       justifyContent: "space-between",
       marginBottom: spacing.md,
     },
 
     sectionTitle: {
-      fontSize: typography.lg,
+      fontSize: typography.md,
       fontWeight: "700",
       color: colors.foreground,
     },
 
     sectionSubtitle: {
-      marginTop: spacing.xs,
+      marginTop: 2,
       fontSize: typography.xs,
       color: colors.mutedForeground,
     },
 
     viewAll: {
-      fontSize: typography.sm,
-      fontWeight: "600",
-      color: colors.foreground,
+      fontSize: typography.xs,
+      fontWeight: "700",
+      color: colors.accent,
     },
 
     taskList: {
@@ -432,38 +505,49 @@ function createStyles(colors: ThemeColors) {
     },
 
     taskCard: {
-      minHeight: 78,
+      minHeight: 70,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
-      padding: spacing.md,
+      borderRadius: 12,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.card,
     },
 
-    statusDot: {
-      width: 9,
-      height: 9,
+    taskStatus: {
+      width: 30,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: spacing.sm,
+    },
+
+    statusCircle: {
+      width: 19,
+      height: 19,
       borderRadius: 999,
-      marginRight: spacing.md,
+      borderWidth: 1.5,
+      alignItems: "center",
+      justifyContent: "center",
     },
 
-    pendingStatusDot: {
-      backgroundColor: colors.foreground,
+    pendingCircle: {
+      borderColor: colors.mutedForeground,
     },
 
-    completedStatusDot: {
+    completedCircle: {
+      borderColor: colors.success,
       backgroundColor: colors.success,
     },
 
     taskContent: {
       flex: 1,
-      marginRight: spacing.md,
+      marginRight: spacing.sm,
     },
 
     taskTitle: {
-      fontSize: typography.md,
+      fontSize: typography.sm,
       fontWeight: "600",
       color: colors.foreground,
     },
@@ -474,23 +558,16 @@ function createStyles(colors: ThemeColors) {
     },
 
     taskMeta: {
-      marginTop: spacing.xs,
+      marginTop: 3,
       fontSize: typography.xs,
       color: colors.mutedForeground,
     },
 
-    overdueText: {
-      marginTop: spacing.xs,
-      fontSize: typography.xs,
-      fontWeight: "600",
-      color: colors.destructive,
-    },
-
     priorityBadge: {
-      minWidth: 68,
-      paddingVertical: spacing.xs,
+      minWidth: 56,
+      paddingVertical: 4,
       paddingHorizontal: spacing.sm,
-      borderRadius: 999,
+      borderRadius: 8,
       alignItems: "center",
     },
 
@@ -503,31 +580,24 @@ function createStyles(colors: ThemeColors) {
     },
 
     lowPriority: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.muted,
     },
 
     priorityText: {
-      fontSize: typography.xs,
-      fontWeight: "600",
+      fontSize: 10,
+      fontWeight: "700",
+      color: colors.foreground,
     },
 
     highPriorityText: {
       color: colors.primaryForeground,
     },
 
-    mediumPriorityText: {
-      color: colors.foreground,
-    },
-
-    lowPriorityText: {
-      color: colors.foreground,
-    },
-
     emptyCard: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 16,
-      padding: spacing.xxl,
+      borderRadius: 14,
+      padding: spacing.xl,
       alignItems: "center",
       backgroundColor: colors.card,
     },
@@ -536,54 +606,32 @@ function createStyles(colors: ThemeColors) {
       width: 42,
       height: 42,
       borderRadius: 21,
-      backgroundColor: colors.muted,
+      backgroundColor: colors.accent + "18",
       alignItems: "center",
       justifyContent: "center",
       marginBottom: spacing.md,
     },
 
-    emptyIconText: {
-      fontSize: typography.lg,
-      fontWeight: "700",
-      color: colors.foreground,
-    },
-
     emptyTitle: {
-      fontSize: typography.lg,
+      fontSize: typography.md,
       fontWeight: "700",
       color: colors.foreground,
     },
 
     emptyText: {
-      marginTop: spacing.sm,
-      maxWidth: 280,
+      marginTop: spacing.xs,
+      maxWidth: 260,
       textAlign: "center",
-      fontSize: typography.sm,
-      lineHeight: 20,
+      fontSize: typography.xs,
+      lineHeight: 18,
       color: colors.mutedForeground,
     },
 
-    emptyButton: {
-      marginTop: spacing.lg,
-      minHeight: 42,
-      borderRadius: 10,
-      paddingHorizontal: spacing.xl,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: colors.primary,
-    },
-
-    emptyButtonText: {
-      fontSize: typography.sm,
-      fontWeight: "600",
-      color: colors.primaryForeground,
-    },
-
     stateCard: {
-      minHeight: 78,
+      minHeight: 70,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
       padding: spacing.lg,
@@ -601,36 +649,46 @@ function createStyles(colors: ThemeColors) {
     },
 
     quickActionsHeader: {
-      marginTop: spacing.xxxl,
+      marginTop: spacing.xxl,
       marginBottom: spacing.md,
     },
 
-    quickActions: {
+    quickActionsGrid: {
       flexDirection: "row",
-      gap: spacing.md,
+      flexWrap: "wrap",
+      gap: spacing.sm,
     },
 
-    quickActionButton: {
-      flex: 1,
-    },
-
-    addButton: {
-      marginTop: spacing.md,
-      minHeight: 52,
-      borderRadius: 14,
+    quickAction: {
+      width: "48%",
+      minHeight: 46,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      backgroundColor: colors.card,
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.primary,
+      gap: spacing.sm,
     },
 
-    addButtonText: {
-      fontSize: typography.md,
-      fontWeight: "700",
-      color: colors.primaryForeground,
+    primaryQuickAction: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accent,
+    },
+
+    quickActionText: {
+      fontSize: typography.xs,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
+
+    primaryQuickActionText: {
+      color: "#FFFFFF",
     },
 
     pressed: {
-      opacity: 0.8,
+      opacity: 0.75,
     },
   });
 }
