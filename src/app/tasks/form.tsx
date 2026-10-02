@@ -75,7 +75,11 @@ function FieldLabel({
   children: string;
   colors: ThemeColors;
 }) {
-  return <Text style={[styles.label, { color: colors.foreground }]}>{children}</Text>;
+  return (
+    <Text style={{ fontSize: typography.xs, fontWeight: "600", color: colors.foreground }}>
+      {children}
+    </Text>
+  );
 }
 
 export default function TaskFormScreen() {
@@ -87,6 +91,7 @@ export default function TaskFormScreen() {
 
   const { addTask, editTask, findTask } = useTasks();
   const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [form, setForm] = useState<TaskFormData>(initialForm);
   const [errors, setErrors] = useState<TaskValidationErrors>({});
