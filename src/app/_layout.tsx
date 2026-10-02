@@ -29,6 +29,7 @@ function AppNavigator() {
         name="index"
         options={{
           headerShown: false,
+          animation: "none",
         }}
       />
 
@@ -50,6 +51,7 @@ function AppNavigator() {
         name="calendar"
         options={{
           headerShown: false,
+          animation: "none",
         }}
       />
 
@@ -57,6 +59,7 @@ function AppNavigator() {
         name="settings"
         options={{
           headerShown: false,
+          animation: "none",
         }}
       />
 
