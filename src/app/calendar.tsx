@@ -132,62 +132,64 @@ export default function CalendarScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Calendar</Text>
-          <Text style={styles.subtitle}>View and manage your tasks by date.</Text>
-        </View>
+          <View style={styles.controls}>
+            <Pressable
+              onPress={goToToday}
+              style={({ pressed }) => [
+                styles.todayButton,
+                pressed && styles.pressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Go to today"
+            >
+              <Text style={styles.todayText}>Today</Text>
+            </Pressable>
 
-        <View style={styles.controls}>
-          <Pressable
-            onPress={goToToday}
-            style={({ pressed }) => [
-              styles.todayButton,
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Go to today"
-          >
-            <Text style={styles.todayText}>Today</Text>
-          </Pressable>
+            <Pressable
+              onPress={() => changeMonth(-1)}
+              style={({ pressed }) => [
+                styles.controlButton,
+                pressed && styles.pressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Previous month"
+            >
+              <AppIcon
+                name={{
+                  ios: "chevron.left",
+                  android: "chevron_left",
+                  web: "chevron_left",
+                }}
+                size={21}
+                color={colors.mutedForeground}
+              />
+            </Pressable>
 
-          <Pressable
-            onPress={() => changeMonth(-1)}
-            style={({ pressed }) => [
-              styles.controlButton,
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Previous month"
-          >
-            <AppIcon
-              name={{
-                ios: "chevron.left",
-                android: "chevron_left",
-                web: "chevron_left",
-              }}
-              size={21}
-              color={colors.mutedForeground}
-            />
-          </Pressable>
+            <Pressable
+              onPress={() => changeMonth(1)}
+              style={({ pressed }) => [
+                styles.controlButton,
+                pressed && styles.pressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Next month"
+            >
+              <AppIcon
+                name={{
+                  ios: "chevron.right",
+                  android: "chevron_right",
+                  web: "chevron_right",
+                }}
+                size={21}
+                color={colors.mutedForeground}
+              />
+            </Pressable>
+          </View>
 
-          <Pressable
-            onPress={() => changeMonth(1)}
-            style={({ pressed }) => [
-              styles.controlButton,
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Next month"
-          >
-            <AppIcon
-              name={{
-                ios: "chevron.right",
-                android: "chevron_right",
-                web: "chevron_right",
-              }}
-              size={21}
-              color={colors.mutedForeground}
-            />
-          </Pressable>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Calendar</Text>
+            <Text style={styles.subtitle}>View and manage your tasks by date.</Text>
+          </View>
         </View>
 
         <View style={styles.calendarCard}>
@@ -396,8 +398,11 @@ function createStyles(colors: ThemeColors) {
     },
     header: {
       position: "relative",
-      minHeight: 100,
+      minHeight: 132,
       marginBottom: 18,
+    },
+    headerText: {
+      paddingTop: 72,
     },
     title: {
       maxWidth: 210,
