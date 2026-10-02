@@ -39,71 +39,140 @@ export function BottomNav() {
 
   return (
     <View
+      pointerEvents="box-none"
       style={[
         styles.wrapper,
-        { paddingBottom: Math.max(insets.bottom, spacing.sm) },
+        { paddingBottom: Math.max(insets.bottom, 10) },
       ]}
     >
-      {ITEMS.map((item) => {
-        const active =
-          item.route === "/"
-            ? pathname === "/"
-            : pathname === item.route || pathname.startsWith(`${item.route}/`);
+      <View style={styles.navBar}>
+        {ITEMS.slice(0, 2).map((item) => renderItem(item))}
+        <View style={styles.centerSlot} />
+        {ITEMS.slice(2).map((item) => renderItem(item))}
 
-        return (
-          <Pressable
-            key={item.route}
-            onPress={() => router.replace(item.route)}
-            style={({ pressed }) => [
-              styles.item,
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${item.label}`}
-          >
-            <AppIcon
-              name={item.icon}
-              size={21}
-              color={active ? colors.accent : colors.mutedForeground}
-            />
-            <Text style={[styles.label, active && styles.activeLabel]}>
-              {item.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+        <Pressable
+          onPress={() => router.push("/tasks/form")}
+          style={({ pressed }) => [
+            styles.fab,
+            pressed && styles.pressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Create new task"
+        >
+          <AppIcon
+            name={{ ios: "plus", android: "add", web: "add" }}
+            size={34}
+            color="#FFFFFF"
+          />
+        </Pressable>
+      </View>
     </View>
   );
+
+  function renderItem(item: (typeof ITEMS)[number]) {
+    const active =
+      item.route === "/"
+        ? pathname === "/"
+        : pathname === item.route || pathname.startsWith(`${item.route}/`);
+
+    return (
+      <Pressable
+        key={item.route}
+        onPress={() => router.replace(item.route)}
+        style={({ pressed }) => [
+          styles.item,
+          pressed && styles.pressed,
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${item.label}`}
+      >
+        <AppIcon
+          name={item.icon}
+          size={27}
+          color={active ? colors.accent : colors.mutedForeground}
+        />
+        <Text style={[styles.label, active && styles.activeLabel]}>
+          {item.label}
+        </Text>
+      </Pressable>
+    );
+  }
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrapper: {
-      flexDirection: "row",
-      paddingTop: spacing.sm,
-      paddingHorizontal: spacing.md,
-      backgroundColor: colors.card,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
+      position: "absolute",
+      left: 20,
+      right: 20,
+      bottom: 0,
+      alignItems: "center",
     },
+
+    navBar: {
+      width: "100%",
+      minHeight: 83,
+      paddingHorizontal: 12,
+      paddingTop: 10,
+      borderRadius: 42,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      flexDirection: "row",
+      alignItems: "center",
+      shadowColor: "#000000",
+      shadowOpacity: 0.08,
+      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 8,
+    },
+
     item: {
       flex: 1,
+      height: 66,
       alignItems: "center",
       justifyContent: "center",
-      minHeight: 48,
-      gap: 3,
+      gap: 5,
     },
+
+    centerSlot: {
+      width: 82,
+    },
+
     label: {
-      fontSize: typography.xs,
-      fontWeight: "500",
+      fontSize: 16,
+      lineHeight: 20,
+      fontWeight: "600",
       color: colors.mutedForeground,
     },
+
     activeLabel: {
       color: colors.accent,
       fontWeight: "700",
     },
+
+    fab: {
+      position: "absolute",
+      left: "50%",
+      top: -30,
+      marginLeft: -41,
+      width: 82,
+      height: 82,
+      borderRadius: 41,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.accent,
+      borderWidth: 8,
+      borderColor: colors.card,
+      shadowColor: colors.accent,
+      shadowOpacity: 0.28,
+      shadowRadius: 15,
+      shadowOffset: { width: 0, height: 7 },
+      elevation: 10,
+    },
+
     pressed: {
-      opacity: 0.7,
+      opacity: 0.75,
     },
   });
 }
