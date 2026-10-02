@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -19,7 +20,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
-import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { TaskFormData, TaskPriority, TaskStatus } from "@/types/task";
 import { createTaskFromForm } from "@/utils/taskUtils";
@@ -28,6 +28,14 @@ import { type TaskValidationErrors, validateTask } from "@/utils/validation";
 const categoryOptions = ["Work", "Personal", "Study", "Health", "Other"];
 const statusOptions: TaskStatus[] = ["PENDING", "COMPLETED"];
 const priorities: TaskPriority[] = ["LOW", "MEDIUM", "HIGH"];
+
+const categoryIcons = {
+  Work: { ios: "briefcase.fill", android: "business_center", web: "business_center" },
+  Personal: { ios: "house.fill", android: "home", web: "home" },
+  Study: { ios: "graduationcap.fill", android: "school", web: "school" },
+  Health: { ios: "heart.fill", android: "favorite", web: "favorite" },
+  Other: { ios: "ellipsis", android: "more_horiz", web: "more_horiz" },
+} as const;
 
 const initialForm: TaskFormData = {
   title: "",
@@ -40,9 +48,7 @@ const initialForm: TaskFormData = {
 };
 
 function parseDate(value: string): Date {
-  if (!value) {
-    return new Date();
-  }
+  if (!value) return new Date();
 
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
@@ -52,14 +58,11 @@ function toISODate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  return \`${year}-${month}-${day}\`;
 }
 
 function formatDate(value: string): string {
-  if (!value) {
-    return "Select date";
-  }
+  if (!value) return "Select date";
 
   return parseDate(value).toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -71,17 +74,23 @@ function formatDate(value: string): string {
 function FieldLabel({
   children,
   colors,
+  required = false,
 }: {
   children: string;
   colors: ThemeColors;
+  required?: boolean;
 }) {
-  return <Text style={[styles.label, { color: colors.foreground }]}>{children}</Text>;
+  return (
+    <Text style={[styles.label, { color: colors.foreground }]}>
+      {children}
+      {required ? <Text style={{ color: colors.destructive }}> *</Text> : null}
+    </Text>
+  );
 }
 
 export default function TaskFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
   const params = useLocalSearchParams<{ id?: string }>();
   const taskId = typeof params.id === "string" ? params.id : undefined;
 
@@ -93,14 +102,13 @@ export default function TaskFormScreen() {
   const [loadingTask, setLoadingTask] = useState(Boolean(taskId));
   const [saving, setSaving] = useState(false);
   const [dateField, setDateField] = useState<"startDate" | "dueDate" | null>(null);
-  const [selectField, setSelectField] = useState<"category" | "status" | null>(null);
+  const [selectField, setSelectField] = useState<"status" | null>(null);
+  const [timeEnabled, setTimeEnabled] = useState(false);
 
   const isEditMode = Boolean(taskId);
 
   useEffect(() => {
-    if (!taskId) {
-      return;
-    }
+    if (!taskId) return;
 
     const id = taskId;
     let active = true;
@@ -109,9 +117,7 @@ export default function TaskFormScreen() {
       try {
         const task = await findTask(id);
 
-        if (!active) {
-          return;
-        }
+        if (!active) return;
 
         if (!task) {
           router.back();
@@ -129,14 +135,9 @@ export default function TaskFormScreen() {
         });
       } catch (error) {
         console.error("Failed to load task:", error);
-
-        if (active) {
-          router.back();
-        }
+        if (active) router.back();
       } finally {
-        if (active) {
-          setLoadingTask(false);
-        }
+        if (active) setLoadingTask(false);
       }
     }
 
@@ -159,9 +160,7 @@ export default function TaskFormScreen() {
     const validationErrors = validateTask(form);
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(validationErrors).length > 0) return;
 
     try {
       setSaving(true);
@@ -195,7 +194,7 @@ export default function TaskFormScreen() {
   if (loadingTask) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.foreground} />
+        <ActivityIndicator size="large" color={colors.accent} />
         <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
           Loading task...
         </Text>
@@ -211,52 +210,83 @@ export default function TaskFormScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + spacing.sm },
+          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.topBar}>
+        <View style={styles.header}>
           <Pressable
             onPress={() => router.back()}
             hitSlop={10}
-            style={styles.iconButton}
+            style={[
+              styles.backButton,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
             accessibilityRole="button"
-            accessibilityLabel="Close task form"
+            accessibilityLabel="Go back"
           >
             <AppIcon
-              name={{ ios: "xmark", android: "close", web: "close" }}
-              size={21}
+              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+              size={22}
               color={colors.foreground}
             />
           </Pressable>
 
-          <Text style={[styles.screenTitle, { color: colors.foreground }]}>
-            {isEditMode ? "Edit Task" : "New Task"}
-          </Text>
+          <View style={styles.headerText}>
+            <Text style={[styles.title, { color: colors.foreground }]}>
+              {isEditMode ? "Edit Task" : "New Task"}
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+              Add a task and keep things on track.
+            </Text>
+          </View>
 
-          <View style={styles.iconButton} />
+          <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.form}>
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.fieldCard,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <View style={styles.labelRow}>
-              <FieldLabel colors={colors}>Title</FieldLabel>
-              <Text style={[styles.counter, { color: colors.mutedForeground }]}>{form.title.length}/100</Text>
+              <FieldLabel colors={colors} required>
+                Title
+              </FieldLabel>
+              <Text style={[styles.counter, { color: colors.mutedForeground }]}>
+                {form.title.length}/100
+              </Text>
             </View>
-            <View style={[styles.inputShell, { backgroundColor: colors.card, borderColor: errors.title ? colors.destructive : colors.border }]}>
-              <AppIcon name={{ ios: "doc.text", android: "description", web: "description" }} size={20} color={colors.mutedForeground} />
+
+            <View
+              style={[
+                styles.inputShell,
+                {
+                  backgroundColor: colors.input,
+                  borderColor: errors.title ? colors.destructive : colors.border,
+                },
+              ]}
+            >
+              <AppIcon
+                name={{ ios: "doc.text", android: "description", web: "description" }}
+                size={20}
+                color={colors.mutedForeground}
+              />
               <TextInput
-              accessibilityLabel="Task title"
-              returnKeyType="next"
-              maxLength={100}
-              value={form.title}
-              onChangeText={(value) => updateField("title", value)}
-              placeholder="What needs to be done?"
-              placeholderTextColor={colors.mutedForeground}
-                style={[styles.input, { color: colors.foreground, backgroundColor: "transparent", borderWidth: 0, flex: 1 }]}
+                accessibilityLabel="Task title"
+                returnKeyType="next"
+                maxLength={100}
+                value={form.title}
+                onChangeText={(value) => updateField("title", value)}
+                placeholder="What needs to be done?"
+                placeholderTextColor={colors.mutedForeground}
+                style={[styles.input, { color: colors.foreground }]}
               />
             </View>
+
             {errors.title ? (
               <Text style={[styles.error, { color: colors.destructive }]}>
                 {errors.title}
@@ -264,54 +294,121 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.fieldCard,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <View style={styles.labelRow}>
               <FieldLabel colors={colors}>Description</FieldLabel>
-              <Text style={[styles.counter, { color: colors.mutedForeground }]}>{form.description.length}/500</Text>
+              <Text style={[styles.counter, { color: colors.mutedForeground }]}>
+                {form.description.length}/500
+              </Text>
             </View>
-            <View style={[styles.inputShell, styles.descriptionShell, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <AppIcon name={{ ios: "text.alignleft", android: "format_align_left", web: "format_align_left" }} size={20} color={colors.mutedForeground} />
+
+            <View
+              style={[
+                styles.descriptionShell,
+                { backgroundColor: colors.input, borderColor: colors.border },
+              ]}
+            >
+              <AppIcon
+                name={{
+                  ios: "text.alignleft",
+                  android: "format_align_left",
+                  web: "format_align_left",
+                }}
+                size={20}
+                color={colors.mutedForeground}
+              />
               <TextInput
-              accessibilityLabel="Task description"
-              returnKeyType="done"
-              maxLength={500}
-              value={form.description}
-              onChangeText={(value) => updateField("description", value)}
-              placeholder="Add some context (optional)..."
-              placeholderTextColor={colors.mutedForeground}
-              multiline
-              textAlignVertical="top"
-                style={[styles.input, styles.descriptionInput, { color: colors.foreground, backgroundColor: "transparent", borderWidth: 0, flex: 1 }]}
+                accessibilityLabel="Task description"
+                returnKeyType="done"
+                maxLength={500}
+                value={form.description}
+                onChangeText={(value) => updateField("description", value)}
+                placeholder="Add some context (optional)..."
+                placeholderTextColor={colors.mutedForeground}
+                multiline
+                textAlignVertical="top"
+                style={[styles.descriptionInput, { color: colors.foreground }]}
               />
             </View>
           </View>
 
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <FieldLabel colors={colors}>Category</FieldLabel>
-            <View style={styles.optionRow}>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryRow}
+            >
               {[
-                { label: "Work", icon: { ios: "briefcase.fill", android: "business_center", web: "business_center" } },
-                { label: "Personal", icon: { ios: "house.fill", android: "home", web: "home" } },
-                { label: "Study", icon: { ios: "graduationcap.fill", android: "school", web: "school" } },
-                { label: "Health", icon: { ios: "heart.fill", android: "favorite", web: "favorite" } },
-                { label: "Other", icon: { ios: "ellipsis", android: "more_horiz", web: "more_horiz" } },
-              ].map((item) => {
-                const selected = form.category === item.label;
+                ...categoryOptions,
+                ...(form.category && !categoryOptions.includes(form.category)
+                  ? [form.category]
+                  : []),
+              ].map((category) => {
+                const selected = form.category === category;
+                const icon =
+                  category in categoryIcons
+                    ? categoryIcons[category as keyof typeof categoryIcons]
+                    : categoryIcons.Other;
+
                 return (
                   <Pressable
-                    key={item.label}
-                    onPress={() => updateField("category", item.label)}
+                    key={category}
+                    onPress={() => updateField("category", category)}
                     accessibilityRole="radio"
-                    accessibilityLabel={item.label}
+                    accessibilityLabel={category}
                     accessibilityState={{ selected }}
-                    style={[styles.categoryOption, { backgroundColor: selected ? colors.accent + "16" : colors.muted, borderColor: selected ? colors.accent : colors.border }]}
+                    style={[
+                      styles.categoryOption,
+                      {
+                        backgroundColor: selected
+                          ? colors.accent + "12"
+                          : colors.muted,
+                        borderColor: selected ? colors.accent : colors.border,
+                      },
+                    ]}
                   >
-                    <AppIcon name={item.icon} size={20} color={selected ? colors.accent : colors.mutedForeground} />
-                    <Text style={[styles.optionText, { color: colors.foreground }]}>{item.label}</Text>
+                    <View
+                      style={[
+                        styles.categoryIcon,
+                        {
+                          backgroundColor: selected
+                            ? colors.accent + "18"
+                            : colors.background,
+                        },
+                      ]}
+                    >
+                      <AppIcon
+                        name={icon}
+                        size={19}
+                        color={selected ? colors.accent : colors.mutedForeground}
+                      />
+                    </View>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.categoryText,
+                        { color: colors.foreground },
+                      ]}
+                    >
+                      {category}
+                    </Text>
                   </Pressable>
                 );
               })}
-            </View>
+            </ScrollView>
+
             {errors.category ? (
               <Text style={[styles.error, { color: colors.destructive }]}>
                 {errors.category}
@@ -319,8 +416,14 @@ export default function TaskFormScreen() {
             ) : null}
           </View>
 
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <FieldLabel colors={colors}>Priority</FieldLabel>
+
             <View style={styles.priorityRow}>
               {priorities.map((priority) => {
                 const selected = form.priority === priority;
@@ -330,25 +433,52 @@ export default function TaskFormScreen() {
                     key={priority}
                     onPress={() => updateField("priority", priority)}
                     accessibilityRole="radio"
-                    accessibilityLabel={priority.charAt(0) + priority.slice(1).toLowerCase() + " priority"}
+                    accessibilityLabel={`${priority.toLowerCase()} priority`}
                     accessibilityState={{ selected }}
                     style={[
                       styles.priorityButton,
                       {
-                        backgroundColor: selected ? priorityColor(priority) + "18" : colors.muted,
-                        borderColor: selected ? priorityColor(priority) : colors.border,
+                        backgroundColor: selected
+                          ? priorityColor(priority) + "14"
+                          : colors.muted,
+                        borderColor: selected
+                          ? priorityColor(priority)
+                          : colors.border,
                       },
                     ]}
                   >
-                    <AppIcon
-                      name={priority === "LOW"
-                        ? { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" }
-                        : priority === "MEDIUM"
-                          ? { ios: "equal", android: "drag_handle", web: "drag_handle" }
-                          : { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" }}
-                      size={20}
-                      color={priorityColor(priority)}
-                    />
+                    <View
+                      style={[
+                        styles.priorityIcon,
+                        {
+                          backgroundColor: priorityColor(priority) + "14",
+                        },
+                      ]}
+                    >
+                      <AppIcon
+                        name={
+                          priority === "LOW"
+                            ? {
+                                ios: "arrow.down",
+                                android: "arrow_downward",
+                                web: "arrow_downward",
+                              }
+                            : priority === "MEDIUM"
+                              ? {
+                                  ios: "equal",
+                                  android: "drag_handle",
+                                  web: "drag_handle",
+                                }
+                              : {
+                                  ios: "arrow.up",
+                                  android: "arrow_upward",
+                                  web: "arrow_upward",
+                                }
+                        }
+                        size={18}
+                        color={priorityColor(priority)}
+                      />
+                    </View>
                     <Text style={[styles.priorityText, { color: colors.foreground }]}>
                       {priority.charAt(0) + priority.slice(1).toLowerCase()}
                     </Text>
@@ -356,17 +486,17 @@ export default function TaskFormScreen() {
                 );
               })}
             </View>
-            {errors.priority ? (
-              <Text style={[styles.error, { color: colors.destructive }]}>
-                {errors.priority}
-              </Text>
-            ) : null}
           </View>
 
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <FieldLabel colors={colors}>Schedule</FieldLabel>
 
-            <View style={styles.dateRow}>
+            <View style={styles.scheduleTopRow}>
               <DateField
                 label="Start date"
                 value={form.startDate}
@@ -383,19 +513,93 @@ export default function TaskFormScreen() {
                 error={errors.dueDate}
               />
             </View>
+
+            <View
+              style={[
+                styles.timeRow,
+                { backgroundColor: colors.input, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.timeInfo}>
+                <View
+                  style={[
+                    styles.timeIcon,
+                    { backgroundColor: colors.muted },
+                  ]}
+                >
+                  <AppIcon
+                    name={{ ios: "clock", android: "schedule", web: "schedule" }}
+                    size={18}
+                    color={colors.mutedForeground}
+                  />
+                </View>
+                <View>
+                  <Text style={[styles.timeTitle, { color: colors.foreground }]}>
+                    Set time
+                  </Text>
+                  <Text style={[styles.timeSubtitle, { color: colors.mutedForeground }]}>
+                    Optional
+                  </Text>
+                </View>
+              </View>
+
+              <Switch
+                value={timeEnabled}
+                onValueChange={setTimeEnabled}
+                trackColor={{
+                  false: colors.border,
+                  true: colors.accent + "66",
+                }}
+                thumbColor={timeEnabled ? colors.accent : colors.mutedForeground}
+                accessibilityLabel="Set task time"
+              />
+            </View>
+
             <Pressable
               disabled
-              style={[styles.scheduleRow, { backgroundColor: colors.muted, borderColor: colors.border }]}
+              style={[
+                styles.repeatRow,
+                { backgroundColor: colors.input, borderColor: colors.border },
+              ]}
             >
-              <AppIcon name={{ ios: "repeat", android: "sync", web: "sync" }} size={20} color={colors.mutedForeground} />
-              <Text style={[styles.scheduleTitle, { color: colors.foreground }]}>Repeat</Text>
-              <Text style={[styles.scheduleValue, { color: colors.mutedForeground }]}>Does not repeat</Text>
-              <AppIcon name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={18} color={colors.mutedForeground} />
+              <View
+                style={[
+                  styles.timeIcon,
+                  { backgroundColor: colors.muted },
+                ]}
+              >
+                <AppIcon
+                  name={{ ios: "repeat", android: "sync", web: "sync" }}
+                  size={18}
+                  color={colors.mutedForeground}
+                />
+              </View>
+              <Text style={[styles.repeatTitle, { color: colors.foreground }]}>
+                Repeat
+              </Text>
+              <Text style={[styles.repeatValue, { color: colors.mutedForeground }]}>
+                Does not repeat
+              </Text>
+              <AppIcon
+                name={{
+                  ios: "chevron.right",
+                  android: "chevron_right",
+                  web: "chevron_right",
+                }}
+                size={18}
+                color={colors.mutedForeground}
+              />
             </Pressable>
           </View>
 
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
             <FieldLabel colors={colors}>Status</FieldLabel>
+
             <SelectField
               value={form.status === "PENDING" ? "Pending" : "Completed"}
               colors={colors}
@@ -409,7 +613,7 @@ export default function TaskFormScreen() {
             accessibilityRole="button"
             accessibilityLabel={isEditMode ? "Update task" : "Create task"}
             style={({ pressed }) => [
-              styles.createButton,
+              styles.primaryButton,
               { backgroundColor: colors.accent },
               pressed && styles.pressed,
             ]}
@@ -420,10 +624,10 @@ export default function TaskFormScreen() {
               <>
                 <AppIcon
                   name={{ ios: "checkmark", android: "check", web: "check" }}
-                  size={20}
+                  size={21}
                   color="#FFFFFF"
                 />
-                <Text style={styles.createText}>
+                <Text style={styles.primaryButtonText}>
                   {isEditMode ? "Update Task" : "Create Task"}
                 </Text>
               </>
@@ -431,23 +635,41 @@ export default function TaskFormScreen() {
           </Pressable>
 
           <Pressable
-              onPress={() => router.push("/bulk-upload")}
-              disabled={saving}
-              accessibilityRole="button"
-              accessibilityLabel="Bulk upload tasks"
-              style={({ pressed }) => [
-                styles.bulkButton,
-                { backgroundColor: colors.card, borderColor: colors.border },
-                pressed && styles.pressed,
-              ]}
-            >
+            onPress={() => router.push("/bulk-upload")}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel="Bulk upload tasks"
+            style={({ pressed }) => [
+              styles.bulkRow,
+              { backgroundColor: colors.card, borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={[styles.bulkIcon, { backgroundColor: colors.accent + "12" }]}>
               <AppIcon
-                name={{ ios: "square.and.arrow.down", android: "upload_file", web: "upload_file" }}
+                name={{
+                  ios: "square.and.arrow.down",
+                  android: "upload_file",
+                  web: "upload_file",
+                }}
                 size={19}
                 color={colors.accent}
               />
-              <Text style={[styles.bulkText, { color: colors.accent }]}>Bulk Upload</Text>
-            </Pressable>
+            </View>
+            <View style={styles.bulkCopy}>
+              <Text style={[styles.bulkTitle, { color: colors.foreground }]}>
+                Bulk Upload
+              </Text>
+              <Text style={[styles.bulkSubtitle, { color: colors.mutedForeground }]}>
+                Import multiple tasks from CSV
+              </Text>
+            </View>
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={19}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
         </View>
       </ScrollView>
 
@@ -466,13 +688,13 @@ export default function TaskFormScreen() {
           >
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-                {selectField === "category" ? "Category" : "Status"}
+                Status
               </Text>
               <Pressable
                 onPress={() => setSelectField(null)}
                 hitSlop={10}
                 accessibilityRole="button"
-                accessibilityLabel={selectField === "category" ? "Close category selector" : "Close status selector"}
+                accessibilityLabel="Close status selector"
               >
                 <AppIcon
                   name={{ ios: "xmark", android: "close", web: "close" }}
@@ -482,60 +704,38 @@ export default function TaskFormScreen() {
               </Pressable>
             </View>
 
-            {(selectField === "category"
-              ? Array.from(
-                  new Set([
-                    ...categoryOptions,
-                    ...(form.category ? [form.category] : []),
-                  ]),
-                )
-              : statusOptions
-            ).map((option) => {
-                const display =
-                  option === "PENDING"
-                    ? "Pending"
-                    : option === "COMPLETED"
-                      ? "Completed"
-                      : option;
+            {statusOptions.map((option) => {
+              const display = option === "PENDING" ? "Pending" : "Completed";
+              const current = form.status === option;
 
-                const current =
-                  selectField === "category"
-                    ? form.category === option
-                    : form.status === option;
-
-                return (
-                  <Pressable
-                    key={option}
-                    onPress={() => {
-                      if (selectField === "category") {
-                        updateField("category", option);
-                      } else {
-                        updateField("status", option as TaskStatus);
-                      }
-                      setSelectField(null);
-                    }}
-                    accessibilityRole="radio"
-                    accessibilityLabel={display}
-                    accessibilityState={{ selected: current }}
-                    style={[
-                      styles.modalOption,
-                      current && { backgroundColor: colors.muted },
-                    ]}
-                  >
-                    <Text style={[styles.modalOptionText, { color: colors.foreground }]}>
-                      {display}
-                    </Text>
-                    {current ? (
-                      <AppIcon
-                        name={{ ios: "checkmark", android: "check", web: "check" }}
-                        size={18}
-                        color={colors.accent}
-                      />
-                    ) : null}
-                  </Pressable>
-                );
-              },
-            )}
+              return (
+                <Pressable
+                  key={option}
+                  onPress={() => {
+                    updateField("status", option);
+                    setSelectField(null);
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityLabel={display}
+                  accessibilityState={{ selected: current }}
+                  style={[
+                    styles.modalOption,
+                    current && { backgroundColor: colors.muted },
+                  ]}
+                >
+                  <Text style={[styles.modalOptionText, { color: colors.foreground }]}>
+                    {display}
+                  </Text>
+                  {current ? (
+                    <AppIcon
+                      name={{ ios: "checkmark", android: "check", web: "check" }}
+                      size={18}
+                      color={colors.accent}
+                    />
+                  ) : null}
+                </Pressable>
+              );
+            })}
           </View>
         </View>
       </Modal>
@@ -587,19 +787,33 @@ function SelectField({
       accessibilityLabel={value || placeholder || "Select option"}
       style={[
         styles.selectField,
-        { backgroundColor: colors.card, borderColor: colors.border },
+        { backgroundColor: colors.input, borderColor: colors.border },
       ]}
     >
-      <Text
-        style={[
-          styles.selectText,
-          { color: value ? colors.foreground : colors.mutedForeground },
-        ]}
-      >
-        {value || placeholder}
-      </Text>
+      <View style={styles.selectContent}>
+        <View style={[styles.selectIcon, { backgroundColor: colors.muted }]}>
+          <AppIcon
+            name={{ ios: "clock", android: "schedule", web: "schedule" }}
+            size={18}
+            color={colors.mutedForeground}
+          />
+        </View>
+        <Text
+          style={[
+            styles.selectText,
+            { color: value ? colors.foreground : colors.mutedForeground },
+          ]}
+        >
+          {value || placeholder}
+        </Text>
+      </View>
+
       <AppIcon
-        name={{ ios: "chevron.down", android: "keyboard_arrow_down", web: "keyboard_arrow_down" }}
+        name={{
+          ios: "chevron.down",
+          android: "keyboard_arrow_down",
+          web: "keyboard_arrow_down",
+        }}
         size={18}
         color={colors.mutedForeground}
       />
@@ -628,15 +842,18 @@ function DateField({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={label + ", " + (value ? formatDate(value) : "Select date")}
+        accessibilityLabel={`${label}, ${value ? formatDate(value) : "Select date"}`}
         style={[
           styles.dateField,
-          { backgroundColor: colors.card, borderColor: error ? colors.destructive : colors.border },
+          {
+            backgroundColor: colors.input,
+            borderColor: error ? colors.destructive : colors.border,
+          },
         ]}
       >
         <AppIcon
           name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }}
-          size={15}
+          size={17}
           color={colors.mutedForeground}
         />
         <Text
@@ -659,48 +876,74 @@ function DateField({
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
+  container: { flex: 1 },
+  content: { paddingHorizontal: 20 },
 
-  container: {
+  loadingContainer: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
   },
 
-  topBar: {
-    minHeight: 44,
+  loadingText: {
+    fontSize: 14,
+  },
+
+  header: {
+    minHeight: 72,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
+    marginBottom: 16,
   },
 
-  iconButton: {
-    width: 36,
-    height: 36,
+  backButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  screenTitle: {
-    fontSize: typography.md,
-    fontWeight: "700",
+  headerText: {
+    flex: 1,
+    marginLeft: 14,
+  },
+
+  headerSpacer: {
+    width: 46,
+  },
+
+  title: {
+    fontSize: 22,
+    lineHeight: 27,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+
+  subtitle: {
+    marginTop: 3,
+    fontSize: 13,
+    lineHeight: 18,
   },
 
   form: {
-    gap: spacing.md,
+    gap: 12,
   },
 
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-
-  sectionCard: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: 14,
+  fieldCard: {
+    padding: 14,
+    borderRadius: 17,
     borderWidth: 1,
+    gap: 9,
+  },
+
+  section: {
+    padding: 14,
+    borderRadius: 17,
+    borderWidth: 1,
+    gap: 11,
   },
 
   labelRow: {
@@ -709,252 +952,325 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  counter: {
-    fontSize: 10,
+  label: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700",
   },
 
-  label: {
-    fontSize: typography.xs,
-    fontWeight: "600",
+  counter: {
+    fontSize: 11,
+    fontWeight: "500",
   },
 
   inputShell: {
-    minHeight: 54,
+    minHeight: 55,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 13,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-  },
-
-  descriptionShell: {
-    alignItems: "flex-start",
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    gap: 10,
   },
 
   input: {
+    flex: 1,
     minHeight: 44,
+    paddingVertical: 9,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+
+  descriptionShell: {
+    minHeight: 105,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    fontSize: typography.xs,
+    paddingHorizontal: 13,
+    paddingTop: 13,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
   },
 
   descriptionInput: {
-    minHeight: 82,
-    paddingTop: spacing.sm,
+    flex: 1,
+    minHeight: 78,
+    paddingTop: 1,
+    paddingBottom: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "500",
   },
 
-  selectField: {
-    minHeight: 44,
+  categoryRow: {
+    gap: 8,
+    paddingRight: 4,
+  },
+
+  categoryOption: {
+    width: 70,
+    minHeight: 78,
+    borderRadius: 13,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 5,
+  },
+
+  categoryIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  categoryText: {
+    maxWidth: 62,
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: "700",
+  },
+
+  priorityRow: {
+    flexDirection: "row",
+    gap: 9,
+  },
+
+  priorityButton: {
+    flex: 1,
+    minHeight: 72,
+    borderRadius: 13,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  priorityIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  priorityText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "700",
+  },
+
+  scheduleTopRow: {
+    flexDirection: "row",
+    gap: 9,
+  },
+
+  dateFieldContainer: {
+    flex: 1,
+    gap: 6,
+  },
+
+  dateLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  dateField: {
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 11,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+
+  dateText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  timeRow: {
+    minHeight: 58,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 11,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
-  selectText: {
-    fontSize: typography.xs,
-  },
-
-  priorityRow: {
+  timeInfo: {
     flexDirection: "row",
-    gap: spacing.xs,
+    alignItems: "center",
+    gap: 10,
   },
 
-  priorityButton: {
-    flex: 1,
-    minHeight: 74,
-    borderWidth: 1,
-    borderRadius: 10,
+  timeIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
   },
 
-  optionRow: {
-    flexDirection: "row",
-    gap: 6,
+  timeTitle: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 
-  categoryOption: {
-    flex: 1,
-    minHeight: 76,
+  timeSubtitle: {
+    marginTop: 1,
+    fontSize: 10,
+  },
+
+  repeatRow: {
+    minHeight: 54,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingHorizontal: 2,
-  },
-
-  optionText: {
-    fontSize: 9,
-    fontWeight: "600",
-  },
-
-  scheduleRow: {
-    minHeight: 52,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 11,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
+    gap: 10,
   },
 
-  scheduleTitle: {
-    fontSize: typography.xs,
-    fontWeight: "600",
+  repeatTitle: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 
-  scheduleValue: {
+  repeatValue: {
     flex: 1,
     textAlign: "right",
     fontSize: 10,
   },
 
-  bulkButton: {
-    minHeight: 46,
+  selectField: {
+    minHeight: 52,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 10,
+    paddingHorizontal: 11,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  selectContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  selectIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    alignItems: "center",
     justifyContent: "center",
-    gap: spacing.sm,
-    marginTop: spacing.xs,
   },
 
-  bulkText: {
-    fontSize: typography.xs,
-    fontWeight: "700",
-  },
-
-  priorityText: {
-    fontSize: typography.xs,
+  selectText: {
+    fontSize: 13,
     fontWeight: "600",
   },
 
-  dateRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-
-  dateFieldContainer: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-
-  dateLabel: {
-    fontSize: 10,
-  },
-
-  dateField: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: spacing.sm,
+  primaryButton: {
+    minHeight: 56,
+    borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
-  },
-
-  dateText: {
-    flex: 1,
-    fontSize: 10,
-  },
-
-  actions: {
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-
-  cancelButton: {
-    flex: 1,
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-    alignItems: "center",
     justifyContent: "center",
+    gap: 9,
+    marginTop: 2,
   },
 
-  createButton: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  cancelText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-  },
-
-  createText: {
-    fontSize: typography.xs,
-    fontWeight: "700",
+  primaryButtonText: {
     color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+
+  bulkRow: {
+    minHeight: 70,
+    borderRadius: 15,
+    borderWidth: 1,
+    paddingHorizontal: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+  },
+
+  bulkIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  bulkCopy: {
+    flex: 1,
+  },
+
+  bulkTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+  },
+
+  bulkSubtitle: {
+    marginTop: 2,
+    fontSize: 11,
   },
 
   error: {
-    fontSize: 10,
+    fontSize: 11,
+    lineHeight: 15,
   },
 
   pressed: {
-    opacity: 0.75,
-  },
-
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  loadingText: {
-    fontSize: typography.sm,
+    opacity: 0.72,
   },
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
 
   modal: {
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     borderWidth: 1,
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
+    padding: 20,
+    paddingBottom: 30,
   },
 
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: spacing.md,
+    marginBottom: 10,
   },
 
   modalTitle: {
-    fontSize: typography.md,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "800",
   },
 
   modalOption: {
-    minHeight: 46,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
+    minHeight: 50,
+    borderRadius: 11,
+    paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
   modalOptionText: {
-    fontSize: typography.sm,
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
