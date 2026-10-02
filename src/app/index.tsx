@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -152,7 +153,8 @@ export default function DashboardScreen() {
   const { tasks, loading, error, refreshTasks } = useTasks();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const styles = createStyles(colors, insets.top);
+  const { width } = useWindowDimensions();
+  const styles = createStyles(colors, insets.top, width);
 
   useFocusEffect(
     useCallback(() => {
@@ -424,7 +426,9 @@ export default function DashboardScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors, topInset = 0) {
+function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390) {
+  const compact = screenWidth < 400;
+
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -591,33 +595,34 @@ function createStyles(colors: ThemeColors, topInset = 0) {
 
     statCard: {
       flex: 1,
-      height: 208,
-      borderRadius: 22,
+      height: compact ? 174 : 208,
+      borderRadius: compact ? 19 : 22,
       borderWidth: 1,
-      padding: 25,
+      padding: compact ? 18 : 25,
       justifyContent: "flex-start",
+      minWidth: 0,
     },
 
     statIcon: {
-      width: 66,
-      height: 66,
-      borderRadius: 18,
+      width: compact ? 54 : 66,
+      height: compact ? 54 : 66,
+      borderRadius: compact ? 16 : 18,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 18,
+      marginBottom: compact ? 14 : 18,
     },
 
     statValue: {
-      fontSize: 35,
-      lineHeight: 40,
+      fontSize: compact ? 30 : 35,
+      lineHeight: compact ? 35 : 40,
       fontWeight: "800",
       color: colors.foreground,
     },
 
     statLabel: {
-      marginTop: 3,
-      fontSize: 19,
-      lineHeight: 25,
+      marginTop: 2,
+      fontSize: compact ? 16 : 19,
+      lineHeight: compact ? 21 : 25,
       fontWeight: "500",
       color: colors.mutedForeground,
     },
