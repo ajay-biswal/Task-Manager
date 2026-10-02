@@ -108,12 +108,17 @@ export default function TaskDetailsScreen() {
 
     const nextStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
-    await toggleTask(task.id, nextStatus);
+    try {
+      await toggleTask(task.id, nextStatus);
 
-    setTask({
+      setTask({
       ...task,
-      status: nextStatus,
-    });
+        status: nextStatus,
+      });
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+      Alert.alert("Update failed", "Unable to update the task status.");
+    }
   }
 
   function handleDelete() {
