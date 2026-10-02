@@ -317,7 +317,8 @@ export default function TaskListScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -605,3 +606,4 @@ function createStyles(colors: ThemeColors) {\n  return StyleSheet.create({
     textAlign: "center",
   },
 });
+}
