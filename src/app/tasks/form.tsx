@@ -243,6 +243,7 @@ export default function TaskFormScreen() {
             <FieldLabel colors={colors}>Title</FieldLabel>
             <TextInput
               accessibilityLabel="Task title"
+              returnKeyType="next"
               value={form.title}
               onChangeText={(value) => updateField("title", value)}
               placeholder="What needs to be done?"
@@ -267,6 +268,7 @@ export default function TaskFormScreen() {
             <FieldLabel colors={colors}>Description</FieldLabel>
             <TextInput
               accessibilityLabel="Task description"
+              returnKeyType="done"
               value={form.description}
               onChangeText={(value) => updateField("description", value)}
               placeholder="Add some context (optional)..."
