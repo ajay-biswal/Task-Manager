@@ -181,7 +181,12 @@ export default function TaskListScreen() {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          await removeTask(task.id);
+          try {
+            await removeTask(task.id);
+          } catch (error) {
+            console.error("Failed to delete task:", error);
+            Alert.alert("Delete failed", "Unable to delete this task.");
+          }
         },
       },
     ]);
@@ -190,7 +195,10 @@ export default function TaskListScreen() {
   function handleToggle(task: Task) {
     const nextStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
-    toggleTask(task.id, nextStatus);
+    toggleTask(task.id, nextStatus).catch((error) => {
+      console.error("Failed to update task status:", error);
+      Alert.alert("Update failed", "Unable to update the task status.");
+    });
   }
 
   return (
