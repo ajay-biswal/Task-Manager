@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BottomNavigation } from "@/components/BottomNavigation";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
@@ -204,7 +204,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNav />
     </View>
   );
 }
