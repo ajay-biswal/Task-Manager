@@ -4,9 +4,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { useTasks } from "@/hooks/useTasks";
+import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
-import type { ThemeColors } from "@/theme";
 import type { Task } from "@/types/task";
 function isToday(dateString: string): boolean {
   const date = new Date(`${dateString}T00:00:00`);
@@ -181,7 +181,7 @@ export default function DashboardScreen() {
         ) : (
           <View style={styles.taskList}>
             {recentTasks.map((task) => (
-              <TaskPreview key={task.id} task={task} />
+              <TaskPreview key={task.id} task={task} colors={colors} />
             ))}
           </View>
         )}
@@ -205,243 +205,243 @@ export default function DashboardScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  content: {
-    padding: spacing.xl,
-    paddingBottom: spacing.xxxl,
-  },
+    content: {
+      padding: spacing.xl,
+      paddingBottom: spacing.xxxl,
+    },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.xxl,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.xxl,
+    },
 
-  title: {
-    fontSize: typography.xxxl,
-    fontWeight: "700",
-    color: colors.foreground,
-  },
+    title: {
+      fontSize: typography.xxxl,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
 
-  subtitle: {
-    marginTop: spacing.xs,
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    subtitle: {
+      marginTop: spacing.xs,
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  settingsButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    settingsButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  settingsIcon: {
-    fontSize: 20,
-    color: colors.foreground,
-  },
+    settingsIcon: {
+      fontSize: 20,
+      color: colors.foreground,
+    },
 
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.md,
-    marginBottom: spacing.xxxl,
-  },
+    statsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.md,
+      marginBottom: spacing.xxxl,
+    },
 
-  statCard: {
-    width: "47%",
-    minHeight: 110,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: spacing.lg,
-    justifyContent: "space-between",
-    backgroundColor: colors.card,
-  },
+    statCard: {
+      width: "47%",
+      minHeight: 110,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      padding: spacing.lg,
+      justifyContent: "space-between",
+      backgroundColor: colors.card,
+    },
 
-  statValue: {
-    fontSize: typography.xxl,
-    fontWeight: "700",
-    color: colors.foreground,
-  },
+    statValue: {
+      fontSize: typography.xxl,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
 
-  statLabel: {
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    statLabel: {
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
-  },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.md,
+    },
 
-  sectionTitle: {
-    fontSize: typography.xl,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
+    sectionTitle: {
+      fontSize: typography.xl,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  viewAll: {
-    fontSize: typography.sm,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
+    viewAll: {
+      fontSize: typography.sm,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  taskList: {
-    gap: spacing.md,
-  },
+    taskList: {
+      gap: spacing.md,
+    },
 
-  taskCard: {
-    minHeight: 90,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: spacing.lg,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.card,
-  },
+    taskCard: {
+      minHeight: 90,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      padding: spacing.lg,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: colors.card,
+    },
 
-  taskContent: {
-    flex: 1,
-    marginRight: spacing.md,
-    gap: spacing.xs,
-  },
+    taskContent: {
+      flex: 1,
+      marginRight: spacing.md,
+      gap: spacing.xs,
+    },
 
-  taskTitle: {
-    fontSize: typography.md,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
+    taskTitle: {
+      fontSize: typography.md,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  completedTaskTitle: {
-    textDecorationLine: "line-through",
-    color: colors.mutedForeground,
-  },
+    completedTaskTitle: {
+      textDecorationLine: "line-through",
+      color: colors.mutedForeground,
+    },
 
-  taskCategory: {
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    taskCategory: {
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  taskDate: {
-    fontSize: typography.xs,
-    color: colors.mutedForeground,
-  },
+    taskDate: {
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
+    },
 
-  priorityBadge: {
-    minWidth: 70,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 999,
-    alignItems: "center",
-  },
+    priorityBadge: {
+      minWidth: 70,
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 999,
+      alignItems: "center",
+    },
 
-  highPriority: {
-    backgroundColor: colors.primary,
-  },
+    highPriority: {
+      backgroundColor: colors.primary,
+    },
 
-  mediumPriority: {
-    backgroundColor: colors.muted,
-  },
+    mediumPriority: {
+      backgroundColor: colors.muted,
+    },
 
-  lowPriority: {
-    backgroundColor: colors.border,
-  },
+    lowPriority: {
+      backgroundColor: colors.border,
+    },
 
-  priorityText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-  },
+    priorityText: {
+      fontSize: typography.xs,
+      fontWeight: "600",
+    },
 
-  highPriorityText: {
-    color: colors.primaryForeground,
-  },
+    highPriorityText: {
+      color: colors.primaryForeground,
+    },
 
-  mediumPriorityText: {
-    color: colors.foreground,
-  },
+    mediumPriorityText: {
+      color: colors.foreground,
+    },
 
-  lowPriorityText: {
-    color: colors.foreground,
-  },
+    lowPriorityText: {
+      color: colors.foreground,
+    },
 
-  emptyCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    padding: spacing.xxl,
-    alignItems: "center",
-  },
+    emptyCard: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 14,
+      padding: spacing.xxl,
+      alignItems: "center",
+    },
 
-  emptyTitle: {
-    fontSize: typography.lg,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
+    emptyTitle: {
+      fontSize: typography.lg,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  emptyText: {
-    marginTop: spacing.sm,
-    textAlign: "center",
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    emptyText: {
+      marginTop: spacing.sm,
+      textAlign: "center",
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  emptyButton: {
-    marginTop: spacing.lg,
-    minHeight: 44,
-    borderRadius: 10,
-    paddingHorizontal: spacing.xl,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-  },
+    emptyButton: {
+      marginTop: spacing.lg,
+      minHeight: 44,
+      borderRadius: 10,
+      paddingHorizontal: spacing.xl,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.primary,
+    },
 
-  emptyButtonText: {
-    fontSize: typography.sm,
-    fontWeight: "600",
-    color: colors.primaryForeground,
-  },
+    emptyButtonText: {
+      fontSize: typography.sm,
+      fontWeight: "600",
+      color: colors.primaryForeground,
+    },
 
-  stateContainer: {
-    padding: spacing.xxl,
-    alignItems: "center",
-  },
+    stateContainer: {
+      padding: spacing.xxl,
+      alignItems: "center",
+    },
 
-  stateText: {
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    stateText: {
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  errorText: {
-    fontSize: typography.sm,
-    color: colors.destructive,
-  },
+    errorText: {
+      fontSize: typography.sm,
+      color: colors.destructive,
+    },
 
-  addButton: {
-    marginTop: spacing.xxl,
-    minHeight: 52,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-  },
+    addButton: {
+      marginTop: spacing.xxl,
+      minHeight: 52,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.primary,
+    },
 
-  addButtonText: {
-    fontSize: typography.md,
-    fontWeight: "600",
-    color: colors.primaryForeground,
-  },
-});
+    addButtonText: {
+      fontSize: typography.md,
+      fontWeight: "600",
+      color: colors.primaryForeground,
+    },
+  });
 }
