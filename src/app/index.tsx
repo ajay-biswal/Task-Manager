@@ -8,6 +8,8 @@ import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task } from "@/types/task";
+import { isTaskOverdue } from "@/utils/taskUtils";
+
 function isToday(dateString: string): boolean {
   const date = new Date(`${dateString}T00:00:00`);
   const today = new Date();
@@ -98,6 +100,8 @@ export default function DashboardScreen() {
 
   const todayTasks = tasks.filter((task) => isToday(task.dueDate)).length;
 
+  const overdueTasks = tasks.filter((task) => isTaskOverdue(task)).length;
+
   const recentTasks = tasks.slice(0, 5);
 
   return (
@@ -144,6 +148,12 @@ export default function DashboardScreen() {
             <Text style={styles.statValue}>{todayTasks}</Text>
 
             <Text style={styles.statLabel}>Due Today</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.overdueStatValue}>{overdueTasks}</Text>
+
+            <Text style={styles.overdueStatLabel}>Overdue</Text>
           </View>
         </View>
 
@@ -276,6 +286,18 @@ function createStyles(colors: ThemeColors) {
     statLabel: {
       fontSize: typography.sm,
       color: colors.mutedForeground,
+    },
+
+    overdueStatValue: {
+      fontSize: typography.xxl,
+      fontWeight: "700",
+      color: colors.destructive,
+    },
+
+    overdueStatLabel: {
+      fontSize: typography.sm,
+      fontWeight: "600",
+      color: colors.destructive,
     },
 
     sectionHeader: {
