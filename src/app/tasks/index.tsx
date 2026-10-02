@@ -1,24 +1,26 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AppIcon } from "@/components/ui/AppIcon";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { useTasks } from "@/hooks/useTasks";
+import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
-import type { ThemeColors } from "@/theme";
 import type { Task, TaskPriority } from "@/types/task";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
 type TaskFilter = "ALL" | "PENDING" | "COMPLETED";
-
 type SortOption = "DUE_DATE" | "PRIORITY";
 
 const priorityOrder: Record<TaskPriority, number> = {
@@ -27,36 +29,54 @@ const priorityOrder: Record<TaskPriority, number> = {
   LOW: 3,
 };
 
+function startOfDay(date = new Date()): Date {
+  const value = new Date(date);
+  value.setHours(0, 0, 0, 0);
+  return value;
+}
+
+function getDayGroup(dateString: string): "Today" | "Tomorrow" | "Later" {
+  const dueDate = new Date(`${dateString}T00:00:00`);
+  const today = startOfDay();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (dueDate.getTime() === today.getTime()) {
+    return "Today";
+  }
+
+  if (dueDate.getTime() === tomorrow.getTime()) {
+    return "Tomorrow";
+  }
+
+  return "Later";
+}
+
 function formatDate(dateString: string): string {
   const date = new Date(`${dateString}T00:00:00`);
 
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
-    year: "numeric",
   });
 }
 
-function TaskCard({
+function TaskRow({
   task,
+  colors,
   onToggle,
-  onDelete,
   onPress,
 }: {
   task: Task;
+  colors: ThemeColors;
   onToggle: () => void;
-  onDelete: () => void;
   onPress: () => void;
 }) {
-  const { colors } = useTheme();
   const styles = createStyles(colors);
   const overdue = isTaskOverdue(task);
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
-    >
+    <View style={styles.taskRow}>
       <Pressable
         onPress={onToggle}
         hitSlop={8}
@@ -64,13 +84,22 @@ function TaskCard({
           styles.checkbox,
           task.status === "COMPLETED" && styles.checkboxCompleted,
         ]}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: task.status === "COMPLETED" }}
       >
         {task.status === "COMPLETED" ? (
-          <Text style={styles.checkmark}>✓</Text>
+          <AppIcon
+            name={{ ios: "checkmark", android: "check", web: "check" }}
+            size={13}
+            color="#FFFFFF"
+          />
         ) : null}
       </Pressable>
 
-      <View style={styles.taskContent}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.taskMain, pressed && styles.pressed]}
+      >
         <Text
           numberOfLines={1}
           style={[
@@ -81,57 +110,43 @@ function TaskCard({
           {task.title}
         </Text>
 
-        <View style={styles.metaRow}>
-          <Text numberOfLines={1} style={styles.category}>
-            {task.category}
-          </Text>
+        <Text style={styles.taskMeta} numberOfLines={1}>
+          {task.category} · Due {formatDate(task.dueDate)}
+          {overdue ? " · Overdue" : ""}
+        </Text>
+      </Pressable>
 
-          <Text style={styles.separator}>•</Text>
-
-          <Text style={styles.dueDate}>Due {formatDate(task.dueDate)}</Text>
-
-          {overdue ? (
-            <>
-              <Text style={styles.separator}>•</Text>
-              <Text style={styles.overdueText}>OVERDUE</Text>
-            </>
-          ) : null}
-        </View>
-      </View>
-
-      <View style={styles.rightSide}>
-        <View
+      <View
+        style={[
+          styles.priorityBadge,
+          task.priority === "HIGH" && styles.highPriority,
+          task.priority === "MEDIUM" && styles.mediumPriority,
+          task.priority === "LOW" && styles.lowPriority,
+        ]}
+      >
+        <Text
           style={[
-            styles.priorityBadge,
-            task.priority === "HIGH" && styles.highPriority,
-            task.priority === "MEDIUM" && styles.mediumPriority,
-            task.priority === "LOW" && styles.lowPriority,
+            styles.priorityText,
+            task.priority === "HIGH" && styles.highPriorityText,
           ]}
         >
-          <Text
-            style={[
-              styles.priorityText,
-              task.priority === "HIGH" && styles.highPriorityText,
-            ]}
-          >
-            {task.priority}
-          </Text>
-        </View>
-
-        <Pressable onPress={onDelete} hitSlop={8} style={styles.deleteButton}>
-          <Text style={styles.deleteText}>×</Text>
-        </Pressable>
+          {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
+        </Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
 export default function TaskListScreen() {
   const router = useRouter();
-
-  const { tasks, loading, error, toggleTask, removeTask, refreshTasks } = useTasks();
+  const insets = useSafeAreaInsets();
+  const { tasks, loading, error, toggleTask, refreshTasks } = useTasks();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, insets.top);
+
+  const [filter, setFilter] = useState<TaskFilter>("ALL");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("DUE_DATE");
 
   useFocusEffect(
     useCallback(() => {
@@ -139,61 +154,50 @@ export default function TaskListScreen() {
     }, [refreshTasks]),
   );
 
-  const [filter, setFilter] = useState<TaskFilter>("ALL");
-
-  const [search, setSearch] = useState("");
-
-  const [sortBy, setSortBy] = useState<SortOption>("DUE_DATE");
-
   const filteredTasks = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    const result = tasks.filter((task) => {
-      const matchesFilter = filter === "ALL" || task.status === filter;
+    return tasks
+      .filter((task) => {
+        const matchesFilter = filter === "ALL" || task.status === filter;
+        const matchesSearch =
+          !normalizedSearch ||
+          task.title.toLowerCase().includes(normalizedSearch) ||
+          task.category.toLowerCase().includes(normalizedSearch);
 
-      const matchesSearch =
-        !normalizedSearch ||
-        task.title.toLowerCase().includes(normalizedSearch) ||
-        task.category.toLowerCase().includes(normalizedSearch);
+        return matchesFilter && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (sortBy === "PRIORITY") {
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }
 
-      return matchesFilter && matchesSearch;
-    });
-
-    return [...result].sort((a, b) => {
-      if (sortBy === "PRIORITY") {
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-      }
-
-      return (
-        new Date(`${a.dueDate}T00:00:00`).getTime() -
-        new Date(`${b.dueDate}T00:00:00`).getTime()
-      );
-    });
+        return (
+          new Date(`${a.dueDate}T00:00:00`).getTime() -
+          new Date(`${b.dueDate}T00:00:00`).getTime()
+        );
+      });
   }, [tasks, filter, search, sortBy]);
 
-  function handleDelete(task: Task) {
-    Alert.alert("Delete task", `Delete "${task.title}"?`, [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await removeTask(task.id);
-          } catch (error) {
-            console.error("Failed to delete task:", error);
-            Alert.alert("Delete failed", "Unable to delete this task.");
-          }
-        },
-      },
-    ]);
-  }
+  const groups = useMemo(() => {
+    const result: Array<{ title: "Today" | "Tomorrow" | "Later"; tasks: Task[] }> =
+      [
+        { title: "Today", tasks: [] },
+        { title: "Tomorrow", tasks: [] },
+        { title: "Later", tasks: [] },
+      ];
+
+    for (const task of filteredTasks) {
+      const group = result.find((item) => item.title === getDayGroup(task.dueDate));
+      group?.tasks.push(task);
+    }
+
+    return result.filter((group) => group.tasks.length > 0);
+  }, [filteredTasks]);
 
   function handleToggle(task: Task) {
-    const nextStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
+    const nextStatus =
+      task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
     toggleTask(task.id, nextStatus).catch((error) => {
       console.error("Failed to update task status:", error);
@@ -201,98 +205,119 @@ export default function TaskListScreen() {
     });
   }
 
+  const listData = groups.flatMap((group) => [
+    { type: "header" as const, id: `header-${group.title}`, title: group.title },
+    ...group.tasks.map((task) => ({
+      type: "task" as const,
+      id: task.id,
+      task,
+    })),
+  ]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Tasks</Text>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Tasks</Text>
+            <Text style={styles.subtitle}>
+              {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+            </Text>
+          </View>
 
-          <Text style={styles.subtitle}>
-            {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
-          </Text>
+          <Pressable
+            onPress={() => router.push("/tasks/form")}
+            style={({ pressed }) => [
+              styles.addButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Add task"
+          >
+            <AppIcon
+              name={{ ios: "plus", android: "add", web: "add" }}
+              size={22}
+              color="#FFFFFF"
+            />
+          </Pressable>
         </View>
 
-        <Pressable
-          onPress={() => router.push("/tasks/form")}
-          style={styles.addButton}
-        >
-          <Text style={styles.addButtonText}>+ Add</Text>
-        </Pressable>
-      </View>
+        <View style={styles.searchRow}>
+          <View style={styles.searchBox}>
+            <AppIcon
+              name={{ ios: "magnifyingglass", android: "search", web: "search" }}
+              size={18}
+              color={colors.mutedForeground}
+            />
 
-      <TextInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search tasks..."
-        placeholderTextColor={colors.mutedForeground}
-        style={styles.searchInput}
-      />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search tasks..."
+              placeholderTextColor={colors.mutedForeground}
+              style={styles.searchInput}
+              returnKeyType="search"
+            />
+          </View>
 
-      <View style={styles.filterRow}>
-        {(
-          [
-            ["ALL", "All"],
-            ["PENDING", "Pending"],
-            ["COMPLETED", "Completed"],
-          ] as const
-        ).map(([value, label]) => {
-          const selected = filter === value;
+          <Pressable
+            onPress={() =>
+              setSortBy((current) =>
+                current === "DUE_DATE" ? "PRIORITY" : "DUE_DATE",
+              )
+            }
+            style={({ pressed }) => [
+              styles.filterIconButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={
+              sortBy === "DUE_DATE" ? "Sort by priority" : "Sort by due date"
+            }
+          >
+            <AppIcon
+              name={{
+                ios: "line.3.horizontal.decrease.circle",
+                android: "filter_list",
+                web: "filter_list",
+              }}
+              size={20}
+              color={colors.foreground}
+            />
+          </Pressable>
+        </View>
 
-          return (
-            <Pressable
-              key={value}
-              onPress={() => setFilter(value)}
-              style={[styles.filterButton, selected && styles.selectedFilter]}
-            >
-              <Text
+        <View style={styles.filterRow}>
+          {(
+            [
+              ["ALL", "All"],
+              ["PENDING", "Pending"],
+              ["COMPLETED", "Completed"],
+            ] as const
+          ).map(([value, label]) => {
+            const selected = filter === value;
+
+            return (
+              <Pressable
+                key={value}
+                onPress={() => setFilter(value)}
                 style={[
-                  styles.filterText,
-                  selected && styles.selectedFilterText,
+                  styles.filterButton,
+                  selected && styles.selectedFilter,
                 ]}
               >
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <View style={styles.sortRow}>
-        <Text style={styles.sortLabel}>Sort by</Text>
-
-        <Pressable
-          onPress={() => setSortBy("DUE_DATE")}
-          style={[
-            styles.sortButton,
-            sortBy === "DUE_DATE" && styles.selectedSort,
-          ]}
-        >
-          <Text
-            style={[
-              styles.sortText,
-              sortBy === "DUE_DATE" && styles.selectedSortText,
-            ]}
-          >
-            Due date
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setSortBy("PRIORITY")}
-          style={[
-            styles.sortButton,
-            sortBy === "PRIORITY" && styles.selectedSort,
-          ]}
-        >
-          <Text
-            style={[
-              styles.sortText,
-              sortBy === "PRIORITY" && styles.selectedSortText,
-            ]}
-          >
-            Priority
-          </Text>
-        </Pressable>
+                <Text
+                  style={[
+                    styles.filterText,
+                    selected && styles.selectedFilterText,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {loading ? (
@@ -305,25 +330,39 @@ export default function TaskListScreen() {
         </View>
       ) : (
         <FlatList
-          data={filteredTasks}
-          keyExtractor={(task) => task.id}
-          renderItem={({ item }) => (
-            <TaskCard
-              task={item}
-              onToggle={() => handleToggle(item)}
-              onDelete={() => handleDelete(item)}
-              onPress={() => router.push(`/tasks/${item.id}`)}
-            />
-          )}
+          data={listData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) =>
+            item.type === "header" ? (
+              <Text style={styles.groupTitle}>{item.title}</Text>
+            ) : (
+              <TaskRow
+                task={item.task}
+                colors={colors}
+                onToggle={() => handleToggle(item.task)}
+                onPress={() => router.push(`/tasks/${item.task.id}`)}
+              />
+            )
+          }
           contentContainerStyle={[
             styles.listContent,
-            filteredTasks.length === 0 && styles.emptyListContent,
+            listData.length === 0 && styles.emptyListContent,
           ]}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <AppIcon
+                  name={{
+                    ios: "checklist",
+                    android: "checklist",
+                    web: "checklist",
+                  }}
+                  size={24}
+                  color={colors.accent}
+                />
+              </View>
               <Text style={styles.emptyTitle}>No tasks found</Text>
-
               <Text style={styles.emptyText}>
                 {search
                   ? "Try a different search."
@@ -333,303 +372,257 @@ export default function TaskListScreen() {
           }
         />
       )}
+
+      <BottomNav />
     </View>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, topInset = 0) {
   return StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.xl,
-  },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  header: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: topInset + spacing.sm,
+    },
 
-  title: {
-    fontSize: typography.xxxl,
-    fontWeight: "700",
-    color: colors.foreground,
-  },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: spacing.md,
+    },
 
-  subtitle: {
-    marginTop: spacing.xs,
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    title: {
+      fontSize: typography.xl,
+      lineHeight: 30,
+      fontWeight: "800",
+      color: colors.foreground,
+    },
 
-  addButton: {
-    minHeight: 42,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-  },
+    subtitle: {
+      marginTop: 1,
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
+    },
 
-  addButtonText: {
-    fontSize: typography.sm,
-    fontWeight: "600",
-    color: colors.primaryForeground,
-  },
+    addButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 11,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.accent,
+    },
 
-  searchInput: {
-    minHeight: 46,
-    borderWidth: 1,
-    borderColor: colors.input,
-    borderRadius: 10,
-    paddingHorizontal: spacing.md,
-    fontSize: typography.md,
-    color: colors.foreground,
-    backgroundColor: colors.background,
-  },
+    searchRow: {
+      flexDirection: "row",
+      gap: spacing.sm,
+    },
 
-  filterRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginTop: spacing.md,
-  },
+    searchBox: {
+      flex: 1,
+      minHeight: 42,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: 10,
+      backgroundColor: colors.muted,
+    },
 
-  filterButton: {
-    flex: 1,
-    minHeight: 42,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    searchInput: {
+      flex: 1,
+      minHeight: 42,
+      paddingVertical: 0,
+      fontSize: typography.sm,
+      color: colors.foreground,
+    },
 
-  selectedFilter: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
+    filterIconButton: {
+      width: 42,
+      minHeight: 42,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.muted,
+    },
 
-  filterText: {
-    fontSize: typography.sm,
-    fontWeight: "500",
-    color: colors.foreground,
-  },
+    filterRow: {
+      flexDirection: "row",
+      gap: spacing.sm,
+      marginTop: spacing.sm,
+      paddingBottom: spacing.md,
+    },
 
-  selectedFilterText: {
-    color: colors.primaryForeground,
-  },
+    filterButton: {
+      paddingHorizontal: spacing.md,
+      minHeight: 34,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.muted,
+    },
 
-  sortRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
+    selectedFilter: {
+      backgroundColor: colors.accent,
+    },
 
-  sortLabel: {
-    marginRight: "auto",
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
+    filterText: {
+      fontSize: typography.xs,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  sortButton: {
-    minHeight: 34,
-    paddingHorizontal: spacing.md,
-    borderRadius: 8,
-    justifyContent: "center",
-    backgroundColor: colors.muted,
-  },
+    selectedFilterText: {
+      color: "#FFFFFF",
+    },
 
-  selectedSort: {
-    backgroundColor: colors.primary,
-  },
+    listContent: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+      gap: spacing.sm,
+    },
 
-  sortText: {
-    fontSize: typography.xs,
-    fontWeight: "500",
-    color: colors.foreground,
-  },
+    emptyListContent: {
+      flexGrow: 1,
+    },
 
-  selectedSortText: {
-    color: colors.primaryForeground,
-  },
+    groupTitle: {
+      marginTop: spacing.sm,
+      marginBottom: spacing.xs,
+      fontSize: typography.sm,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
 
-  listContent: {
-    gap: spacing.md,
-    paddingBottom: spacing.xxxl,
-  },
+    taskRow: {
+      minHeight: 58,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.xs,
+    },
 
-  emptyListContent: {
-    flexGrow: 1,
-  },
+    checkbox: {
+      width: 21,
+      height: 21,
+      borderRadius: 999,
+      borderWidth: 1.5,
+      borderColor: colors.mutedForeground,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: spacing.sm,
+    },
 
-  taskCard: {
-    minHeight: 86,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.card,
-  },
+    checkboxCompleted: {
+      borderColor: colors.success,
+      backgroundColor: colors.success,
+    },
 
-  pressed: {
-    opacity: 0.75,
-  },
+    taskMain: {
+      flex: 1,
+      marginRight: spacing.sm,
+    },
 
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 7,
-    marginRight: spacing.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    taskTitle: {
+      fontSize: typography.sm,
+      fontWeight: "600",
+      color: colors.foreground,
+    },
 
-  checkboxCompleted: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
+    completedTitle: {
+      textDecorationLine: "line-through",
+      color: colors.mutedForeground,
+    },
 
-  checkmark: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: colors.primaryForeground,
-  },
+    taskMeta: {
+      marginTop: 2,
+      fontSize: typography.xs,
+      color: colors.mutedForeground,
+    },
 
-  taskContent: {
-    flex: 1,
-    marginRight: spacing.sm,
-  },
+    priorityBadge: {
+      minWidth: 52,
+      paddingVertical: 4,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 7,
+      alignItems: "center",
+    },
 
-  taskTitle: {
-    fontSize: typography.md,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
+    highPriority: {
+      backgroundColor: colors.destructive,
+    },
 
-  completedTitle: {
-    textDecorationLine: "line-through",
-    color: colors.mutedForeground,
-  },
+    mediumPriority: {
+      backgroundColor: "#F59E0B20",
+    },
 
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: spacing.xs,
-  },
+    lowPriority: {
+      backgroundColor: colors.muted,
+    },
 
-  category: {
-    maxWidth: 90,
-    fontSize: typography.xs,
-    color: colors.mutedForeground,
-  },
+    priorityText: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
 
-  separator: {
-    marginHorizontal: spacing.xs,
-    fontSize: typography.xs,
-    color: colors.mutedForeground,
-  },
+    highPriorityText: {
+      color: "#FFFFFF",
+    },
 
-  dueDate: {
-    fontSize: typography.xs,
-    color: colors.mutedForeground,
-  },
+    stateContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  overdueText: {
-    fontSize: typography.xs,
-    fontWeight: "700",
-    color: colors.destructive,
-  },
+    stateText: {
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+    },
 
-  rightSide: {
-    alignItems: "flex-end",
-    gap: spacing.sm,
-  },
+    errorText: {
+      fontSize: typography.sm,
+      color: colors.destructive,
+    },
 
-  priorityBadge: {
-    minWidth: 64,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 999,
-    alignItems: "center",
-  },
+    emptyContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingTop: spacing.xxxl,
+    },
 
-  highPriority: {
-    backgroundColor: colors.primary,
-  },
+    emptyIcon: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.accent + "18",
+    },
 
-  mediumPriority: {
-    backgroundColor: colors.muted,
-  },
+    emptyTitle: {
+      marginTop: spacing.md,
+      fontSize: typography.md,
+      fontWeight: "700",
+      color: colors.foreground,
+    },
 
-  lowPriority: {
-    backgroundColor: colors.border,
-  },
+    emptyText: {
+      marginTop: spacing.xs,
+      fontSize: typography.sm,
+      color: colors.mutedForeground,
+      textAlign: "center",
+    },
 
-  priorityText: {
-    fontSize: typography.xs,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
-
-  highPriorityText: {
-    color: colors.primaryForeground,
-  },
-
-  deleteButton: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  deleteText: {
-    fontSize: 22,
-    lineHeight: 22,
-    color: colors.mutedForeground,
-  },
-
-  stateContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  stateText: {
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-  },
-
-  errorText: {
-    fontSize: typography.sm,
-    color: colors.destructive,
-  },
-
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: spacing.xxxl,
-  },
-
-  emptyTitle: {
-    fontSize: typography.lg,
-    fontWeight: "600",
-    color: colors.foreground,
-  },
-
-  emptyText: {
-    marginTop: spacing.sm,
-    fontSize: typography.sm,
-    color: colors.mutedForeground,
-    textAlign: "center",
-  },
-});
+    pressed: {
+      opacity: 0.75,
+    },
+  });
 }
