@@ -584,7 +584,7 @@ function DateField({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = createStyles(colors);
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -792,4 +792,4 @@ const styles = StyleSheet.create({
   modalOptionText: {
     fontSize: typography.sm,
   },
-});
+  });\n}\n
