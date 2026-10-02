@@ -20,6 +20,354 @@ import { useTheme } from "@/theme/ThemeContext";
 import type { Task } from "@/types/task";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
 
+export default function TaskDetailsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ id?: string }>();
+  const taskId = typeof params.id === "string" ? params.id : undefined;
+
+  const { findTask, removeTask, toggleTask } = useTasks();
+  const { colors } = useTheme();
+
+  const [task, setTask] = useState<Task | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!taskId) {
+      router.back();
+      return;
+    }
+
+    const id = taskId;
+    let active = true;
+
+    async function loadTask() {
+      try {
+        const result = await findTask(id);
+
+        if (!active) {
+          return;
+        }
+
+        if (!result) {
+          router.back();
+          return;
+        }
+
+        setTask(result);
+      } catch (error) {
+        console.error("Failed to load task:", error);
+
+        if (active) {
+          router.back();
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadTask();
+
+    return () => {
+      active = false;
+    };
+  }, [taskId, findTask, router]);
+
+  async function handleToggle() {
+    if (!task) {
+      return;
+    }
+
+    const nextStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
+
+    try {
+      await toggleTask(task.id, nextStatus);
+      setTask({
+        ...task,
+        status: nextStatus,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+      Alert.alert("Update failed", "Unable to update the task status.");
+    }
+  }
+
+  function handleDelete() {
+    if (!task) {
+      return;
+    }
+
+    Alert.alert("Delete task", `Delete "${task.title}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            setDeleting(true);
+            await removeTask(task.id);
+            router.back();
+          } catch (error) {
+            console.error("Failed to delete task:", error);
+            setDeleting(false);
+            Alert.alert("Delete failed", "Unable to delete the task.");
+          }
+        },
+      },
+    ]);
+  }
+
+  function handleEdit() {
+    if (task) {
+      router.push(`/tasks/form?id=${task.id}`);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={[styles.stateText, { color: colors.mutedForeground }]}>
+          Loading task...
+        </Text>
+      </View>
+    );
+  }
+
+  if (!task) {
+    return (
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.stateTitle, { color: colors.foreground }]}>
+          Task not found
+        </Text>
+        <Pressable onPress={() => router.back()}>
+          <Text style={[styles.link, { color: colors.accent }]}>Go back</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const isCompleted = task.status === "COMPLETED";
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 10 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.back()}
+            style={[
+              styles.topIconButton,
+              { backgroundColor: colors.muted, borderColor: colors.border },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+          >
+            <AppIcon
+              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+              size={21}
+              color={colors.foreground}
+            />
+          </Pressable>
+
+          <Text style={[styles.screenTitle, { color: colors.foreground }]}>
+            Task
+          </Text>
+
+          <Pressable
+            onPress={handleEdit}
+            style={[
+              styles.topIconButton,
+              { backgroundColor: colors.muted, borderColor: colors.border },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Edit task"
+          >
+            <AppIcon
+              name={{ ios: "pencil", android: "edit", web: "edit" }}
+              size={18}
+              color={colors.foreground}
+            />
+          </Pressable>
+        </View>
+
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.card, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.summaryMain}>
+            <Text
+              style={[styles.title, { color: colors.foreground }]}
+              numberOfLines={2}
+            >
+              {task.title}
+            </Text>
+
+            <View style={styles.badges}>
+              <View
+                style={[
+                  styles.priorityBadge,
+                  { backgroundColor: getPriorityBackground(task.priority, colors) },
+                ]}
+              >
+                <AppIcon
+                  name={{ ios: "exclamationmark.circle.fill", android: "priority_high", web: "priority_high" }}
+                  size={12}
+                  color={getPriorityTextColor(task.priority, colors)}
+                />
+                <Text
+                  style={[
+                    styles.priorityText,
+                    { color: getPriorityTextColor(task.priority, colors) },
+                  ]}
+                >
+                  {capitalize(task.priority)}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: colors.muted },
+                ]}
+              >
+                <AppIcon
+                  name={isCompleted
+                    ? { ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }
+                    : { ios: "clock", android: "schedule", web: "schedule" }}
+                  size={12}
+                  color={colors.mutedForeground}
+                />
+                <Text style={[styles.statusText, { color: colors.mutedForeground }]}>
+                  {isCompleted ? "Completed" : "Pending"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+        </View>
+
+        {task.description ? (
+          <SectionCard icon="description" title="Description" colors={colors}>
+            <Text style={[styles.description, { color: colors.mutedForeground }]}>
+              {task.description}
+            </Text>
+          </SectionCard>
+        ) : null}
+
+        <SectionCard icon="list_alt" title="Details" colors={colors}>
+          <DetailRow icon="folder" label="Category" value={task.category} colors={colors} />
+          <DetailRow
+            icon="flag"
+            label="Priority"
+            value={capitalize(task.priority)}
+            valueColor={getPriorityTextColor(task.priority, colors)}
+            colors={colors}
+          />
+          <DetailRow icon="calendar_today" label="Start date" value={formatDate(task.startDate)} colors={colors} />
+          <DetailRow icon="calendar_today" label="Due date" value={formatDate(task.dueDate)} colors={colors} />
+          <DetailRow
+            icon="schedule"
+            label="Status"
+            value={isCompleted ? "Completed" : "Pending"}
+            colors={colors}
+          />
+        </SectionCard>
+
+        <SectionCard icon="history" title="Activity" colors={colors}>
+          <ActivityRow label="Created" value={formatDateTime(task.createdAt)} colors={colors} />
+          <ActivityRow label="Last updated" value={formatDateTime(task.updatedAt)} colors={colors} />
+        </SectionCard>
+
+        <View style={styles.actions}>
+          <Pressable
+            onPress={handleToggle}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              { backgroundColor: colors.accent },
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppIcon
+              name={isCompleted
+                ? { ios: "arrow.uturn.backward", android: "undo", web: "undo" }
+                : { ios: "checkmark", android: "check", web: "check" }}
+              size={17}
+              color="#FFFFFF"
+            />
+            <Text style={styles.primaryButtonText}>
+              {isCompleted ? "Mark as Pending" : "Mark as Completed"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleEdit}
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              { backgroundColor: colors.card, borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppIcon
+              name={{ ios: "pencil", android: "edit", web: "edit" }}
+              size={16}
+              color={colors.foreground}
+            />
+            <Text style={[styles.secondaryButtonText, { color: colors.foreground }]}>
+              Edit Task
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleDelete}
+            disabled={deleting}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              {
+                backgroundColor: colors.destructive + "12",
+                borderColor: colors.destructive,
+              },
+              pressed && styles.pressed,
+            ]}
+          >
+            {deleting ? (
+              <ActivityIndicator color={colors.destructive} />
+            ) : (
+              <>
+                <AppIcon
+                  name={{ ios: "trash", android: "delete", web: "delete" }}
+                  size={16}
+                  color={colors.destructive}
+                />
+                <Text style={[styles.deleteText, { color: colors.destructive }]}>
+                  Delete Task
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+type SectionIcon = {
+  ios: string;
+  android: string;
+  web: string;
+};
+
 function SectionCard({
   icon,
   title,
