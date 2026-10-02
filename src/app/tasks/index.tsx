@@ -20,7 +20,7 @@ import { useTheme } from "@/theme/ThemeContext";
 import type { Task, TaskPriority } from "@/types/task";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
-type TaskFilter = "ALL" | "PENDING" | "COMPLETED";
+type TaskFilter = "ALL" | "PENDING" | "COMPLETED" | "OVERDUE";
 type SortOption = "DUE_DATE" | "PRIORITY";
 
 const priorityOrder: Record<TaskPriority, number> = {
@@ -61,6 +61,17 @@ function formatDate(dateString: string): string {
   });
 }
 
+function getCategoryColor(category: string, colors: ThemeColors): string {
+  const normalized = category.trim().toLowerCase();
+
+  if (normalized === "development") return "#8B5CF6";
+  if (normalized === "review") return "#22C55E";
+  if (normalized === "learning") return "#F5C542";
+  if (normalized === "personal") return colors.accent;
+
+  return colors.accent;
+}
+
 function TaskRow({
   task,
   colors,
@@ -74,9 +85,15 @@ function TaskRow({
 }) {
   const styles = createStyles(colors);
   const overdue = isTaskOverdue(task);
+  const categoryColor = getCategoryColor(task.category, colors);
 
   return (
-    <View style={styles.taskRow}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel={`Open task ${task.title}`}
+    >
       <Pressable
         onPress={onToggle}
         hitSlop={8}
@@ -96,10 +113,7 @@ function TaskRow({
         ) : null}
       </Pressable>
 
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [styles.taskMain, pressed && styles.pressed]}
-      >
+      <View style={styles.taskMain}>
         <Text
           numberOfLines={1}
           style={[
@@ -110,11 +124,17 @@ function TaskRow({
           {task.title}
         </Text>
 
-        <Text style={styles.taskMeta} numberOfLines={1}>
-          {task.category} · Due {formatDate(task.dueDate)}
-          {overdue ? " · Overdue" : ""}
-        </Text>
-      </Pressable>
+        <View style={styles.taskMetaRow}>
+          <View style={[styles.categoryDot, { backgroundColor: categoryColor }]} />
+          <Text style={styles.taskMeta} numberOfLines={1}>
+            {task.category}
+          </Text>
+          <Text style={styles.metaSeparator}>·</Text>
+          <Text style={[styles.taskMeta, overdue && styles.overdueMeta]} numberOfLines={1}>
+            Due {formatDate(task.dueDate)}
+          </Text>
+        </View>
+      </View>
 
       <View
         style={[
@@ -128,12 +148,13 @@ function TaskRow({
           style={[
             styles.priorityText,
             task.priority === "HIGH" && styles.highPriorityText,
+            task.priority === "MEDIUM" && styles.mediumPriorityText,
           ]}
         >
           {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -173,7 +194,11 @@ export default function TaskListScreen() {
 
     return tasks
       .filter((task) => {
-        const matchesFilter = filter === "ALL" || task.status === filter;
+        const matchesFilter =
+          filter === "ALL" ||
+          (filter === "OVERDUE"
+            ? isTaskOverdue(task)
+            : task.status === filter);
         const matchesSearch =
           !normalizedSearch ||
           task.title.toLowerCase().includes(normalizedSearch) ||
@@ -235,23 +260,26 @@ export default function TaskListScreen() {
           <View>
             <Text style={styles.title}>Tasks</Text>
             <Text style={styles.subtitle}>
-              {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+              {tasks.length} {tasks.length === 1 ? "task" : "tasks"} · Stay consistent
             </Text>
           </View>
 
           <Pressable
-            onPress={() => router.push("/tasks/form")}
-            style={({ pressed }) => [
-              styles.addButton,
-              pressed && styles.pressed,
-            ]}
+            onPress={() =>
+              Alert.alert("TaskFlow", undefined, [
+                { text: "Add task", onPress: () => router.push("/tasks/form") },
+                { text: "Bulk upload", onPress: () => router.push("/bulk-upload") },
+                { text: "Cancel", style: "cancel" },
+              ])
+            }
+            style={({ pressed }) => [styles.moreButton, pressed && styles.pressed]}
             accessibilityRole="button"
-            accessibilityLabel="Add task"
+            accessibilityLabel="Task options"
           >
             <AppIcon
-              name={{ ios: "plus", android: "add", web: "add" }}
+              name={{ ios: "ellipsis", android: "more_vert", web: "more_vert" }}
               size={22}
-              color="#FFFFFF"
+              color={colors.foreground}
             />
           </Pressable>
         </View>
@@ -308,6 +336,7 @@ export default function TaskListScreen() {
               ["ALL", "All"],
               ["PENDING", "Pending"],
               ["COMPLETED", "Completed"],
+              ["OVERDUE", "Overdue"],
             ] as const
           ).map(([value, label]) => {
             const selected = filter === value;
@@ -316,17 +345,9 @@ export default function TaskListScreen() {
               <Pressable
                 key={value}
                 onPress={() => setFilter(value)}
-                style={[
-                  styles.filterButton,
-                  selected && styles.selectedFilter,
-                ]}
+                style={[styles.filterButton, selected && styles.selectedFilter]}
               >
-                <Text
-                  style={[
-                    styles.filterText,
-                    selected && styles.selectedFilterText,
-                  ]}
-                >
+                <Text style={[styles.filterText, selected && styles.selectedFilterText]}>
                   {label}
                 </Text>
               </Pressable>
@@ -349,7 +370,12 @@ export default function TaskListScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) =>
             item.type === "header" ? (
-              <Text style={styles.groupTitle}>{item.title}</Text>
+              <View style={styles.groupHeader}>
+                <Text style={styles.groupTitle}>{item.title}</Text>
+                <Text style={styles.groupCount}>
+                  {item.tasks.length} {item.tasks.length === 1 ? "task" : "tasks"}
+                </Text>
+              </View>
             ) : (
               <TaskRow
                 task={item.task}
@@ -395,132 +421,144 @@ export default function TaskListScreen() {
 
 function createStyles(colors: ThemeColors, topInset = 0) {
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
+    container: { flex: 1, backgroundColor: colors.background },
 
     content: {
       paddingHorizontal: spacing.lg,
-      paddingTop: topInset + spacing.sm,
+      paddingTop: topInset + 18,
     },
 
     header: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: spacing.md,
+      marginBottom: 16,
     },
 
     title: {
-      fontSize: typography.xl,
-      lineHeight: 30,
+      fontSize: 28,
+      lineHeight: 32,
       fontWeight: "800",
       color: colors.foreground,
     },
 
     subtitle: {
-      marginTop: 1,
-      fontSize: typography.xs,
+      marginTop: 3,
+      fontSize: 13,
       color: colors.mutedForeground,
     },
 
-    addButton: {
+    moreButton: {
       width: 40,
       height: 40,
-      borderRadius: 11,
+      borderRadius: 20,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.accent,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.muted,
     },
 
-    searchRow: {
-      flexDirection: "row",
-      gap: spacing.sm,
-    },
+    searchRow: { flexDirection: "row", gap: 8 },
 
     searchBox: {
       flex: 1,
-      minHeight: 42,
+      minHeight: 44,
       flexDirection: "row",
       alignItems: "center",
-      gap: spacing.sm,
-      paddingHorizontal: spacing.md,
-      borderRadius: 10,
+      gap: 9,
+      paddingHorizontal: 14,
+      borderRadius: 12,
       backgroundColor: colors.muted,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
 
     searchInput: {
       flex: 1,
       minHeight: 42,
       paddingVertical: 0,
-      fontSize: typography.sm,
+      fontSize: 13,
       color: colors.foreground,
     },
 
     filterIconButton: {
-      width: 42,
-      minHeight: 42,
-      borderRadius: 10,
+      width: 44,
+      minHeight: 44,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.muted,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
 
     filterRow: {
       flexDirection: "row",
-      gap: spacing.sm,
-      marginTop: spacing.sm,
-      paddingBottom: spacing.md,
+      gap: 8,
+      marginTop: 12,
+      paddingBottom: 13,
     },
 
     filterButton: {
-      paddingHorizontal: spacing.md,
-      minHeight: 34,
+      flex: 1,
+      minHeight: 36,
+      paddingHorizontal: 6,
       borderRadius: 999,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.muted,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
 
-    selectedFilter: {
-      backgroundColor: colors.accent,
-    },
+    selectedFilter: { backgroundColor: colors.accent, borderColor: colors.accent },
 
     filterText: {
-      fontSize: typography.xs,
+      fontSize: 12,
       fontWeight: "600",
       color: colors.foreground,
     },
 
-    selectedFilterText: {
-      color: "#FFFFFF",
-    },
+    selectedFilterText: { color: "#FFFFFF" },
 
     listContent: {
       paddingHorizontal: spacing.lg,
-      paddingBottom: spacing.xl,
-      gap: spacing.sm,
+      paddingBottom: 124,
+      gap: 8,
     },
 
-    emptyListContent: {
-      flexGrow: 1,
+    emptyListContent: { flexGrow: 1 },
+
+    groupHeader: {
+      minHeight: 34,
+      marginTop: 7,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
     },
 
     groupTitle: {
-      marginTop: spacing.sm,
-      marginBottom: spacing.xs,
-      fontSize: typography.sm,
+      fontSize: 14,
       fontWeight: "700",
       color: colors.foreground,
     },
 
-    taskRow: {
-      minHeight: 58,
+    groupCount: {
+      fontSize: 12,
+      color: colors.mutedForeground,
+    },
+
+    taskCard: {
+      minHeight: 70,
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.xs,
+      paddingHorizontal: 13,
+      paddingVertical: 11,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
     },
 
     checkbox: {
@@ -531,7 +569,7 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       borderColor: colors.mutedForeground,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: spacing.sm,
+      marginRight: 12,
     },
 
     checkboxCompleted: {
@@ -539,14 +577,12 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       backgroundColor: colors.success,
     },
 
-    taskMain: {
-      flex: 1,
-      marginRight: spacing.sm,
-    },
+    taskMain: { flex: 1, minWidth: 0, marginRight: 9 },
 
     taskTitle: {
-      fontSize: typography.sm,
-      fontWeight: "600",
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: "700",
       color: colors.foreground,
     },
 
@@ -555,41 +591,53 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       color: colors.mutedForeground,
     },
 
+    taskMetaRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 5,
+      minWidth: 0,
+    },
+
+    categoryDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+      marginRight: 5,
+    },
+
     taskMeta: {
-      marginTop: 2,
-      fontSize: typography.xs,
+      fontSize: 11,
       color: colors.mutedForeground,
     },
 
+    metaSeparator: {
+      marginHorizontal: 5,
+      fontSize: 11,
+      color: colors.mutedForeground,
+    },
+
+    overdueMeta: { color: colors.destructive },
+
     priorityBadge: {
-      minWidth: 52,
-      paddingVertical: 4,
-      paddingHorizontal: spacing.sm,
-      borderRadius: 7,
+      minWidth: 46,
+      paddingVertical: 7,
+      paddingHorizontal: 8,
+      borderRadius: 8,
       alignItems: "center",
     },
 
-    highPriority: {
-      backgroundColor: colors.destructive,
-    },
-
-    mediumPriority: {
-      backgroundColor: "#F59E0B20",
-    },
-
-    lowPriority: {
-      backgroundColor: colors.muted,
-    },
+    highPriority: { backgroundColor: colors.destructive + "18" },
+    mediumPriority: { backgroundColor: "#F59E0B20" },
+    lowPriority: { backgroundColor: colors.muted },
 
     priorityText: {
       fontSize: 10,
       fontWeight: "700",
-      color: colors.foreground,
+      color: colors.mutedForeground,
     },
 
-    highPriorityText: {
-      color: "#FFFFFF",
-    },
+    highPriorityText: { color: colors.destructive },
+    mediumPriorityText: { color: "#D97706" },
 
     stateContainer: {
       flex: 1,
@@ -597,15 +645,8 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       justifyContent: "center",
     },
 
-    stateText: {
-      fontSize: typography.sm,
-      color: colors.mutedForeground,
-    },
-
-    errorText: {
-      fontSize: typography.sm,
-      color: colors.destructive,
-    },
+    stateText: { fontSize: typography.sm, color: colors.mutedForeground },
+    errorText: { fontSize: typography.sm, color: colors.destructive },
 
     emptyContainer: {
       alignItems: "center",
@@ -636,8 +677,6 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       textAlign: "center",
     },
 
-    pressed: {
-      opacity: 0.75,
-    },
+    pressed: { opacity: 0.75 },
   });
 }
