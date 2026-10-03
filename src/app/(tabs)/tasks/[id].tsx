@@ -38,6 +38,7 @@ export default function TaskDetailsScreen() {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [dialog, setDialog] = useState<{
     title: string;
     message: string;
@@ -90,6 +91,7 @@ export default function TaskDetailsScreen() {
       task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
     try {
+      setUpdating(true);
       await toggleTask(task.id, nextStatus);
       setTask({
         ...task,
@@ -103,6 +105,8 @@ export default function TaskDetailsScreen() {
         message: "Unable to update the task status. Please try again.",
         actions: [{ label: "OK", onPress: () => setDialog(null) }],
       });
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -303,6 +307,8 @@ export default function TaskDetailsScreen() {
           <Button
             title={isCompleted ? "Mark as Pending" : "Mark as Completed"}
             onPress={handleToggle}
+            disabled={updating}
+            loading={updating}
           />
           <Button title="Edit Task" onPress={handleEdit} variant="secondary" />
           <Button
