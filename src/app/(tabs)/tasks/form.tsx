@@ -261,22 +261,13 @@ export default function TaskFormScreen() {
             ]}
           >
             <View style={styles.labelRow}>
-              <FieldLabel colors={colors}>Description</FieldLabel>
+              <FieldLabel colors={colors} required>
+                Title
+              </FieldLabel>
               <Text style={[styles.counter, { color: colors.mutedForeground }]}>
-                {form.description.length}/500
+                {form.title.length}/100
               </Text>
             </View>
-
-            <Input
-              value={form.description}
-              onChangeText={(value) => updateField("description", value)}
-              placeholder="Add some context (optional)..."
-              multiline
-              numberOfLines={4}
-              maxLength={500}
-            />
-
-          </View>
 
             <Input
               value={form.title}
@@ -286,40 +277,6 @@ export default function TaskFormScreen() {
               maxLength={100}
               returnKeyType="next"
             />
-
-          </View>
-
-            <View
-              style={[
-                styles.inputShell,
-                {
-                  backgroundColor: colors.background,
-                  borderColor: errors.title ? colors.destructive : colors.border,
-                },
-              ]}
-            >
-              <AppIcon
-                name={{ ios: "doc.text", android: "description", web: "description" }}
-                size={20}
-                color={colors.mutedForeground}
-              />
-              <TextInput
-                accessibilityLabel="Task title"
-                returnKeyType="next"
-                maxLength={100}
-                value={form.title}
-                onChangeText={(value) => updateField("title", value)}
-                placeholder="What needs to be done?"
-                placeholderTextColor={colors.mutedForeground}
-                style={[styles.input, { color: colors.foreground }]}
-              />
-            </View>
-
-            {errors.title ? (
-              <Text style={[styles.error, { color: colors.destructive }]}>
-                {errors.title}
-              </Text>
-            ) : null}
           </View>
 
           <View
@@ -335,34 +292,14 @@ export default function TaskFormScreen() {
               </Text>
             </View>
 
-            <View
-              style={[
-                styles.descriptionShell,
-                { backgroundColor: colors.input, borderColor: colors.border },
-              ]}
-            >
-              <AppIcon
-                name={{
-                  ios: "text.alignleft",
-                  android: "format_align_left",
-                  web: "format_align_left",
-                }}
-                size={20}
-                color={colors.mutedForeground}
-              />
-              <TextInput
-                accessibilityLabel="Task description"
-                returnKeyType="done"
-                maxLength={500}
-                value={form.description}
-                onChangeText={(value) => updateField("description", value)}
-                placeholder="Add some context (optional)..."
-                placeholderTextColor={colors.mutedForeground}
-                multiline
-                textAlignVertical="top"
-                style={[styles.descriptionInput, { color: colors.foreground }]}
-              />
-            </View>
+            <Input
+              value={form.description}
+              onChangeText={(value) => updateField("description", value)}
+              placeholder="Add some context (optional)..."
+              multiline
+              numberOfLines={4}
+              maxLength={500}
+            />
           </View>
 
           <View
@@ -416,7 +353,11 @@ export default function TaskFormScreen() {
                       <AppIcon
                         name={icon}
                         size={19}
-                        color={selected ? colors.accent : colors.mutedForeground}
+                        color={
+                          selected
+                            ? colors.accent
+                            : colors.mutedForeground
+                        }
                       />
                     </View>
                     <Text
@@ -503,7 +444,12 @@ export default function TaskFormScreen() {
                         color={priorityColor(priority)}
                       />
                     </View>
-                    <Text style={[styles.priorityText, { color: colors.foreground }]}>
+                    <Text
+                      style={[
+                        styles.priorityText,
+                        { color: colors.foreground },
+                      ]}
+                    >
                       {priority.charAt(0) + priority.slice(1).toLowerCase()}
                     </Text>
                   </Pressable>
@@ -537,7 +483,6 @@ export default function TaskFormScreen() {
                 error={errors.dueDate}
               />
             </View>
-
           </View>
 
           <View
@@ -595,10 +540,16 @@ export default function TaskFormScreen() {
                               }
                         }
                         size={20}
-                        color={selected ? colors.accent : colors.mutedForeground}
+                        color={
+                          selected
+                            ? colors.accent
+                            : colors.mutedForeground
+                        }
                       />
                     </View>
-                    <Text style={[styles.statusText, { color: colors.foreground }]}>
+                    <Text
+                      style={[styles.statusText, { color: colors.foreground }]}
+                    >
                       {isPending ? "Pending" : "Completed"}
                     </Text>
                   </Pressable>
@@ -613,7 +564,6 @@ export default function TaskFormScreen() {
             loading={saving}
             disabled={saving}
           />
-
         </View>
       </ScrollView>
 
