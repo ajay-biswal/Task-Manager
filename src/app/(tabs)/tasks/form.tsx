@@ -58,8 +58,9 @@ function FieldLabel({
 export default function TaskFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; returnTo?: string }>();
   const taskId = typeof params.id === "string" ? params.id : undefined;
+  const returnTo = typeof params.returnTo === "string" ? params.returnTo : undefined;
 
   const { addTask, editTask, findTask } = useTasks();
   const { colors } = useTheme();
@@ -181,7 +182,14 @@ export default function TaskFormScreen() {
       >
         <View style={styles.header}>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => {
+              if (!isEditMode && returnTo === "dashboard") {
+                router.replace("/");
+                return;
+              }
+
+              router.back();
+            }}
             hitSlop={10}
             style={[
               styles.backButton,
