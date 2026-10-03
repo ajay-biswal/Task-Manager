@@ -1,4 +1,5 @@
 import { SymbolView } from "expo-symbols";
+import type { SymbolViewProps } from "expo-symbols";
 import type { ColorValue, StyleProp, ViewStyle } from "react-native";
 
 interface AppIconProps {
@@ -20,7 +21,7 @@ export function AppIcon({
 }: AppIconProps) {
   return (
     <SymbolView
-      name={name}
+      name={name as SymbolViewProps["name"]}
       size={size}
       tintColor={color}
       style={style}
