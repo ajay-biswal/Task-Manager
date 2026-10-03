@@ -79,7 +79,9 @@ export function DateField({
           display={Platform.OS === "ios" ? "spinner" : "default"}
           minimumDate={minimumDate}
           onValueChange={(event, date) => {
+            if (!date) return;
             onChange(toISODate(date));
+            setShowPicker(false);
           }}
           onDismiss={handleDismiss}
         />
