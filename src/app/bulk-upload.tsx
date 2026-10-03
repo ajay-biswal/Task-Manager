@@ -205,7 +205,7 @@ export default function BulkUploadScreen() {
       setImportSummary(null);
 
       const result = await DocumentPicker.getDocumentAsync({
-        type: "text/csv",
+        type: "*/*",
         multiple: false,
         copyToCacheDirectory: true,
       });
@@ -263,10 +263,10 @@ export default function BulkUploadScreen() {
           title: row.title!.trim(),
           description: row.description?.trim() ?? "",
           category: row.category!.trim(),
-          priority: row.priority!.trim().toUpperCase(),
+          priority: row.priority?.trim().toUpperCase() || "MEDIUM",
           start_date: row.start_date!.trim(),
           due_date: row.due_date!.trim(),
-          status: row.status!.trim().toUpperCase(),
+          status: row.status?.trim().toUpperCase() || "PENDING",
         });
       });
 
