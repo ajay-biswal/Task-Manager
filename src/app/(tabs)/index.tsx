@@ -17,10 +17,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { TaskCard } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
+import { exportTasksToCsv } from "@/services/taskExport";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import { isTaskOverdue } from "@/utils/taskUtils";
-import { exportTasksToCsv } from "@/services/taskExport";
 
 function isToday(dateString: string): boolean {
   const date = new Date(`${dateString}T00:00:00`);
@@ -61,11 +61,12 @@ function ProgressRing({
 
   return (
     <View style={stylesProgressRing.container}>
+      <View style={[stylesProgressRing.track, { borderColor: colors.muted }]} />
       <Host style={stylesProgressRing.host} matchContents>
         <CircularProgressIndicator
           progress={percent}
           color={colors.accent}
-          trackColor={colors.muted}
+          trackColor="transparent"
           strokeWidth={11}
           strokeCap="round"
           modifiers={[size(124, 124)]}
@@ -73,17 +74,9 @@ function ProgressRing({
       </Host>
 
       <View
-        style={[
-          stylesProgressRing.center,
-          { backgroundColor: colors.card },
-        ]}
+        style={[stylesProgressRing.center, { backgroundColor: colors.card }]}
       >
-        <Text
-          style={[
-            stylesProgressRing.text,
-            { color: colors.foreground },
-          ]}
-        >
+        <Text style={[stylesProgressRing.text, { color: colors.foreground }]}>
           {Math.round(percent * 100)}%
         </Text>
       </View>
@@ -152,8 +145,6 @@ function StatCard({
 
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-
-      
     </View>
   );
 }
@@ -205,9 +196,7 @@ export default function DashboardScreen() {
         <View style={styles.hero}>
           <View style={styles.heroTop}>
             <View style={styles.heroText}>
-              <Text style={styles.greeting}>
-                {getGreeting()}, Ajay 👋
-              </Text>
+              <Text style={styles.greeting}>{getGreeting()}, Ajay 👋</Text>
               <Text style={styles.heroTitle}>
                 Have a productive{"\n"}day ahead.
               </Text>
@@ -215,7 +204,6 @@ export default function DashboardScreen() {
             </View>
 
             <View style={styles.headerActions}>
-
               <Pressable
                 onPress={() => router.push("/settings")}
                 style={({ pressed }) => [
@@ -226,7 +214,11 @@ export default function DashboardScreen() {
                 accessibilityLabel="Open settings"
               >
                 <AppIcon
-                  name={{ ios: "gearshape", android: "settings", web: "settings" }}
+                  name={{
+                    ios: "gearshape",
+                    android: "settings",
+                    web: "settings",
+                  }}
                   size={22}
                   color={colors.foreground}
                 />
@@ -265,8 +257,6 @@ export default function DashboardScreen() {
           </View>
 
           <ProgressRing progress={progress} colors={colors} />
-
-          
         </View>
 
         <View style={styles.statsRow}>
@@ -346,25 +336,26 @@ export default function DashboardScreen() {
             <Text style={styles.emptyTitle}>You’re all caught up!</Text>
 
             <Text style={styles.emptyText}>
-              No tasks are due today.{"\n"}Enjoy your free time or add a new task.
+              No tasks are due today.{"\n"}Enjoy your free time or add a new
+              task.
             </Text>
 
             <Pressable
-                onPress={() => router.push("/tasks/form")}
-                style={({ pressed }) => [
-                  styles.emptyAction,
-                  pressed && styles.pressed,
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Add a new task"
-              >
-                <AppIcon
-                  name={{ ios: "plus", android: "add", web: "add" }}
-                  size={22}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.emptyActionText}>Add a new task</Text>
-              </Pressable>
+              onPress={() => router.push("/tasks/form")}
+              style={({ pressed }) => [
+                styles.emptyAction,
+                pressed && styles.pressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Add a new task"
+            >
+              <AppIcon
+                name={{ ios: "plus", android: "add", web: "add" }}
+                size={22}
+                color="#FFFFFF"
+              />
+              <Text style={styles.emptyActionText}>Add a new task</Text>
+            </Pressable>
           </View>
         ) : (
           <View style={styles.taskList}>
@@ -382,7 +373,32 @@ export default function DashboardScreen() {
                   });
                 }}
                 onPress={() => router.push(`/tasks/${task.id}`)}
-              />
+                style={({ pressed }) => [
+                  styles.taskCard,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.taskDot,
+                    {
+                      backgroundColor:
+                        task.status === "COMPLETED"
+                          ? colors.success
+                          : colors.accent,
+                    },
+                  ]}
+                />
+
+                <View style={styles.taskCopy}>
+                  <Text style={styles.taskTitle} numberOfLines={1}>
+                    {task.title}
+                  </Text>
+                  <Text style={styles.taskMeta} numberOfLines={1}>
+                    {task.category} · {task.priority.toLowerCase()}
+                  </Text>
+                </View>
+              </Pressable>
             ))}
           </View>
         )}
@@ -398,9 +414,18 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityLabel="Bulk import tasks"
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#17243A" : "#E4EFFD" }]}>
+            <View
+              style={[
+                styles.quickActionIcon,
+                { backgroundColor: isDark ? "#17243A" : "#E4EFFD" },
+              ]}
+            >
               <AppIcon
-                name={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
+                name={{
+                  ios: "arrow.down.doc",
+                  android: "upload_file",
+                  web: "upload_file",
+                }}
                 size={22}
                 color={colors.accent}
               />
@@ -425,9 +450,18 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityLabel="Export tasks"
           >
-            <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#16301F" : "#DDF8E2" }]}>
+            <View
+              style={[
+                styles.quickActionIcon,
+                { backgroundColor: isDark ? "#16301F" : "#DDF8E2" },
+              ]}
+            >
               <AppIcon
-                name={{ ios: "square.and.arrow.up", android: "file_upload", web: "file_upload" }}
+                name={{
+                  ios: "square.and.arrow.up",
+                  android: "file_upload",
+                  web: "file_upload",
+                }}
                 size={22}
                 color={colors.success}
               />
@@ -440,7 +474,12 @@ export default function DashboardScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDark = false) {
+function createStyles(
+  colors: ThemeColors,
+  topInset = 0,
+  screenWidth = 390,
+  isDark = false,
+) {
   const compact = screenWidth < 400;
 
   return StyleSheet.create({
@@ -780,6 +819,13 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
     },
     pressed: {
       opacity: 0.72,
+    },
+    track: {
+      position: "absolute",
+      width: 124,
+      height: 124,
+      borderRadius: 62,
+      borderWidth: 11,
     },
   });
 }
