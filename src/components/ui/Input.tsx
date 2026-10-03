@@ -1,31 +1,25 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputProps,
+} from "react-native";
 
 import { useTheme } from "@/theme/ThemeContext";
 
-type InputProps = {
+type InputProps = Omit<TextInputProps, "style"> & {
   label?: string;
-  placeholder?: string;
-  value: string;
-  onChangeText: (value: string) => void;
   error?: string;
-  disabled?: boolean;
-  multiline?: boolean;
-  numberOfLines?: number;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
 };
 
 export default function Input({
   label,
-  placeholder,
-  value,
-  onChangeText,
   error,
-  disabled = false,
+  editable = true,
   multiline = false,
-  numberOfLines = 4,
-  secureTextEntry = false,
-  keyboardType = "default",
+  numberOfLines,
+  ...props
 }: InputProps) {
   const { colors } = useTheme();
 
@@ -38,16 +32,11 @@ export default function Input({
       ) : null}
 
       <TextInput
-        accessibilityLabel={label}
-        editable={!disabled}
+        {...props}
+        editable={editable}
         multiline={multiline}
-        numberOfLines={multiline ? numberOfLines : 1}
-        placeholder={placeholder}
+        numberOfLines={numberOfLines}
         placeholderTextColor={colors.mutedForeground}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        value={value}
-        onChangeText={onChangeText}
         style={[
           styles.input,
           {
@@ -56,7 +45,7 @@ export default function Input({
             borderColor: error ? colors.destructive : colors.input,
           },
           multiline && styles.multiline,
-          disabled && styles.disabled,
+          !editable && styles.disabled,
         ]}
       />
 
