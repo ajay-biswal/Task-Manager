@@ -180,7 +180,7 @@ export default function TaskDetailsScreen() {
           </Pressable>
 
           <Text style={[styles.screenTitle, { color: colors.foreground }]}>
-            Task
+            Task Details
           </Text>
 
           <Pressable
@@ -290,7 +290,19 @@ export default function TaskDetailsScreen() {
           <ActivityRow label="Last updated" value={formatDateTime(task.updatedAt)} colors={colors} />
         </SectionCard>
 
-        <View style={styles.actions}>
+
+      </ScrollView>
+      <View
+        style={[
+          styles.actionBar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}
+      >
+        <View style={styles.footerActions}>
           <Pressable
             onPress={handleToggle}
             style={({ pressed }) => [
@@ -357,7 +369,7 @@ export default function TaskDetailsScreen() {
             )}
           </Pressable>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -497,7 +509,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 36,
+    paddingBottom: 24,
     gap: 12,
   },
   topBar: {
@@ -643,9 +655,13 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontWeight: "600",
   },
-  actions: {
+  actionBar: {
+    borderTopWidth: 1,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  footerActions: {
     gap: 10,
-    marginTop: 4,
   },
   primaryButton: {
     minHeight: 50,
