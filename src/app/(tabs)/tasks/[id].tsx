@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +12,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { Button, Card, IconButton } from "@/components/ui";
+import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
@@ -163,49 +164,34 @@ export default function TaskDetailsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
-          <Pressable
+          <IconButton
+            icon={
+              <AppIcon
+                name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+                size={21}
+                color={colors.foreground}
+              />
+            }
             onPress={() => router.back()}
-            style={[
-              styles.topIconButton,
-              { backgroundColor: colors.muted, borderColor: colors.border },
-            ]}
-            accessibilityRole="button"
             accessibilityLabel="Back"
-          >
-            <AppIcon
-              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
-              size={21}
-              color={colors.foreground}
-            />
-          </Pressable>
-
+          />
           <Text style={[styles.screenTitle, { color: colors.foreground }]}>
             Task Details
           </Text>
-
-          <Pressable
+          <IconButton
+            icon={
+              <AppIcon
+                name={{ ios: "pencil", android: "edit", web: "edit" }}
+                size={18}
+                color={colors.foreground}
+              />
+            }
             onPress={handleEdit}
-            style={[
-              styles.topIconButton,
-              { backgroundColor: colors.muted, borderColor: colors.border },
-            ]}
-            accessibilityRole="button"
             accessibilityLabel="Edit task"
-          >
-            <AppIcon
-              name={{ ios: "pencil", android: "edit", web: "edit" }}
-              size={18}
-              color={colors.foreground}
-            />
-          </Pressable>
+          />
         </View>
 
-        <View
-          style={[
-            styles.summaryCard,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
+        <Card variant="outlined" padding="md">
           <View style={styles.summaryMain}>
             <Text
               style={[styles.title, { color: colors.foreground }]}
@@ -213,50 +199,12 @@ export default function TaskDetailsScreen() {
             >
               {task.title}
             </Text>
-
             <View style={styles.badges}>
-              <View
-                style={[
-                  styles.priorityBadge,
-                  { backgroundColor: getPriorityBackground(task.priority, colors) },
-                ]}
-              >
-                <AppIcon
-                  name={{ ios: "exclamationmark.circle.fill", android: "priority_high", web: "priority_high" }}
-                  size={12}
-                  color={getPriorityTextColor(task.priority, colors)}
-                />
-                <Text
-                  style={[
-                    styles.priorityText,
-                    { color: getPriorityTextColor(task.priority, colors) },
-                  ]}
-                >
-                  {capitalize(task.priority)}
-                </Text>
-              </View>
-
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: colors.muted },
-                ]}
-              >
-                <AppIcon
-                  name={isCompleted
-                    ? { ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }
-                    : { ios: "clock", android: "schedule", web: "schedule" }}
-                  size={12}
-                  color={colors.mutedForeground}
-                />
-                <Text style={[styles.statusText, { color: colors.mutedForeground }]}>
-                  {isCompleted ? "Completed" : "Pending"}
-                </Text>
-              </View>
+              <TaskPriorityBadge priority={task.priority} />
+              <TaskStatusBadge status={task.status} />
             </View>
           </View>
-
-        </View>
+        </Card>
 
         {task.description ? (
           <SectionCard icon="description" title="Description" colors={colors}>
@@ -303,72 +251,20 @@ export default function TaskDetailsScreen() {
         ]}
       >
         <View style={styles.footerActions}>
-          <Pressable
+          <Button
+            title={isCompleted ? "Mark as Pending" : "Mark as Completed"}
             onPress={handleToggle}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              { backgroundColor: colors.accent },
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppIcon
-              name={isCompleted
-                ? { ios: "arrow.uturn.backward", android: "undo", web: "undo" }
-                : { ios: "checkmark", android: "check", web: "check" }}
-              size={17}
-              color="#FFFFFF"
-            />
-            <Text style={styles.primaryButtonText}>
-              {isCompleted ? "Mark as Pending" : "Mark as Completed"}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={handleEdit}
-            style={({ pressed }) => [
-              styles.secondaryButton,
-              { backgroundColor: colors.card, borderColor: colors.border },
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppIcon
-              name={{ ios: "pencil", android: "edit", web: "edit" }}
-              size={16}
-              color={colors.foreground}
-            />
-            <Text style={[styles.secondaryButtonText, { color: colors.foreground }]}>
-              Edit Task
-            </Text>
-          </Pressable>
-
-          <Pressable
+          />
+          <Button title="Edit Task" onPress={handleEdit} variant="secondary" />
+          <Button
+            title="Delete Task"
             onPress={handleDelete}
+            variant="danger"
             disabled={deleting}
-            style={({ pressed }) => [
-              styles.deleteButton,
-              {
-                backgroundColor: colors.destructive + "12",
-                borderColor: colors.destructive,
-              },
-              pressed && styles.pressed,
-            ]}
-          >
-            {deleting ? (
-              <ActivityIndicator color={colors.destructive} />
-            ) : (
-              <>
-                <AppIcon
-                  name={{ ios: "trash", android: "delete", web: "delete" }}
-                  size={16}
-                  color={colors.destructive}
-                />
-                <Text style={[styles.deleteText, { color: colors.destructive }]}>
-                  Delete Task
-                </Text>
-              </>
-            )}
-          </Pressable>
+            loading={deleting}
+          />
         </View>
+      </View>
       </View>
     </View>
   );
@@ -403,12 +299,7 @@ function SectionCard({
   };
 
   return (
-    <View
-      style={[
-        styles.sectionCard,
-        { backgroundColor: colors.card, borderColor: colors.border },
-      ]}
-    >
+    <Card variant="outlined" padding="md">
       <View style={styles.sectionHeader}>
         <View style={[styles.sectionIcon, { backgroundColor: colors.muted }]}>
           <AppIcon name={iconName} size={16} color={colors.accent} />
@@ -418,7 +309,7 @@ function SectionCard({
         </Text>
       </View>
       {children}
-    </View>
+    </Card>
   );
 }
 
@@ -532,16 +423,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: "800",
   },
-  summaryCard: {
-    minHeight: 104,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
   summaryMain: {
     flex: 1,
     minWidth: 0,
@@ -558,38 +439,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  priorityBadge: {
-    minHeight: 30,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
   priorityText: {
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700",
-  },
-  statusBadge: {
-    minHeight: 30,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  statusText: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "600",
-  },
-  sectionCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 10,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -660,52 +513,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
   },
-  footerActions: {
-    gap: 10,
-  },
-  primaryButton: {
-    minHeight: 50,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    lineHeight: 19,
-    fontWeight: "800",
-  },
-  secondaryButton: {
-    minHeight: 50,
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    lineHeight: 19,
-    fontWeight: "800",
-  },
-  deleteButton: {
-    minHeight: 50,
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-  },
-  deleteText: {
-    fontSize: 14,
-    lineHeight: 19,
-    fontWeight: "800",
-  },
-  pressed: { opacity: 0.75 },
   center: {
     flex: 1,
     alignItems: "center",
