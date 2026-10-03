@@ -12,8 +12,8 @@ export const colors = {
     border: "#E4E4E7",
     input: "#E4E4E7",
 
-    primary: "#18181B",
-    primaryForeground: "#FAFAFA",
+    primary: "#3B82F6",
+    primaryForeground: "#FFFFFF",
     accent: "#3B82F6",
 
     destructive: "#DC2626",
@@ -39,8 +39,8 @@ export const colors = {
     border: "#27272A",
     input: "#3F3F46",
 
-    primary: "#FAFAFA",
-    primaryForeground: "#18181B",
+    primary: "#60A5FA",
+    primaryForeground: "#09090B",
     accent: "#60A5FA",
 
     destructive: "#EF4444",
