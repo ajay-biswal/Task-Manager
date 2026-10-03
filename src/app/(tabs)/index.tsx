@@ -158,6 +158,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const styles = createStyles(colors, insets.top, width, isDark);
+  const [exporting, setExporting] = useState(false);
   const [dialog, setDialog] = useState<{
     title: string;
     message: string;
@@ -384,7 +385,10 @@ export default function DashboardScreen() {
                 return;
               }
 
+              if (exporting) return;
+
               try {
+                setExporting(true);
                 await exportTasksToCsv(tasks);
               } catch (err) {
                 console.error("Export failed:", err);
@@ -392,11 +396,13 @@ export default function DashboardScreen() {
                   title: "Export failed",
                   message: "Could not export your tasks. Please try again.",
                 });
+              } finally {
+                setExporting(false);
               }
             }}
             variant="outlined"
             padding="none"
-            style={[styles.quickActionCard, { backgroundColor: isDark ? "#111A15" : "#F3FBF5" }]}
+            style={[styles.quickActionCard, { backgroundColor: isDark ? "#111A15" : "#F3FBF5" }, exporting && styles.disabledAction]}
           >
             <View
               style={[
