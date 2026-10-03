@@ -9,3 +9,4 @@ export { default as EmptyState } from "./EmptyState";
 export { default as ScreenHeader } from "./ScreenHeader";
 export { DateField } from "./DateField";
 export { default as Dialog } from "./Dialog";
+export type { DialogAction } from "./Dialog";
