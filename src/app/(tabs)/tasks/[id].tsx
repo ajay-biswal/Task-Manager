@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -49,41 +49,40 @@ export default function TaskDetailsScreen() {
     }[];
   } | null>(null);
 
-  useEffect(() => {
-    if (!taskId) {
-      router.back();
-      return;
-    }
-
-    const id = taskId;
-    let active = true;
-
-    async function loadTask() {
-      try {
-        const result = await findTask(id);
-
-        if (!active) return;
-
-        if (!result) {
-          router.back();
-          return;
-        }
-
-        setTask(result);
-      } catch (error) {
-        console.error("Failed to load task:", error);
-        if (active) router.back();
-      } finally {
-        if (active) setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!taskId) {
+        router.back();
+        return undefined;
       }
-    }
 
-    loadTask();
+      const id = taskId;
+      let active = true;
 
-    return () => {
-      active = false;
-    };
-  }, [taskId, findTask, router]);
+      async function loadTask() {
+        setLoading(true);
+        try {
+          const result = await findTask(id);
+          if (!active) return;
+          if (!result) {
+            router.back();
+            return;
+          }
+          setTask(result);
+        } catch (error) {
+          console.error("Failed to load task:", error);
+          if (active) router.back();
+        } finally {
+          if (active) setLoading(false);
+        }
+      }
+
+      loadTask();
+      return () => {
+        active = false;
+      };
+    }, [taskId, findTask, router]),
+  );
 
   async function handleToggle() {
     if (!task) return;
@@ -206,17 +205,6 @@ export default function TaskDetailsScreen() {
             Task Details
           </Text>
 
-          <IconButton
-            icon={
-              <AppIcon
-                name={{ ios: "pencil", android: "edit", web: "edit" }}
-                size={18}
-                color={colors.foreground}
-              />
-            }
-            onPress={handleEdit}
-            accessibilityLabel="Edit task"
-          />
         </View>
 
         <Card variant="outlined" padding="md">
@@ -467,10 +455,15 @@ const styles = StyleSheet.create({
     height: 56,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    position: "relative",
     marginBottom: 4,
   },
   screenTitle: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
     fontSize: 17,
     lineHeight: 22,
     fontWeight: "800",
