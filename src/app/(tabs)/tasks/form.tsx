@@ -234,7 +234,6 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.fieldCard,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <View style={styles.labelRow}>
@@ -280,10 +279,9 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.section,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <FieldLabel colors={colors}>Category</FieldLabel>
+            <FieldLabel colors={colors} required>Category</FieldLabel>
             <TaskCategorySelector
               value={form.category}
               onChange={(value) => updateField("category", value)}
@@ -297,7 +295,7 @@ export default function TaskFormScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <FieldLabel colors={colors}>Priority</FieldLabel>
+            <FieldLabel colors={colors} required>Priority</FieldLabel>
             <TaskPrioritySelector
               value={form.priority}
               onChange={(value) => updateField("priority", value)}
@@ -310,16 +308,18 @@ export default function TaskFormScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <FieldLabel colors={colors}>Schedule</FieldLabel>
+            <FieldLabel colors={colors} required>Schedule</FieldLabel>
             <View style={styles.scheduleTopRow}>
               <DateField
                 label="Start date"
+                required
                 value={form.startDate}
                 onChange={(value) => updateField("startDate", value)}
                 error={errors.startDate}
               />
               <DateField
                 label="Due date"
+                required
                 value={form.dueDate}
                 onChange={(value) => updateField("dueDate", value)}
                 error={errors.dueDate}
@@ -428,16 +428,12 @@ const styles = StyleSheet.create({
   },
 
   fieldCard: {
-    padding: 14,
-    borderRadius: 17,
-    borderWidth: 1,
+    paddingVertical: 4,
     gap: 9,
   },
 
   section: {
-    padding: 14,
-    borderRadius: 17,
-    borderWidth: 1,
+    paddingVertical: 4,
     gap: 11,
   },
 
