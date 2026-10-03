@@ -8,3 +8,4 @@ export { default as Divider } from "./Divider";
 export { default as EmptyState } from "./EmptyState";
 export { default as ScreenHeader } from "./ScreenHeader";
 export { DateField } from "./DateField";
+export { default as Dialog } from "./Dialog";
