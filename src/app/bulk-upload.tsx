@@ -3,7 +3,6 @@ import { useTasks } from "@/hooks/useTasks";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
-import { File, Paths } from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
