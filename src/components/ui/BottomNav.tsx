@@ -53,10 +53,9 @@ export function BottomNav() {
       ]}
     >
       <View style={styles.navBar}>
-        <View style={styles.navSide}>
+        <View style={styles.navItems}>
           {ITEMS.slice(0, 2).map((item) => renderItem(item))}
-        </View>
-        <View style={styles.navSide}>
+          <View style={styles.centerSlot} />
           {ITEMS.slice(2).map((item) => renderItem(item))}
         </View>
 
@@ -134,15 +133,21 @@ function createStyles(colors: ThemeColors, isDark: boolean) {
       elevation: 8,
     },
 
-    navSide: {
-      width: "50%",
+    navItems: {
+      flex: 1,
       height: 66,
       flexDirection: "row",
       alignItems: "center",
     },
 
+    centerSlot: {
+      width: "20%",
+      height: 66,
+    },
+
     item: {
-      flex: 1,
+      width: "20%",
+      height: 66,
       height: 66,
       alignItems: "center",
       justifyContent: "center",
