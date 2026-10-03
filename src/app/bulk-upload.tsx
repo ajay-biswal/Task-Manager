@@ -346,7 +346,13 @@ export default function BulkUploadScreen() {
         failed: failedCount,
       });
 
-
+      // Clear the selected CSV data after the import completes.
+      // Keep the summary visible so the user can see the result.
+      setFileName(null);
+      setFileSize(null);
+      setValidRows([]);
+      setValidationErrors([]);
+      setCsvError(null);
     } catch (error) {
       console.error("Failed to import tasks:", error);
       setDialog({
