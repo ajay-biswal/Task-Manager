@@ -79,6 +79,7 @@ export default function TaskFormScreen() {
   const [dialog, setDialog] = useState<{
     title: string;
     message: string;
+    actions?: DialogAction[];
   } | null>(null);
 
   const isEditMode = Boolean(taskId);
@@ -421,12 +422,14 @@ export default function TaskFormScreen() {
         visible={dialog !== null}
         title={dialog?.title ?? ""}
         message={dialog?.message}
-        actions={[
-          {
-            label: "OK",
-            onPress: () => setDialog(null),
-          },
-        ]}
+        actions={
+          dialog?.actions ?? [
+            {
+              label: "OK",
+              onPress: () => setDialog(null),
+            },
+          ]
+        }
         onRequestClose={() => setDialog(null)}
       />
     </KeyboardAvoidingView>
