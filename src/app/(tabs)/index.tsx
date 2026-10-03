@@ -14,8 +14,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppIcon } from "@/components/ui/AppIcon";
 import { TaskCard } from "@/components/task";
+import { AppIcon } from "@/components/ui/AppIcon";
+import { Button, Card, IconButton } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import type { ThemeColors } from "@/theme";
@@ -133,10 +134,12 @@ function StatCard({
   const styles = createStyles(colors);
 
   return (
-    <View
+    <Card
+      variant="outlined"
+      padding="none"
       style={[
         styles.statCard,
-        { backgroundColor: background, borderColor: colors.border },
+        { backgroundColor: background },
       ]}
     >
       <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
@@ -145,7 +148,7 @@ function StatCard({
 
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    </Card>
   );
 }
 
@@ -204,30 +207,24 @@ export default function DashboardScreen() {
             </View>
 
             <View style={styles.headerActions}>
-              <Pressable
+              <IconButton
+                variant="ghost"
+                size="lg"
                 onPress={() => router.push("/settings")}
-                style={({ pressed }) => [
-                  styles.headerButton,
-                  pressed && styles.pressed,
-                ]}
-                accessibilityRole="button"
                 accessibilityLabel="Open settings"
-              >
-                <AppIcon
-                  name={{
-                    ios: "gearshape",
-                    android: "settings",
-                    web: "settings",
-                  }}
-                  size={22}
-                  color={colors.foreground}
-                />
-              </Pressable>
+                icon={
+                  <AppIcon
+                    name={{ ios: "gearshape", android: "settings", web: "settings" }}
+                    size={22}
+                    color={colors.foreground}
+                  />
+                }
+              />
             </View>
           </View>
         </View>
 
-        <View style={styles.progressCard}>
+        <Card variant="outlined" padding="none" style={styles.progressCard}>
           <View style={styles.progressCopy}>
             <Text style={styles.progressTitle}>Task Progress</Text>
 
@@ -257,7 +254,7 @@ export default function DashboardScreen() {
           </View>
 
           <ProgressRing progress={progress} colors={colors} />
-        </View>
+        </Card>
 
         <View style={styles.statsRow}>
           <StatCard
@@ -318,15 +315,15 @@ export default function DashboardScreen() {
         </View>
 
         {loading ? (
-          <View style={styles.emptyCard}>
+          <Card variant="outlined" padding="none" style={styles.emptyCard}>
             <Text style={styles.stateText}>Loading your tasks...</Text>
-          </View>
+          </Card>
         ) : error ? (
           <View style={styles.emptyCard}>
             <Text style={styles.errorText}>{error}</Text>
-          </View>
+          </Card>
         ) : todaysTasks.length === 0 ? (
-          <View style={styles.emptyCard}>
+          <Card variant="outlined" padding="none" style={styles.emptyCard}>
             <Image
               source={require("../../../assets/dashboard/empty-tasks.png")}
               style={styles.emptyImage}
@@ -340,23 +337,9 @@ export default function DashboardScreen() {
               task.
             </Text>
 
-            <Pressable
-              onPress={() => router.push("/tasks/form")}
-              style={({ pressed }) => [
-                styles.emptyAction,
-                pressed && styles.pressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Add a new task"
-            >
-              <AppIcon
-                name={{ ios: "plus", android: "add", web: "add" }}
-                size={22}
-                color="#FFFFFF"
-              />
-              <Text style={styles.emptyActionText}>Add a new task</Text>
-            </Pressable>
-          </View>
+            <Button title="Add a new task" onPress={() => router.push("/tasks/form")} />
+            </Button>
+          </Card>
         ) : (
           <View style={styles.taskList}>
             {todaysTasks.slice(0, 3).map((task) => (
@@ -379,15 +362,11 @@ export default function DashboardScreen() {
         )}
 
         <View style={styles.quickActions}>
-          <Pressable
+          <Card
             onPress={() => router.push("/bulk-upload")}
-            style={({ pressed }) => [
-              styles.quickActionCard,
-              { backgroundColor: isDark ? "#0D1420" : "#F2F7FD" },
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Bulk import tasks"
+            variant="outlined"
+            padding="none"
+            style={[styles.quickActionCard, { backgroundColor: isDark ? "#0D1420" : "#F2F7FD" }]}
           >
             <View
               style={[
@@ -406,9 +385,9 @@ export default function DashboardScreen() {
               />
             </View>
             <Text style={styles.quickActionTitle}>Import</Text>
-          </Pressable>
+          </Card>
 
-          <Pressable
+          <Card
             onPress={async () => {
               try {
                 await exportTasksToCsv(tasks);
@@ -417,13 +396,9 @@ export default function DashboardScreen() {
                 Alert.alert("Export failed", "Could not export your tasks.");
               }
             }}
-            style={({ pressed }) => [
-              styles.quickActionCard,
-              { backgroundColor: isDark ? "#111A15" : "#F3FBF5" },
-              pressed && styles.pressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Export tasks"
+            variant="outlined"
+            padding="none"
+            style={[styles.quickActionCard, { backgroundColor: isDark ? "#111A15" : "#F3FBF5" }]}
           >
             <View
               style={[
@@ -442,7 +417,7 @@ export default function DashboardScreen() {
               />
             </View>
             <Text style={styles.quickActionTitle}>Export</Text>
-          </Pressable>
+          </Card>
         </View>
       </ScrollView>
     </View>
@@ -509,21 +484,7 @@ function createStyles(
       flexDirection: "row",
       gap: 12,
     },
-    headerButton: {
-      width: 58,
-      height: 58,
-      borderRadius: 29,
-      backgroundColor: isDark ? "#11151B" : colors.card,
-      borderWidth: isDark ? 1 : 0,
-      borderColor: isDark ? "#242B35" : "transparent",
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: "#000000",
-      shadowOpacity: 0.06,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 5 },
-      elevation: 3,
-    },
+
     progressCard: {
       minHeight: compact ? 184 : 194,
       marginTop: 0,
@@ -693,24 +654,8 @@ function createStyles(
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-    emptyAction: {
-      marginTop: 18,
-      minWidth: 190,
-      height: 48,
-      paddingHorizontal: 20,
-      borderRadius: 10,
-      backgroundColor: colors.accent,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 10,
-    },
-    emptyActionText: {
-      fontSize: 16,
-      lineHeight: 20,
-      fontWeight: "700",
-      color: "#FFFFFF",
-    },
+
+
     stateText: {
       fontSize: 16,
       color: colors.mutedForeground,
@@ -723,35 +668,11 @@ function createStyles(
     taskList: {
       gap: 10,
     },
-    taskCard: {
-      minHeight: 72,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      backgroundColor: colors.card,
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 16,
-      gap: 12,
-    },
-    taskDot: {
-      width: 11,
-      height: 11,
-      borderRadius: 6,
-    },
-    taskCopy: {
-      flex: 1,
-    },
-    taskTitle: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: colors.foreground,
-    },
-    taskMeta: {
-      marginTop: 3,
-      fontSize: 13,
-      color: colors.mutedForeground,
-    },
+
+
+
+
+
     quickActions: {
       flexDirection: "row",
       gap: 12,
