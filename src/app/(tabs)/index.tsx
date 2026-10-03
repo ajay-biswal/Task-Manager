@@ -373,32 +373,7 @@ export default function DashboardScreen() {
                   });
                 }}
                 onPress={() => router.push(`/tasks/${task.id}`)}
-                style={({ pressed }) => [
-                  styles.taskCard,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.taskDot,
-                    {
-                      backgroundColor:
-                        task.status === "COMPLETED"
-                          ? colors.success
-                          : colors.accent,
-                    },
-                  ]}
-                />
-
-                <View style={styles.taskCopy}>
-                  <Text style={styles.taskTitle} numberOfLines={1}>
-                    {task.title}
-                  </Text>
-                  <Text style={styles.taskMeta} numberOfLines={1}>
-                    {task.category} · {task.priority.toLowerCase()}
-                  </Text>
-                </View>
-              </Pressable>
+              />
             ))}
           </View>
         )}
