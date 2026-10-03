@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Checkbox } from "@/components/ui";
-import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
+import TaskPriorityBadge from "@/components/task/TaskPriorityBadge";
+import TaskStatusBadge from "@/components/task/TaskStatusBadge";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task, TaskStatus } from "@/types/task";
 import { formatShortDate } from "@/utils/dateUtils";
