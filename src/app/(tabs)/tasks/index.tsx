@@ -63,7 +63,7 @@ export default function TaskListScreen() {
   const { focusSearch } = useLocalSearchParams<{ focusSearch?: string }>();
   const searchInputRef = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
-  const { tasks, loading, error, toggleTask, refreshTasks } = useTasks();
+  const { tasks, loading, error, toggleTask, refreshTasks, isTaskPending } = useTasks();
   const { colors } = useTheme();
   const styles = createStyles(colors, insets.top);
 
