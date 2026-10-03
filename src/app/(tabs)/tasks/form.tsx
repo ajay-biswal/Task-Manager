@@ -10,7 +10,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -94,7 +93,6 @@ export default function TaskFormScreen() {
   const [saving, setSaving] = useState(false);
   const [dateField, setDateField] = useState<"startDate" | "dueDate" | null>(null);
   const [selectField, setSelectField] = useState<"status" | null>(null);
-  const [timeEnabled, setTimeEnabled] = useState(false);
 
   const isEditMode = Boolean(taskId);
 
@@ -277,7 +275,7 @@ export default function TaskFormScreen() {
               style={[
                 styles.inputShell,
                 {
-                  backgroundColor: colors.input,
+                  backgroundColor: colors.background,
                   borderColor: errors.title ? colors.destructive : colors.border,
                 },
               ]}
@@ -357,11 +355,7 @@ export default function TaskFormScreen() {
           >
             <FieldLabel colors={colors}>Category</FieldLabel>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryRow}
-            >
+            <View style={styles.categoryGrid}>
               {[
                 ...categoryOptions,
                 ...(form.category && !categoryOptions.includes(form.category)
@@ -419,7 +413,7 @@ export default function TaskFormScreen() {
                   </Pressable>
                 );
               })}
-            </ScrollView>
+            </View>
 
             {errors.category ? (
               <Text style={[styles.error, { color: colors.destructive }]}>
@@ -526,82 +520,6 @@ export default function TaskFormScreen() {
               />
             </View>
 
-            <View
-              style={[
-                styles.timeRow,
-                { backgroundColor: colors.input, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.timeInfo}>
-                <View
-                  style={[
-                    styles.timeIcon,
-                    { backgroundColor: colors.muted },
-                  ]}
-                >
-                  <AppIcon
-                    name={{ ios: "clock", android: "schedule", web: "schedule" }}
-                    size={18}
-                    color={colors.mutedForeground}
-                  />
-                </View>
-                <View>
-                  <Text style={[styles.timeTitle, { color: colors.foreground }]}>
-                    Set time
-                  </Text>
-                  <Text style={[styles.timeSubtitle, { color: colors.mutedForeground }]}>
-                    Optional
-                  </Text>
-                </View>
-              </View>
-
-              <Switch
-                value={timeEnabled}
-                onValueChange={setTimeEnabled}
-                trackColor={{
-                  false: colors.border,
-                  true: colors.accent + "66",
-                }}
-                thumbColor={timeEnabled ? colors.accent : colors.mutedForeground}
-                accessibilityLabel="Set task time"
-              />
-            </View>
-
-            <Pressable
-              disabled
-              style={[
-                styles.repeatRow,
-                { backgroundColor: colors.input, borderColor: colors.border },
-              ]}
-            >
-              <View
-                style={[
-                  styles.timeIcon,
-                  { backgroundColor: colors.muted },
-                ]}
-              >
-                <AppIcon
-                  name={{ ios: "repeat", android: "sync", web: "sync" }}
-                  size={18}
-                  color={colors.mutedForeground}
-                />
-              </View>
-              <Text style={[styles.repeatTitle, { color: colors.foreground }]}>
-                Repeat
-              </Text>
-              <Text style={[styles.repeatValue, { color: colors.mutedForeground }]}>
-                Does not repeat
-              </Text>
-              <AppIcon
-                name={{
-                  ios: "chevron.right",
-                  android: "chevron_right",
-                  web: "chevron_right",
-                }}
-                size={18}
-                color={colors.mutedForeground}
-              />
-            </Pressable>
           </View>
 
           <View
@@ -832,7 +750,7 @@ function DateField({
             { color: value ? colors.foreground : colors.mutedForeground },
           ]}
         >
-          {formatDate(value)}
+          {value ? formatDate(value) : "Select date"}
         </Text>
       </Pressable>
       {error ? (
@@ -976,20 +894,23 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  categoryRow: {
-    gap: 8,
-    paddingRight: 4,
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
 
   categoryOption: {
-    width: 70,
-    minHeight: 78,
-    borderRadius: 13,
+    flexBasis: "31%",
+    flexGrow: 1,
+    minWidth: 92,
+    minHeight: 82,
+    borderRadius: 14,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    paddingHorizontal: 5,
+    paddingHorizontal: 8,
   },
 
   categoryIcon: {
@@ -1001,9 +922,8 @@ const styles = StyleSheet.create({
   },
 
   categoryText: {
-    maxWidth: 62,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: "700",
   },
 
@@ -1065,61 +985,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 11,
     fontWeight: "600",
-  },
-
-  timeRow: {
-    minHeight: 58,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  timeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  timeIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  timeTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-
-  timeSubtitle: {
-    marginTop: 1,
-    fontSize: 10,
-  },
-
-  repeatRow: {
-    minHeight: 54,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  repeatTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-
-  repeatValue: {
-    flex: 1,
-    textAlign: "right",
-    fontSize: 10,
   },
 
   selectField: {
