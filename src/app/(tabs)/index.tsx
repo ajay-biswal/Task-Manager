@@ -417,15 +417,11 @@ export default function DashboardScreen() {
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#17243A" : "#E4EFFD" }]}>
               <AppIcon
                 name={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
-                size={24}
+                size={22}
                 color={colors.accent}
               />
             </View>
-            <View style={styles.quickActionCopy}>
-              <Text style={styles.quickActionTitle}>Bulk Import</Text>
-              <Text style={styles.quickActionSubtitle}>Import tasks from CSV</Text>
-            </View>
-            
+            <Text style={styles.quickActionTitle}>Import</Text>
           </Pressable>
 
           <Pressable
@@ -448,15 +444,11 @@ export default function DashboardScreen() {
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#16301F" : "#DDF8E2" }]}>
               <AppIcon
                 name={{ ios: "square.and.arrow.up", android: "file_upload", web: "file_upload" }}
-                size={24}
+                size={22}
                 color={colors.success}
               />
             </View>
-            <View style={styles.quickActionCopy}>
-              <Text style={styles.quickActionTitle}>Export Tasks</Text>
-              <Text style={styles.quickActionSubtitle}>Save tasks as CSV</Text>
-            </View>
-            
+            <Text style={styles.quickActionTitle}>Export</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -763,23 +755,25 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.mutedForeground,
     },
     quickActions: {
+      flexDirection: "row",
       gap: 12,
       marginTop: 22,
     },
     quickActionCard: {
-      minHeight: 86,
+      flex: 1,
+      minHeight: 88,
       borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
-      flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 16,
-      gap: 13,
+      justifyContent: "center",
+      paddingHorizontal: 10,
+      gap: 8,
     },
     quickActionIcon: {
-      width: 52,
-      height: 52,
-      borderRadius: 16,
+      width: 44,
+      height: 44,
+      borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -787,10 +781,11 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       flex: 1,
     },
     quickActionTitle: {
-      fontSize: 17,
-      lineHeight: 22,
+      fontSize: 16,
+      lineHeight: 20,
       fontWeight: "800",
       color: colors.foreground,
+      textAlign: "center",
     },
     quickActionSubtitle: {
       marginTop: 2,
