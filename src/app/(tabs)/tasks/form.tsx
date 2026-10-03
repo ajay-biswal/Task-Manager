@@ -21,6 +21,7 @@ import {
   TaskStatusSelector,
 } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
+import { useTaskFormDraft } from "@/context/TaskFormDraftContext";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { TaskFormData } from "@/types/task";
@@ -63,9 +64,10 @@ export default function TaskFormScreen() {
   const returnTo = typeof params.returnTo === "string" ? params.returnTo : undefined;
 
   const { addTask, editTask, findTask } = useTasks();
+  const { draft, setDraft, clearDraft } = useTaskFormDraft();
   const { colors } = useTheme();
 
-  const [form, setForm] = useState<TaskFormData>(initialForm);
+  const [form, setForm] = useState<TaskFormData>(taskId ? initialForm : draft);
   const [errors, setErrors] = useState<TaskValidationErrors>({});
   const [loadingTask, setLoadingTask] = useState(Boolean(taskId));
   const [saving, setSaving] = useState(false);
@@ -113,6 +115,12 @@ export default function TaskFormScreen() {
     };
   }, [taskId, findTask, router]);
 
+  useEffect(() => {
+    if (isEditMode) return;
+
+    setDraft(form);
+  }, [form, isEditMode, setDraft]);
+
   function updateField<K extends keyof TaskFormData>(
     field: K,
     value: TaskFormData[K],
@@ -145,6 +153,7 @@ export default function TaskFormScreen() {
         });
       } else {
         await addTask(createTaskFromForm(form));
+        clearDraft();
       }
 
       router.back();
@@ -358,12 +367,55 @@ export default function TaskFormScreen() {
             />
           </View>
 
-          <Button
-            title={isEditMode ? "Update Task" : "Create Task"}
-            onPress={handleSave}
-            loading={saving}
-            disabled={saving}
-          />
+          <View style={styles.actions}>
+            <Button
+              title={isEditMode ? "Update Task" : "Create Task"}
+              onPress={handleSave}
+              loading={saving}
+              disabled={saving}
+            />
+
+            {!isEditMode ? (
+              <Pressable
+                onPress={() => {
+                  Alert.alert(
+                    "Clear form",
+                    "Clear all entered task details?",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Clear",
+                        style: "destructive",
+                        onPress: () => {
+                          clearDraft();
+                          setForm(initialForm);
+                          setErrors({});
+                        },
+                      },
+                    ],
+                  );
+                }}
+                disabled={saving}
+                style={({ pressed }) => [
+                  styles.clearButton,
+                  { borderColor: colors.border },
+                  pressed && styles.pressed,
+                  saving && styles.disabled,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Clear task form"
+              >
+                <Text
+                  style={[
+                    styles.clearButtonText,
+                    { color: colors.destructive },
+                  ]}
+                >
+                  Clear
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
       </ScrollView>
 
@@ -433,6 +485,29 @@ const styles = StyleSheet.create({
 
   form: {
     gap: 12,
+  },
+
+  actions: {
+    gap: 10,
+    marginTop: 4,
+  },
+
+  clearButton: {
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+
+  clearButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  disabled: {
+    opacity: 0.45,
   },
 
   fieldCard: {
