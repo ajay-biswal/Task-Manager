@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import type { ReactNode } from "react";
 
 import { useTheme } from "@/theme/ThemeContext";
@@ -8,6 +9,7 @@ type CardProps = {
   onPress?: () => void;
   variant?: "default" | "outlined" | "muted";
   padding?: "none" | "sm" | "md" | "lg";
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function Card({
@@ -15,6 +17,7 @@ export default function Card({
   onPress,
   variant = "default",
   padding = "md",
+  style,
 }: CardProps) {
   const { colors } = useTheme();
 
@@ -29,6 +32,7 @@ export default function Card({
           borderColor: colors.border,
         },
         variant === "outlined" && styles.outlined,
+        style,
       ]}
     >
       {children}
