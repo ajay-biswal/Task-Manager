@@ -1,9 +1,8 @@
 import { CircularProgressIndicator, Host } from "@expo/ui/jetpack-compose";
 import { size } from "@expo/ui/jetpack-compose/modifiers";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -16,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TaskCard } from "@/components/task";
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Button, Card } from "@/components/ui";
+import { Card, Dialog } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import type { ThemeColors } from "@/theme";
@@ -159,6 +158,10 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const styles = createStyles(colors, insets.top, width, isDark);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -322,7 +325,6 @@ export default function DashboardScreen() {
               task.
             </Text>
 
-            <Button title="Add a new task" onPress={() => router.push("/tasks/form?returnTo=dashboard")} />
           </Card>
         ) : (
           <View style={styles.taskList}>
@@ -333,10 +335,10 @@ export default function DashboardScreen() {
                 onToggle={(status) => {
                   toggleTask(task.id, status).catch((err) => {
                     console.error("Failed to update task status:", err);
-                    Alert.alert(
-                      "Update failed",
-                      "Unable to update the task status.",
-                    );
+                    setDialog({
+                      title: "Update failed",
+                      message: "Unable to update the task status. Please try again.",
+                    });
                   });
                 }}
                 onPress={() => router.push(`/tasks/${task.id}`)}
@@ -373,11 +375,22 @@ export default function DashboardScreen() {
 
           <Card
             onPress={async () => {
+              if (tasks.length === 0) {
+                setDialog({
+                  title: "No tasks",
+                  message: "There are no tasks to export.",
+                });
+                return;
+              }
+
               try {
                 await exportTasksToCsv(tasks);
               } catch (err) {
                 console.error("Export failed:", err);
-                Alert.alert("Export failed", "Could not export your tasks.");
+                setDialog({
+                  title: "Export failed",
+                  message: "Could not export your tasks. Please try again.",
+                });
               }
             }}
             variant="outlined"
@@ -404,6 +417,19 @@ export default function DashboardScreen() {
           </Card>
         </View>
       </ScrollView>
+
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={[
+          {
+            label: "OK",
+            onPress: () => setDialog(null),
+          },
+        ]}
+        onRequestClose={() => setDialog(null)}
+      />
     </View>
   );
 }
