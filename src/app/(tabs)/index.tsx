@@ -146,18 +146,6 @@ function StatCard({
       ]}
     >
       <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
-        <AppIcon name={icon} size={21} color={iconColor} />
-      </View>
-
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-
-      <AppIcon
-        name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-        size={18}
-        color={colors.mutedForeground}
-        style={styles.statChevron}
-      />
     </View>
   );
 }
@@ -233,69 +221,6 @@ export default function DashboardScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Search tasks"
               >
-                <AppIcon
-                  name={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                  size={22}
-                  color={colors.foreground}
-                />
-              </Pressable>
-
-              <Pressable
-                onPress={() => router.push("/settings")}
-                style={({ pressed }) => [
-                  styles.headerButton,
-                  pressed && styles.pressed,
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Open settings"
-              >
-                <AppIcon
-                  name={{ ios: "gearshape", android: "settings", web: "settings" }}
-                  size={22}
-                  color={colors.foreground}
-                />
-              </Pressable>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.progressCard}>
-          <View style={styles.progressCopy}>
-            <Text style={styles.progressTitle}>Task Progress</Text>
-
-            <Text style={styles.progressCount}>
-              {completedTasks} of {totalTasks}
-            </Text>
-
-            <Text style={styles.progressSubtitle}>tasks completed</Text>
-
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${Math.round(progress * 100)}%`,
-                      backgroundColor: colors.accent,
-                    },
-                  ]}
-                />
-              </View>
-
-              <Text style={styles.progressPercent}>
-                {Math.round(progress * 100)}%
-              </Text>
-            </View>
-          </View>
-
-          <ProgressRing progress={progress} colors={colors} />
-
-          <AppIcon
-            name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-            size={20}
-            color={colors.mutedForeground}
-            style={styles.progressChevron}
-          />
         </View>
 
         <View style={styles.statsRow}>
@@ -387,55 +312,6 @@ export default function DashboardScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Add a new task"
               >
-                <AppIcon
-                  name={{ ios: "plus", android: "add", web: "add" }}
-                  size={22}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.emptyActionText}>Add a new task</Text>
-              </Pressable>
-          </View>
-        ) : (
-          <View style={styles.taskList}>
-            {todaysTasks.slice(0, 3).map((task) => (
-              <Pressable
-                key={task.id}
-                onPress={() => router.push(`/tasks/${task.id}`)}
-                style={({ pressed }) => [
-                  styles.taskCard,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.taskDot,
-                    {
-                      backgroundColor:
-                        task.status === "COMPLETED"
-                          ? colors.success
-                          : colors.accent,
-                    },
-                  ]}
-                />
-
-                <View style={styles.taskCopy}>
-                  <Text style={styles.taskTitle} numberOfLines={1}>
-                    {task.title}
-                  </Text>
-                  <Text style={styles.taskMeta} numberOfLines={1}>
-                    {task.category} · {task.priority.toLowerCase()}
-                  </Text>
-                </View>
-
-                <AppIcon
-                  name={{
-                    ios: "chevron.right",
-                    android: "chevron_right",
-                    web: "chevron_right",
-                  }}
-                  size={18}
-                  color={colors.mutedForeground}
-                />
               </Pressable>
             ))}
           </View>
@@ -453,21 +329,6 @@ export default function DashboardScreen() {
             accessibilityLabel="Bulk import tasks"
           >
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#17243A" : "#E4EFFD" }]}>
-              <AppIcon
-                name={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
-                size={24}
-                color={colors.accent}
-              />
-            </View>
-            <View style={styles.quickActionCopy}>
-              <Text style={styles.quickActionTitle}>Bulk Import</Text>
-              <Text style={styles.quickActionSubtitle}>Import tasks from CSV</Text>
-            </View>
-            <AppIcon
-              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-              size={19}
-              color={colors.mutedForeground}
-            />
           </Pressable>
 
           <Pressable
@@ -488,21 +349,6 @@ export default function DashboardScreen() {
             accessibilityLabel="Export tasks"
           >
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#16301F" : "#DDF8E2" }]}>
-              <AppIcon
-                name={{ ios: "square.and.arrow.up", android: "file_upload", web: "file_upload" }}
-                size={24}
-                color={colors.success}
-              />
-            </View>
-            <View style={styles.quickActionCopy}>
-              <Text style={styles.quickActionTitle}>Export Tasks</Text>
-              <Text style={styles.quickActionSubtitle}>Save tasks as CSV</Text>
-            </View>
-            <AppIcon
-              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-              size={19}
-              color={colors.mutedForeground}
-            />
           </Pressable>
         </View>
       </ScrollView>
