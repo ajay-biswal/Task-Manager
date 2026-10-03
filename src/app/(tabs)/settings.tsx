@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { Dialog } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import { spacing, typography } from "@/theme";
@@ -23,51 +23,52 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { tasks, clearTasks } = useTasks();
   const { isDark, colors, toggleTheme } = useTheme();
-  const [exporting, setExporting] = useState(false);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message?: string;
+    actions: Array<{
+      label: string;
+      variant?: "default" | "cancel" | "danger";
+      onPress: () => void | Promise<void>;
+    }>;
+  } | null>(null);
   const styles = createStyles(colors);
 
-  async function handleExportTasks() {
-    if (tasks.length === 0) {
-      Alert.alert("No tasks", "There are no tasks to export.");
-      return;
-    }
-
-    try {
-      setExporting(true);
-      await exportTasksToCsv(tasks);
-      Alert.alert(
-        "Export complete",
-        `${tasks.length} task(s) were exported successfully.`,
-      );
-    } catch (error) {
-      console.error("Failed to export tasks:", error);
-      Alert.alert("Export failed", "Unable to export tasks as a CSV file.");
-    } finally {
-      setExporting(false);
-    }
-  }
-
   function handleClearTasks() {
-    Alert.alert(
-      "Clear all tasks",
-      "This will permanently delete all tasks from this device.",
-      [
-        { text: "Cancel", style: "cancel" },
+    setDialog({
+      title: "Clear all tasks",
+      message: "This will permanently delete all tasks from this device.",
+      actions: [
         {
-          text: "Clear All",
-          style: "destructive",
+          label: "Cancel",
+          variant: "cancel",
+          onPress: () => setDialog(null),
+        },
+        {
+          label: "Clear all",
+          variant: "danger",
           onPress: async () => {
+            setDialog(null);
+
             try {
               await clearTasks();
-              Alert.alert("Tasks cleared", "All tasks have been removed.");
             } catch (error) {
               console.error("Failed to clear tasks:", error);
-              Alert.alert("Error", "Unable to clear tasks.");
+              setDialog({
+                title: "Clear failed",
+                message: "Unable to clear tasks. Please try again.",
+                actions: [
+                  {
+                    label: "OK",
+                    onPress: () => setDialog(null),
+                  },
+                ],
+              });
             }
           },
         },
       ],
-    );
+    });
   }
 
   return (
@@ -119,37 +120,6 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Data</Text>
 
           <Pressable
-            onPress={handleExportTasks}
-            disabled={exporting}
-            style={({ pressed }) => [styles.actionRow, pressed && styles.pressed]}
-          >
-            <View style={styles.actionIcon}>
-              <AppIcon
-                name={{
-                  ios: "square.and.arrow.up",
-                  android: "file_download",
-                  web: "file_download",
-                }}
-                size={20}
-                color={colors.foreground}
-              />
-            </View>
-            <View style={styles.rowContent}>
-              <Text style={styles.rowTitle}>
-                {exporting ? "Exporting..." : "Export tasks"}
-              </Text>
-              <Text style={styles.rowDescription}>
-                Share your tasks as a CSV file.
-              </Text>
-            </View>
-            <AppIcon
-              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-              size={18}
-              color={colors.mutedForeground}
-            />
-          </Pressable>
-
-          <Pressable
             onPress={handleClearTasks}
             style={({ pressed }) => [
               styles.actionRow,
@@ -180,6 +150,14 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
+
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={dialog?.actions ?? []}
+        onRequestClose={() => setDialog(null)}
+      />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
 
