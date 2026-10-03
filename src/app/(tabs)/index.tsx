@@ -322,7 +322,7 @@ export default function DashboardScreen() {
               task.
             </Text>
 
-            <Button title="Add a new task" onPress={() => router.push("/tasks/form")} />
+            <Button title="Add a new task" onPress={() => router.push("/tasks/form?returnTo=dashboard")} />
           </Card>
         ) : (
           <View style={styles.taskList}>
