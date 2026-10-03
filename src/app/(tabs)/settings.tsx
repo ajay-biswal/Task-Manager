@@ -23,11 +23,11 @@ export default function SettingsScreen() {
   const [dialog, setDialog] = useState<{
     title: string;
     message?: string;
-    actions: Array<{
+    actions: {
       label: string;
       variant?: "default" | "cancel" | "danger";
       onPress: () => void | Promise<void>;
-    }>;
+    }[];
   } | null>(null);
   const styles = createStyles(colors);
 
