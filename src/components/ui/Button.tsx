@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -7,6 +7,7 @@ type ButtonProps = {
   onPress: () => void;
   variant?: "primary" | "secondary" | "danger";
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export default function Button({
@@ -14,8 +15,10 @@ export default function Button({
   onPress,
   variant = "primary",
   disabled = false,
+  loading = false,
 }: ButtonProps) {
   const { colors } = useTheme();
+  const isDisabled = disabled || loading;
 
   const backgroundColor =
     variant === "primary"
@@ -34,8 +37,8 @@ export default function Button({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled}
+      accessibilityState={{ disabled: isDisabled }}
+      disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
@@ -44,11 +47,15 @@ export default function Button({
           borderColor: colors.border,
           borderWidth: 1,
         },
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
+        pressed && !isDisabled && styles.pressed,
+        isDisabled && styles.disabled,
       ]}
     >
-      <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+      {loading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+      )}
     </Pressable>
   );
 }
