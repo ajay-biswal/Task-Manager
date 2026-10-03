@@ -8,6 +8,7 @@ import { SQLiteProvider } from "expo-sqlite";
 
 import { initializeDatabase } from "@/database/database";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
+import { TaskFormDraftProvider } from "@/context/TaskFormDraftContext";
 
 function AppNavigator() {
   const { isDark, colors } = useTheme();
@@ -55,9 +56,11 @@ function ThemedNavigator() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <SQLiteProvider databaseName="taskflow.db" onInit={initializeDatabase}>
-        <ThemedNavigator />
-      </SQLiteProvider>
+      <TaskFormDraftProvider>
+        <SQLiteProvider databaseName="taskflow.db" onInit={initializeDatabase}>
+          <ThemedNavigator />
+        </SQLiteProvider>
+      </TaskFormDraftProvider>
     </ThemeProvider>
   );
 }
