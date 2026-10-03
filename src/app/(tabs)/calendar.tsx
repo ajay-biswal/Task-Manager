@@ -488,6 +488,10 @@ function createStyles(colors: ThemeColors) {
       justifyContent: "center",
     },
     selectedDayCircle: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      overflow: "hidden",
       backgroundColor: colors.accent,
     },
     dayNumber: {
