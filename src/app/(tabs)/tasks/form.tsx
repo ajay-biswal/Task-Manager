@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -92,7 +91,6 @@ export default function TaskFormScreen() {
   const [loadingTask, setLoadingTask] = useState(Boolean(taskId));
   const [saving, setSaving] = useState(false);
   const [dateField, setDateField] = useState<"startDate" | "dueDate" | null>(null);
-  const [selectField, setSelectField] = useState<"status" | null>(null);
 
   const isEditMode = Boolean(taskId);
 
@@ -530,11 +528,63 @@ export default function TaskFormScreen() {
           >
             <FieldLabel colors={colors}>Status</FieldLabel>
 
-            <SelectField
-              value={form.status === "PENDING" ? "Pending" : "Completed"}
-              colors={colors}
-              onPress={() => setSelectField("status")}
-            />
+            <View style={styles.statusRow}>
+              {statusOptions.map((status) => {
+                const selected = form.status === status;
+                const isPending = status === "PENDING";
+
+                return (
+                  <Pressable
+                    key={status}
+                    onPress={() => updateField("status", status)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={isPending ? "Pending" : "Completed"}
+                    accessibilityState={{ selected }}
+                    style={[
+                      styles.statusOption,
+                      {
+                        backgroundColor: selected
+                          ? colors.accent + "12"
+                          : colors.muted,
+                        borderColor: selected ? colors.accent : colors.border,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.statusIcon,
+                        {
+                          backgroundColor: selected
+                            ? colors.accent + "18"
+                            : colors.background,
+                        },
+                      ]}
+                    >
+                      <AppIcon
+                        name={
+                          isPending
+                            ? {
+                                ios: "clock",
+                                android: "schedule",
+                                web: "schedule",
+                              }
+                            : {
+                                ios: "checkmark.circle.fill",
+                                android: "check_circle",
+                                web: "check_circle",
+                              }
+                        }
+                        size={20}
+                        color={selected ? colors.accent : colors.mutedForeground}
+                      />
+                    </View>
+                    <Text style={[styles.statusText, { color: colors.foreground }]}>
+                      {isPending ? "Pending" : "Completed"}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <Pressable
@@ -559,73 +609,6 @@ export default function TaskFormScreen() {
 
         </View>
       </ScrollView>
-
-      <Modal
-        visible={selectField !== null}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setSelectField(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modal,
-              { backgroundColor: colors.card, borderColor: colors.border },
-            ]}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-                Status
-              </Text>
-              <Pressable
-                onPress={() => setSelectField(null)}
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="Close status selector"
-              >
-                <AppIcon
-                  name={{ ios: "xmark", android: "close", web: "close" }}
-                  size={20}
-                  color={colors.mutedForeground}
-                />
-              </Pressable>
-            </View>
-
-            {statusOptions.map((option) => {
-              const display = option === "PENDING" ? "Pending" : "Completed";
-              const current = form.status === option;
-
-              return (
-                <Pressable
-                  key={option}
-                  onPress={() => {
-                    updateField("status", option);
-                    setSelectField(null);
-                  }}
-                  accessibilityRole="radio"
-                  accessibilityLabel={display}
-                  accessibilityState={{ selected: current }}
-                  style={[
-                    styles.modalOption,
-                    current && { backgroundColor: colors.muted },
-                  ]}
-                >
-                  <Text style={[styles.modalOptionText, { color: colors.foreground }]}>
-                    {display}
-                  </Text>
-                  {current ? (
-                    <AppIcon
-                      name={{ ios: "checkmark", android: "check", web: "check" }}
-                      size={18}
-                      color={colors.accent}
-                    />
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      </Modal>
 
       {dateField ? (
         <DateTimePicker
@@ -654,58 +637,6 @@ function priorityColor(priority: TaskPriority): string {
   if (priority === "LOW") return "#22C55E";
   if (priority === "MEDIUM") return "#EAB308";
   return "#EF4444";
-}
-
-function SelectField({
-  value,
-  placeholder,
-  colors,
-  onPress,
-}: {
-  value: string;
-  placeholder?: string;
-  colors: ThemeColors;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={value || placeholder || "Select option"}
-      style={[
-        styles.selectField,
-        { backgroundColor: colors.input, borderColor: colors.border },
-      ]}
-    >
-      <View style={styles.selectContent}>
-        <View style={[styles.selectIcon, { backgroundColor: colors.muted }]}>
-          <AppIcon
-            name={{ ios: "clock", android: "schedule", web: "schedule" }}
-            size={18}
-            color={colors.mutedForeground}
-          />
-        </View>
-        <Text
-          style={[
-            styles.selectText,
-            { color: value ? colors.foreground : colors.mutedForeground },
-          ]}
-        >
-          {value || placeholder}
-        </Text>
-      </View>
-
-      <AppIcon
-        name={{
-          ios: "chevron.down",
-          android: "keyboard_arrow_down",
-          web: "keyboard_arrow_down",
-        }}
-        size={18}
-        color={colors.mutedForeground}
-      />
-    </Pressable>
-  );
 }
 
 function DateField({
@@ -987,33 +918,34 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  selectField: {
-    minHeight: 52,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 11,
+  statusRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  selectContent: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 10,
   },
 
-  selectIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
+  statusOption: {
+    flex: 1,
+    minHeight: 76,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    paddingHorizontal: 10,
+  },
+
+  statusIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  selectText: {
-    fontSize: 13,
-    fontWeight: "600",
+  statusText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
   },
 
   primaryButton: {
@@ -1042,43 +974,4 @@ const styles = StyleSheet.create({
     opacity: 0.72,
   },
 
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-
-  modal: {
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    borderWidth: 1,
-    padding: 20,
-    paddingBottom: 30,
-  },
-
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-  },
-
-  modalOption: {
-    minHeight: 50,
-    borderRadius: 11,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  modalOptionText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
 });
