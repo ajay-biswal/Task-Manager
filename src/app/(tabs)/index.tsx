@@ -581,7 +581,7 @@ function createStyles(
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "space-between",
-      marginBottom: 17,
+      marginBottom: 10,
     },
     sectionTitle: {
       fontSize: 27,
@@ -603,7 +603,7 @@ function createStyles(
       color: colors.accent,
     },
     emptyCard: {
-      minHeight: compact ? 320 : isDark ? 384 : 352,
+      minHeight: compact ? 300 : isDark ? 350 : 330,
       borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
@@ -615,9 +615,9 @@ function createStyles(
     },
     emptyImage: {
       width: "88%",
-      height: compact ? 145 : isDark ? 180 : 170,
+      height: compact ? 132 : isDark ? 160 : 150,
       marginTop: -8,
-      marginBottom: 2,
+      marginBottom: 4,
       opacity: isDark ? 0.9 : 1,
     },
     emptyTitle: {
@@ -656,12 +656,11 @@ function createStyles(
     quickActions: {
       flexDirection: "row",
       gap: 12,
-      marginTop: 22,
+      marginTop: 18,
     },
     quickActionCard: {
       flex: 1,
-      flex: 1,
-      minHeight: 112,
+      minHeight: 104,
       borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
