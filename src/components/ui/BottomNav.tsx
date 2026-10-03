@@ -53,9 +53,12 @@ export function BottomNav() {
       ]}
     >
       <View style={styles.navBar}>
-        {ITEMS.slice(0, 2).map((item) => renderItem(item))}
-        <View style={styles.centerSlot} />
-        {ITEMS.slice(2).map((item) => renderItem(item))}
+        <View style={styles.navSide}>
+          {ITEMS.slice(0, 2).map((item) => renderItem(item))}
+        </View>
+        <View style={styles.navSide}>
+          {ITEMS.slice(2).map((item) => renderItem(item))}
+        </View>
 
         <Pressable
           onPress={() => router.push("/tasks/form")}
@@ -131,16 +134,19 @@ function createStyles(colors: ThemeColors, isDark: boolean) {
       elevation: 8,
     },
 
+    navSide: {
+      width: "50%",
+      height: 66,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
     item: {
       flex: 1,
       height: 66,
       alignItems: "center",
       justifyContent: "center",
       gap: 5,
-    },
-
-    centerSlot: {
-      width: 82,
     },
 
     label: {
