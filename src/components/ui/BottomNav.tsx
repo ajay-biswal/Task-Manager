@@ -38,7 +38,7 @@ export function BottomNav() {
 
   // Detail and form screens use the full screen so their actions are never
   // covered by the floating tab bar.
-  const isTaskSubscreen = pathname.startsWith("/tasks/");
+  const isTaskSubscreen =\n    pathname.startsWith("/tasks/") || pathname === "/bulk-upload";
 
   if (isTaskSubscreen) {
     return null;
