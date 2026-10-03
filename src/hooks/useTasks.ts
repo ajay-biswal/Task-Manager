@@ -1,5 +1,5 @@
 import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createTask,
@@ -22,16 +22,25 @@ export function useTasks() {
   const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const refreshRequestRef = useRef(0);
 
   const loadTasks = useCallback(async () => {
+    const requestId = ++refreshRequestRef.current;
+
     try {
       setError(null);
 
       const result = await getTasks(database);
-      setTasks(result);
+
+      if (requestId === refreshRequestRef.current) {
+        setTasks(result);
+      }
     } catch (err) {
       console.error("Failed to load tasks:", err);
-      setError("Failed to load tasks.");
+
+      if (requestId === refreshRequestRef.current) {
+        setError("Failed to load tasks.");
+      }
     }
   }, [database]);
 
@@ -112,15 +121,15 @@ export function useTasks() {
         await updateTaskStatus(database, id, status);
 
         setTasks((current) =>
-        current.map((task) =>
-          task.id === id
-            ? {
-                ...task,
-                status,
-                updatedAt: new Date().toISOString(),
-              }
-            : task,
-        ),
+          current.map((task) =>
+            task.id === id
+              ? {
+                  ...task,
+                  status,
+                  updatedAt: new Date().toISOString(),
+                }
+              : task,
+          ),
         );
       } finally {
         setPendingTaskIds((current) => {
