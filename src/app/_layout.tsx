@@ -30,7 +30,13 @@ function AppNavigator() {
       />
       <Stack.Screen
         name="bulk-upload"
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          animation: "none",
+          contentStyle: {
+            backgroundColor: colors.background,
+          },
+        }}
       />
     </Stack>
   );
