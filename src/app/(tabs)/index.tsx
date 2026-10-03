@@ -319,7 +319,7 @@ export default function DashboardScreen() {
             <Text style={styles.stateText}>Loading your tasks...</Text>
           </Card>
         ) : error ? (
-          <View style={styles.emptyCard}>
+          <Card variant="outlined" padding="none" style={styles.emptyCard}>
             <Text style={styles.errorText}>{error}</Text>
           </Card>
         ) : todaysTasks.length === 0 ? (
@@ -338,7 +338,6 @@ export default function DashboardScreen() {
             </Text>
 
             <Button title="Add a new task" onPress={() => router.push("/tasks/form")} />
-            </Button>
           </Card>
         ) : (
           <View style={styles.taskList}>
