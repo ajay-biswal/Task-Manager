@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui";
-
-type TaskPriority = "low" | "medium" | "high";
+import type { TaskPriority } from "@/types/task";
 
 type TaskPriorityBadgeProps = {
   priority: TaskPriority;
@@ -13,15 +12,15 @@ const priorityConfig: Record<
     variant: "default" | "warning" | "danger";
   }
 > = {
-  low: {
+  LOW: {
     label: "Low",
     variant: "default",
   },
-  medium: {
+  MEDIUM: {
     label: "Medium",
     variant: "warning",
   },
-  high: {
+  HIGH: {
     label: "High",
     variant: "danger",
   },
