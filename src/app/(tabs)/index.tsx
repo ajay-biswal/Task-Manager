@@ -3,6 +3,7 @@ import { size } from "@expo/ui/jetpack-compose/modifiers";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -18,6 +19,7 @@ import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import { isTaskOverdue } from "@/utils/taskUtils";
+import { exportTasksToCsv } from "@/services/taskExport";
 
 function isToday(dateString: string): boolean {
   const date = new Date(`${dateString}T00:00:00`);
@@ -439,20 +441,69 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        <View style={styles.motivationCard}>
-  <View style={styles.quoteIcon}>
-            <Text style={styles.quoteMark}>“</Text>
-          </View>
+        <View style={styles.quickActions}>
+          <Pressable
+            onPress={() => router.push("/bulk-upload")}
+            style={({ pressed }) => [
+              styles.quickActionCard,
+              { backgroundColor: isDark ? "#0D1420" : "#F2F7FD" },
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Bulk import tasks"
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#17243A" : "#E4EFFD" }]}>
+              <AppIcon
+                name={{ ios: "arrow.down.doc", android: "upload_file", web: "upload_file" }}
+                size={24}
+                color={colors.accent}
+              />
+            </View>
+            <View style={styles.quickActionCopy}>
+              <Text style={styles.quickActionTitle}>Bulk Import</Text>
+              <Text style={styles.quickActionSubtitle}>Import tasks from CSV</Text>
+            </View>
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={19}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
 
-          <Text style={styles.quoteText}>
-            Small steps every day{"\n"}lead to big results.
-          </Text>
-
-          <AppIcon
-            name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
-            size={20}
-            color={colors.mutedForeground}
-          />
+          <Pressable
+            onPress={async () => {
+              try {
+                await exportTasksToCsv(tasks);
+              } catch (err) {
+                console.error("Export failed:", err);
+                Alert.alert("Export failed", "Could not export your tasks.");
+              }
+            }}
+            style={({ pressed }) => [
+              styles.quickActionCard,
+              { backgroundColor: isDark ? "#111A15" : "#F3FBF5" },
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Export tasks"
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#16301F" : "#DDF8E2" }]}>
+              <AppIcon
+                name={{ ios: "square.and.arrow.up", android: "file_upload", web: "file_upload" }}
+                size={24}
+                color={colors.success}
+              />
+            </View>
+            <View style={styles.quickActionCopy}>
+              <Text style={styles.quickActionTitle}>Export Tasks</Text>
+              <Text style={styles.quickActionSubtitle}>Save tasks as CSV</Text>
+            </View>
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              size={19}
+              color={colors.mutedForeground}
+            />
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -757,41 +808,42 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       fontSize: 13,
       color: colors.mutedForeground,
     },
-    motivationCard: {
-      height: compact ? 92 : 112,
-      flexDirection: "row",
-      alignItems: "center",
+    quickActions: {
+      gap: 12,
       marginTop: 22,
-      borderRadius: 22,
-      overflow: "hidden",
-      backgroundColor: isDark ? "#0B1422" : "#F2F7FD",
+    },
+    quickActionCard: {
+      minHeight: 86,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
-      justifyContent: "space-between",
-      paddingHorizontal: 22,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      gap: 13,
     },
-    quoteIcon: {
-      width: 54,
-      height: 54,
-      borderRadius: 27,
-      backgroundColor: colors.card,
+    quickActionIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 0,
-      marginRight: 16,
     },
-    quoteMark: {
-      marginTop: -7,
-      fontSize: 39,
-      lineHeight: 45,
-      fontWeight: "800",
-      color: colors.accent,
+    quickActionCopy: {
+      flex: 1,
     },
-    quoteText: {
-      fontSize: 18,
-      lineHeight: 24,
+    quickActionTitle: {
+      fontSize: 17,
+      lineHeight: 22,
       fontWeight: "800",
       color: colors.foreground,
+    },
+    quickActionSubtitle: {
+      marginTop: 2,
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: "500",
+      color: colors.mutedForeground,
     },
     pressed: {
       opacity: 0.72,
