@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TaskCard } from "@/components/task";
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Button, Card, IconButton } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import { exportTasksToCsv } from "@/services/taskExport";
 import type { ThemeColors } from "@/theme";
@@ -206,21 +206,6 @@ export default function DashboardScreen() {
               <Text style={styles.date}>{formatToday()}</Text>
             </View>
 
-            <View style={styles.headerActions}>
-              <IconButton
-                variant="ghost"
-                size="lg"
-                onPress={() => router.push("/settings")}
-                accessibilityLabel="Open settings"
-                icon={
-                  <AppIcon
-                    name={{ ios: "gearshape", android: "settings", web: "settings" }}
-                    size={22}
-                    color={colors.foreground}
-                  />
-                }
-              />
-            </View>
           </View>
         </View>
 
@@ -479,10 +464,6 @@ function createStyles(
       fontWeight: "500",
       color: colors.mutedForeground,
     },
-    headerActions: {
-      flexDirection: "row",
-      gap: 12,
-    },
 
     progressCard: {
       minHeight: compact ? 184 : 194,
@@ -679,18 +660,19 @@ function createStyles(
     },
     quickActionCard: {
       flex: 1,
-      minHeight: 88,
+      flex: 1,
+      minHeight: 112,
       borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 10,
-      gap: 8,
+      gap: 10,
     },
     quickActionIcon: {
-      width: 44,
-      height: 44,
+      width: 52,
+      height: 52,
       borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
