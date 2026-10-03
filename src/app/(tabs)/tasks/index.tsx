@@ -1,7 +1,6 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { Dialog } from "@/components/ui";
 import { TaskCard } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
@@ -70,6 +70,173 @@ export default function TaskListScreen() {
   const [filter, setFilter] = useState<TaskFilter>("ALL");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("DUE_DATE");
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (focusSearch !== "1") {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [focusSearch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshTasks();
+    }, [refreshTasks]),
+  );
+
+  const filteredTasks = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    return tasks
+      .filter((task) => {
+        const matchesFilter =
+          filter === "ALL" ||
+          (filter === "OVERDUE"
+            ? isTaskOverdue(task)
+            : task.status === filter);
+        const matchesSearch =
+          !normalizedSearch ||
+          task.title.toLowerCase().includes(normalizedSearch) ||
+          task.category.toLowerCase().includes(normalizedSearch);
+
+        return matchesFilter && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (sortBy === "PRIORITY") {
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }
+
+        return (
+          new Date(`${a.dueDate}T00:00:00`).getTime() -
+          new Date(`${b.dueDate}T00:00:00`).getTime()
+        );
+      });
+  }, [tasks, filter, search, sortBy]);
+
+  const groups = useMemo(() => {
+    const result: Array<{
+      title: "Overdue" | "Today" | "Tomorrow" | "Later";
+      tasks: Task[];
+    }> = [
+      { title: "Overdue", tasks: [] },
+      { title: "Today", tasks: [] },
+      { title: "Tomorrow", tasks: [] },
+      { title: "Later", tasks: [] },
+    ];
+
+    for (const task of filteredTasks) {
+      const group = result.find((item) => item.title === getDayGroup(task.dueDate));
+      group?.tasks.push(task);
+    }
+
+    return result.filter((group) => group.tasks.length > 0);
+  }, [filteredTasks]);
+
+  const listData = groups.flatMap((group) => [
+    { type: "header" as const, id: `header-${group.title}`, title: group.title, tasks: group.tasks },
+    ...group.tasks.map((task) => ({
+      type: "task" as const,
+      id: task.id,
+      task,
+    })),
+  ]);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Tasks</Text>
+            <Text style={styles.subtitle}>
+              {tasks.length} {tasks.length === 1 ? "task" : "tasks"} · Stay consistent
+            </Text>
+          </View>
+
+mport { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { AppIcon } from "@/components/ui/AppIcon";
+import { Dialog } from "@/components/ui";
+import { TaskCard } from "@/components/task";
+import { useTasks } from "@/hooks/useTasks";
+import type { ThemeColors } from "@/theme";
+import { spacing, typography } from "@/theme";
+import { useTheme } from "@/theme/ThemeContext";
+import type { Task, TaskPriority } from "@/types/task";
+import { isTaskOverdue } from "@/utils/taskUtils";
+
+type TaskFilter = "ALL" | "PENDING" | "COMPLETED" | "OVERDUE";
+type SortOption = "DUE_DATE" | "PRIORITY";
+
+const priorityOrder: Record<TaskPriority, number> = {
+  HIGH: 1,
+  MEDIUM: 2,
+  LOW: 3,
+};
+
+function startOfDay(date = new Date()): Date {
+  const value = new Date(date);
+  value.setHours(0, 0, 0, 0);
+  return value;
+}
+
+function getDayGroup(
+  dateString: string,
+): "Overdue" | "Today" | "Tomorrow" | "Later" {
+  const dueDate = new Date(`${dateString}T00:00:00`);
+  const today = startOfDay();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (dueDate.getTime() < today.getTime()) {
+    return "Overdue";
+  }
+
+  if (dueDate.getTime() === today.getTime()) {
+    return "Today";
+  }
+
+  if (dueDate.getTime() === tomorrow.getTime()) {
+    return "Tomorrow";
+  }
+
+  return "Later";
+}
+
+export default function TaskListScreen() {
+  const router = useRouter();
+  const { focusSearch } = useLocalSearchParams<{ focusSearch?: string }>();
+  const searchInputRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
+  const { tasks, loading, error, toggleTask, refreshTasks } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors, insets.top);
+
+  const [filter, setFilter] = useState<TaskFilter>("ALL");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("DUE_DATE");
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (focusSearch !== "1") {
@@ -275,7 +442,10 @@ export default function TaskListScreen() {
                 onToggle={(status) => {
                   toggleTask(item.task.id, status).catch((error) => {
                     console.error("Failed to update task status:", error);
-                    Alert.alert("Update failed", "Unable to update the task status.");
+                    setDialog({
+                      title: "Update failed",
+                      message: "Unable to update the task status. Please try again.",
+                    });
                   });
                 }}
                 onPress={() => router.push(`/tasks/${item.task.id}`)}
@@ -310,6 +480,18 @@ export default function TaskListScreen() {
           }
         />
       )}
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={[
+          {
+            label: "OK",
+            onPress: () => setDialog(null),
+          },
+        ]}
+        onRequestClose={() => setDialog(null)}
+      />
     </View>
   );
 }
@@ -341,17 +523,6 @@ function createStyles(colors: ThemeColors, topInset = 0) {
       marginTop: 3,
       fontSize: 13,
       color: colors.mutedForeground,
-    },
-
-    moreButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.muted,
     },
 
     searchRow: { flexDirection: "row", gap: 8 },
