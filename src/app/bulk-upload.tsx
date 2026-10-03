@@ -247,18 +247,31 @@ export default function BulkUploadScreen() {
 
       const valid: NormalizedCsvTaskRow[] = [];
       const errors: string[] = [];
+      const seenIds = new Set<string>();
 
       results.data.forEach((rawRow, index) => {
+        const rowNumber = index + 2;
         const row = normalizeRow(rawRow);
-        const rowErrors = validateCsvRow(row, index + 2);
+        const rowErrors = validateCsvRow(row, rowNumber);
 
         if (rowErrors.length > 0) {
           errors.push(...rowErrors);
           return;
         }
 
+        const id = row.id!.trim();
+
+        if (seenIds.has(id)) {
+          errors.push(
+            "Row " + rowNumber + ": Duplicate ID " + id + " in this CSV file",
+          );
+          return;
+        }
+
+        seenIds.add(id);
+
         valid.push({
-          id: row.id!.trim(),
+          id,
           title: row.title!.trim(),
           description: row.description?.trim() ?? "",
           category: row.category!.trim(),
@@ -338,7 +351,8 @@ export default function BulkUploadScreen() {
             : null,
           failedCount > 0 ? failedCount + " task(s) failed." : null,
           validationErrors.length > 0
-            ? validationErrors.length + " validation issue(s) skipped."
+            ? validationErrors.length +
+              " validation issue(s) skipped."
             : null,
         ]
           .filter(Boolean)
