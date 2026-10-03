@@ -1,4 +1,3 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -15,26 +14,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Button, Input } from "@/components/ui";
+import { Button, DateField, Input } from "@/components/ui";
+import {
+  TaskCategorySelector,
+  TaskPrioritySelector,
+  TaskStatusSelector,
+} from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
-import type { TaskFormData, TaskPriority, TaskStatus } from "@/types/task";
+import type { TaskFormData } from "@/types/task";
 import { formatDate } from "@/utils/dateUtils";
 import { createTaskFromForm } from "@/utils/taskUtils";
 import { type TaskValidationErrors, validateTask } from "@/utils/validation";
 
-const categoryOptions = ["Work", "Personal", "Study", "Health", "Other"];
-const statusOptions: TaskStatus[] = ["PENDING", "COMPLETED"];
-const priorities: TaskPriority[] = ["LOW", "MEDIUM", "HIGH"];
-
-const categoryIcons = {
-  Work: { ios: "briefcase.fill", android: "business_center", web: "business_center" },
-  Personal: { ios: "house.fill", android: "home", web: "home" },
-  Study: { ios: "graduationcap.fill", android: "school", web: "school" },
-  Health: { ios: "heart.fill", android: "favorite", web: "favorite" },
-  Other: { ios: "ellipsis", android: "more_horiz", web: "more_horiz" },
-} as const;
 
 const initialForm: TaskFormData = {
   title: "",
@@ -45,20 +38,6 @@ const initialForm: TaskFormData = {
   dueDate: "",
   status: "PENDING",
 };
-
-function parseDate(value: string): Date {
-  if (!value) return new Date();
-
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function toISODate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 function FieldLabel({
   children,
@@ -90,7 +69,6 @@ export default function TaskFormScreen() {
   const [errors, setErrors] = useState<TaskValidationErrors>({});
   const [loadingTask, setLoadingTask] = useState(Boolean(taskId));
   const [saving, setSaving] = useState(false);
-  const [dateField, setDateField] = useState<"startDate" | "dueDate" | null>(null);
 
   const isEditMode = Boolean(taskId);
 
@@ -310,56 +288,12 @@ export default function TaskFormScreen() {
           >
             <FieldLabel colors={colors}>Category</FieldLabel>
 
-            <View style={styles.categoryGrid}>
-              {[
-                ...categoryOptions,
-                ...(form.category && !categoryOptions.includes(form.category)
-                  ? [form.category]
-                  : []),
-              ].map((category) => {
-                const selected = form.category === category;
-                const icon =
-                  category in categoryIcons
-                    ? categoryIcons[category as keyof typeof categoryIcons]
-                    : categoryIcons.Other;
-
-                return (
-                  <Pressable
-                    key={category}
-                    onPress={() => updateField("category", category)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={category}
-                    accessibilityState={{ selected }}
-                    style={[
-                      styles.categoryOption,
-                      {
-                        backgroundColor: selected
-                          ? colors.accent + "12"
-                          : colors.muted,
-                        borderColor: selected ? colors.accent : colors.border,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.categoryIcon,
-                        {
-                          backgroundColor: selected
-                            ? colors.accent + "18"
-                            : colors.background,
-                        },
-                      ]}
-                    >
-                      <AppIcon
-                        name={icon}
-                        size={19}
-                        color={
-                          selected
-                            ? colors.accent
-                            : colors.mutedForeground
-                        }
-                      />
-                    </View>
+            <TaskCategorySelector
+              value={form.category}
+              onChange={(value) => updateField("category", value)}
+              error={errors.category}
+            />
+          </View>
                     <Text
                       numberOfLines={1}
                       style={[
@@ -374,11 +308,7 @@ export default function TaskFormScreen() {
               })}
             </View>
 
-            {errors.category ? (
-              <Text style={[styles.error, { color: colors.destructive }]}>
-                {errors.category}
-              </Text>
-            ) : null}
+
           </View>
 
           <View
@@ -389,61 +319,11 @@ export default function TaskFormScreen() {
           >
             <FieldLabel colors={colors}>Priority</FieldLabel>
 
-            <View style={styles.priorityRow}>
-              {priorities.map((priority) => {
-                const selected = form.priority === priority;
-
-                return (
-                  <Pressable
-                    key={priority}
-                    onPress={() => updateField("priority", priority)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={`${priority.toLowerCase()} priority`}
-                    accessibilityState={{ selected }}
-                    style={[
-                      styles.priorityButton,
-                      {
-                        backgroundColor: selected
-                          ? priorityColor(priority) + "14"
-                          : colors.muted,
-                        borderColor: selected
-                          ? priorityColor(priority)
-                          : colors.border,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.priorityIcon,
-                        {
-                          backgroundColor: priorityColor(priority) + "14",
-                        },
-                      ]}
-                    >
-                      <AppIcon
-                        name={
-                          priority === "LOW"
-                            ? {
-                                ios: "arrow.down",
-                                android: "arrow_downward",
-                                web: "arrow_downward",
-                              }
-                            : priority === "MEDIUM"
-                              ? {
-                                  ios: "equal",
-                                  android: "drag_handle",
-                                  web: "drag_handle",
-                                }
-                              : {
-                                  ios: "arrow.up",
-                                  android: "arrow_upward",
-                                  web: "arrow_upward",
-                                }
-                        }
-                        size={18}
-                        color={priorityColor(priority)}
-                      />
-                    </View>
+            <TaskPrioritySelector
+              value={form.priority}
+              onChange={(value) => updateField("priority", value)}
+            />
+          </View>
                     <Text
                       style={[
                         styles.priorityText,
@@ -470,19 +350,19 @@ export default function TaskFormScreen() {
               <DateField
                 label="Start date"
                 value={form.startDate}
-                colors={colors}
-                onPress={() => setDateField("startDate")}
+                onChange={(value) => updateField("startDate", value)}
                 error={errors.startDate}
               />
 
               <DateField
                 label="Due date"
                 value={form.dueDate}
-                colors={colors}
-                onPress={() => setDateField("dueDate")}
+                onChange={(value) => updateField("dueDate", value)}
                 error={errors.dueDate}
+                minimumDate={form.startDate ? new Date(...form.startDate.split("-").map((part, index) => index === 1 ? Number(part) - 1 : Number(part)) as [number, number, number]) : undefined}
               />
             </View>
+          </View>
           </View>
 
           <View
@@ -493,60 +373,11 @@ export default function TaskFormScreen() {
           >
             <FieldLabel colors={colors}>Status</FieldLabel>
 
-            <View style={styles.statusRow}>
-              {statusOptions.map((status) => {
-                const selected = form.status === status;
-                const isPending = status === "PENDING";
-
-                return (
-                  <Pressable
-                    key={status}
-                    onPress={() => updateField("status", status)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={isPending ? "Pending" : "Completed"}
-                    accessibilityState={{ selected }}
-                    style={[
-                      styles.statusOption,
-                      {
-                        backgroundColor: selected
-                          ? colors.accent + "12"
-                          : colors.muted,
-                        borderColor: selected ? colors.accent : colors.border,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.statusIcon,
-                        {
-                          backgroundColor: selected
-                            ? colors.accent + "18"
-                            : colors.background,
-                        },
-                      ]}
-                    >
-                      <AppIcon
-                        name={
-                          isPending
-                            ? {
-                                ios: "clock",
-                                android: "schedule",
-                                web: "schedule",
-                              }
-                            : {
-                                ios: "checkmark.circle.fill",
-                                android: "check_circle",
-                                web: "check_circle",
-                              }
-                        }
-                        size={20}
-                        color={
-                          selected
-                            ? colors.accent
-                            : colors.mutedForeground
-                        }
-                      />
-                    </View>
+            <TaskStatusSelector
+              value={form.status}
+              onChange={(value) => updateField("status", value)}
+            />
+          </View>
                     <Text
                       style={[styles.statusText, { color: colors.foreground }]}
                     >
@@ -567,88 +398,11 @@ export default function TaskFormScreen() {
         </View>
       </ScrollView>
 
-      {dateField ? (
-        <DateTimePicker
-          value={parseDate(form[dateField])}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          minimumDate={
-            dateField === "dueDate" && form.startDate
-              ? parseDate(form.startDate)
-              : undefined
-          }
-          onValueChange={(event, date) => {
-            if (date) {
-              updateField(dateField, toISODate(date));
-              setDateField(null);
-            }
-          }}
-          onDismiss={() => setDateField(null)}
-        />
-      ) : null}
+
     </KeyboardAvoidingView>
   );
 }
 
-function priorityColor(priority: TaskPriority): string {
-  if (priority === "LOW") return "#22C55E";
-  if (priority === "MEDIUM") return "#EAB308";
-  return "#EF4444";
-}
-
-function DateField({
-  label,
-  value,
-  colors,
-  onPress,
-  error,
-}: {
-  label: string;
-  value: string;
-  colors: ThemeColors;
-  onPress: () => void;
-  error?: string;
-}) {
-  return (
-    <View style={styles.dateFieldContainer}>
-      <Text style={[styles.dateLabel, { color: colors.mutedForeground }]}>
-        {label}
-      </Text>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`${label}, ${value ? formatDate(value) : "Select date"}`}
-        style={[
-          styles.dateField,
-          {
-            backgroundColor: colors.input,
-            borderColor: error ? colors.destructive : colors.border,
-          },
-        ]}
-      >
-        <AppIcon
-          name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }}
-          size={17}
-          color={colors.mutedForeground}
-        />
-        <Text
-          numberOfLines={1}
-          style={[
-            styles.dateText,
-            { color: value ? colors.foreground : colors.mutedForeground },
-          ]}
-        >
-          {value ? formatDate(value) : "Select date"}
-        </Text>
-      </Pressable>
-      {error ? (
-        <Text style={[styles.error, { color: colors.destructive }]}>
-          {error}
-        </Text>
-      ) : null}
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -743,184 +497,54 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  inputShell: {
-    minHeight: 55,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 13,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
 
-  input: {
-    flex: 1,
-    minHeight: 44,
-    paddingVertical: 9,
-    fontSize: 14,
-    fontWeight: "500",
-  },
 
-  descriptionShell: {
-    minHeight: 105,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 13,
-    paddingTop: 13,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
 
-  descriptionInput: {
-    flex: 1,
-    minHeight: 78,
-    paddingTop: 1,
-    paddingBottom: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "500",
-  },
 
-  categoryGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
 
-  categoryOption: {
-    flexBasis: "31%",
-    flexGrow: 1,
-    minWidth: 92,
-    minHeight: 82,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingHorizontal: 8,
-  },
 
-  categoryIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
-  categoryText: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "700",
-  },
 
-  priorityRow: {
-    flexDirection: "row",
-    gap: 9,
-  },
 
-  priorityButton: {
-    flex: 1,
-    minHeight: 72,
-    borderRadius: 13,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
 
-  priorityIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
-  priorityText: {
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: "700",
-  },
+
+
+
+
+
+
+
+
+
+
+
+
 
   scheduleTopRow: {
     flexDirection: "row",
     gap: 9,
   },
 
-  dateFieldContainer: {
-    flex: 1,
-    gap: 6,
-  },
 
-  dateLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
 
-  dateField: {
-    minHeight: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-  },
 
-  dateText: {
-    flex: 1,
-    fontSize: 11,
-    fontWeight: "600",
-  },
 
-  statusRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
 
-  statusOption: {
-    flex: 1,
-    minHeight: 76,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingHorizontal: 10,
-  },
 
-  statusIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
-  statusText: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "700",
-  },
 
-  primaryButton: {
-    minHeight: 56,
-    borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-    marginTop: 2,
-  },
 
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "900",
-  },
+
+
+
+
+
+
+
+
+
+
 
   error: {
     fontSize: 11,
