@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { TaskCard } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
@@ -67,92 +67,6 @@ function getCategoryColor(category: string, colors: ThemeColors): string {
   if (normalized === "personal") return colors.accent;
 
   return colors.accent;
-}
-
-function TaskRow({
-  task,
-  colors,
-  onToggle,
-  onPress,
-}: {
-  task: Task;
-  colors: ThemeColors;
-  onToggle: () => void;
-  onPress: () => void;
-}) {
-  const styles = createStyles(colors);
-  const overdue = isTaskOverdue(task);
-  const categoryColor = getCategoryColor(task.category, colors);
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
-      accessibilityRole="button"
-      accessibilityLabel={`Open task ${task.title}`}
-    >
-      <Pressable
-        onPress={onToggle}
-        hitSlop={8}
-        style={[
-          styles.checkbox,
-          task.status === "COMPLETED" && styles.checkboxCompleted,
-        ]}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: task.status === "COMPLETED" }}
-      >
-        {task.status === "COMPLETED" ? (
-          <AppIcon
-            name={{ ios: "checkmark", android: "check", web: "check" }}
-            size={13}
-            color="#FFFFFF"
-          />
-        ) : null}
-      </Pressable>
-
-      <View style={styles.taskMain}>
-        <Text
-          numberOfLines={1}
-          style={[
-            styles.taskTitle,
-            task.status === "COMPLETED" && styles.completedTitle,
-          ]}
-        >
-          {task.title}
-        </Text>
-
-        <View style={styles.taskMetaRow}>
-          <View style={[styles.categoryDot, { backgroundColor: categoryColor }]} />
-          <Text style={styles.taskMeta} numberOfLines={1}>
-            {task.category}
-          </Text>
-          <Text style={styles.metaSeparator}>·</Text>
-          <Text style={[styles.taskMeta, overdue && styles.overdueMeta]} numberOfLines={1}>
-            Due {formatShortDate(task.dueDate)}
-          </Text>
-        </View>
-      </View>
-
-      <View
-        style={[
-          styles.priorityBadge,
-          task.priority === "HIGH" && styles.highPriority,
-          task.priority === "MEDIUM" && styles.mediumPriority,
-          task.priority === "LOW" && styles.lowPriority,
-        ]}
-      >
-        <Text
-          style={[
-            styles.priorityText,
-            task.priority === "HIGH" && styles.highPriorityText,
-            task.priority === "MEDIUM" && styles.mediumPriorityText,
-          ]}
-        >
-          {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
-        </Text>
-      </View>
-    </Pressable>
-  );
 }
 
 export default function TaskListScreen() {
@@ -377,10 +291,14 @@ export default function TaskListScreen() {
                 </Text>
               </View>
             ) : (
-              <TaskRow
+              <TaskCard
                 task={item.task}
-                colors={colors}
-                onToggle={() => handleToggle(item.task)}
+                onToggle={(status) => {
+                  toggleTask(item.task.id, status).catch((error) => {
+                    console.error("Failed to update task status:", error);
+                    Alert.alert("Update failed", "Unable to update the task status.");
+                  });
+                }}
                 onPress={() => router.push(`/tasks/${item.task.id}`)}
               />
             )
