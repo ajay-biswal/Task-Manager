@@ -159,6 +159,8 @@ export default function TaskFormScreen() {
       } else {
         await addTask(createTaskFromForm(form));
         clearDraft();
+        setForm(initialForm);
+        setErrors({});
       }
 
       router.back();
