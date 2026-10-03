@@ -24,7 +24,6 @@ import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { TaskFormData } from "@/types/task";
-import { formatDate } from "@/utils/dateUtils";
 import { createTaskFromForm } from "@/utils/taskUtils";
 import { type TaskValidationErrors, validateTask } from "@/utils/validation";
 
@@ -246,7 +245,6 @@ export default function TaskFormScreen() {
                 {form.title.length}/100
               </Text>
             </View>
-
             <Input
               value={form.title}
               onChangeText={(value) => updateField("title", value)}
@@ -269,7 +267,6 @@ export default function TaskFormScreen() {
                 {form.description.length}/500
               </Text>
             </View>
-
             <Input
               value={form.description}
               onChangeText={(value) => updateField("description", value)}
@@ -287,28 +284,11 @@ export default function TaskFormScreen() {
             ]}
           >
             <FieldLabel colors={colors}>Category</FieldLabel>
-
             <TaskCategorySelector
               value={form.category}
               onChange={(value) => updateField("category", value)}
               error={errors.category}
             />
-          </View>
-                    <Text
-                      numberOfLines={1}
-                      style={[
-                        styles.categoryText,
-                        { color: colors.foreground },
-                      ]}
-                    >
-                      {category}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-
           </View>
 
           <View
@@ -318,24 +298,10 @@ export default function TaskFormScreen() {
             ]}
           >
             <FieldLabel colors={colors}>Priority</FieldLabel>
-
             <TaskPrioritySelector
               value={form.priority}
               onChange={(value) => updateField("priority", value)}
             />
-          </View>
-                    <Text
-                      style={[
-                        styles.priorityText,
-                        { color: colors.foreground },
-                      ]}
-                    >
-                      {priority.charAt(0) + priority.slice(1).toLowerCase()}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
           </View>
 
           <View
@@ -345,7 +311,6 @@ export default function TaskFormScreen() {
             ]}
           >
             <FieldLabel colors={colors}>Schedule</FieldLabel>
-
             <View style={styles.scheduleTopRow}>
               <DateField
                 label="Start date"
@@ -353,16 +318,23 @@ export default function TaskFormScreen() {
                 onChange={(value) => updateField("startDate", value)}
                 error={errors.startDate}
               />
-
               <DateField
                 label="Due date"
                 value={form.dueDate}
                 onChange={(value) => updateField("dueDate", value)}
                 error={errors.dueDate}
-                minimumDate={form.startDate ? new Date(...form.startDate.split("-").map((part, index) => index === 1 ? Number(part) - 1 : Number(part)) as [number, number, number]) : undefined}
+                minimumDate={
+                  form.startDate
+                    ? (() => {
+                        const [year, month, day] = form.startDate
+                          .split("-")
+                          .map(Number);
+                        return new Date(year, month - 1, day);
+                      })()
+                    : undefined
+                }
               />
             </View>
-          </View>
           </View>
 
           <View
@@ -372,21 +344,10 @@ export default function TaskFormScreen() {
             ]}
           >
             <FieldLabel colors={colors}>Status</FieldLabel>
-
             <TaskStatusSelector
               value={form.status}
               onChange={(value) => updateField("status", value)}
             />
-          </View>
-                    <Text
-                      style={[styles.statusText, { color: colors.foreground }]}
-                    >
-                      {isPending ? "Pending" : "Completed"}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
           </View>
 
           <Button
