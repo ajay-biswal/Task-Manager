@@ -11,15 +11,21 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { Button, Card, IconButton } from "@/components/ui";
-import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task } from "@/types/task";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
+
+type SectionIcon = {
+  ios: string;
+  android: string;
+  web: string;
+};
 
 export default function TaskDetailsScreen() {
   const router = useRouter();
@@ -47,9 +53,7 @@ export default function TaskDetailsScreen() {
       try {
         const result = await findTask(id);
 
-        if (!active) {
-          return;
-        }
+        if (!active) return;
 
         if (!result) {
           router.back();
@@ -59,14 +63,9 @@ export default function TaskDetailsScreen() {
         setTask(result);
       } catch (error) {
         console.error("Failed to load task:", error);
-
-        if (active) {
-          router.back();
-        }
+        if (active) router.back();
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     }
 
@@ -78,11 +77,10 @@ export default function TaskDetailsScreen() {
   }, [taskId, findTask, router]);
 
   async function handleToggle() {
-    if (!task) {
-      return;
-    }
+    if (!task) return;
 
-    const nextStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
+    const nextStatus =
+      task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
     try {
       await toggleTask(task.id, nextStatus);
@@ -98,9 +96,7 @@ export default function TaskDetailsScreen() {
   }
 
   function handleDelete() {
-    if (!task) {
-      return;
-    }
+    if (!task) return;
 
     Alert.alert("Delete task", `Delete "${task.title}"?`, [
       { text: "Cancel", style: "cancel" },
@@ -145,9 +141,7 @@ export default function TaskDetailsScreen() {
         <Text style={[styles.stateTitle, { color: colors.foreground }]}>
           Task not found
         </Text>
-        <Pressable onPress={() => router.back()}>
-          <Text style={[styles.link, { color: colors.accent }]}>Go back</Text>
-        </Pressable>
+        <Button title="Go back" onPress={() => router.back()} variant="secondary" />
       </View>
     );
   }
@@ -167,7 +161,11 @@ export default function TaskDetailsScreen() {
           <IconButton
             icon={
               <AppIcon
-                name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+                name={{
+                  ios: "chevron.left",
+                  android: "arrow_back",
+                  web: "arrow_back",
+                }}
                 size={21}
                 color={colors.foreground}
               />
@@ -175,9 +173,11 @@ export default function TaskDetailsScreen() {
             onPress={() => router.back()}
             accessibilityLabel="Back"
           />
+
           <Text style={[styles.screenTitle, { color: colors.foreground }]}>
             Task Details
           </Text>
+
           <IconButton
             icon={
               <AppIcon
@@ -199,6 +199,7 @@ export default function TaskDetailsScreen() {
             >
               {task.title}
             </Text>
+
             <View style={styles.badges}>
               <TaskPriorityBadge priority={task.priority} />
               <TaskStatusBadge status={task.status} />
@@ -208,14 +209,21 @@ export default function TaskDetailsScreen() {
 
         {task.description ? (
           <SectionCard icon="description" title="Description" colors={colors}>
-            <Text style={[styles.description, { color: colors.mutedForeground }]}>
+            <Text
+              style={[styles.description, { color: colors.mutedForeground }]}
+            >
               {task.description}
             </Text>
           </SectionCard>
         ) : null}
 
         <SectionCard icon="list_alt" title="Details" colors={colors}>
-          <DetailRow icon="folder" label="Category" value={task.category} colors={colors} />
+          <DetailRow
+            icon="folder"
+            label="Category"
+            value={task.category}
+            colors={colors}
+          />
           <DetailRow
             icon="flag"
             label="Priority"
@@ -223,8 +231,18 @@ export default function TaskDetailsScreen() {
             valueColor={getPriorityTextColor(task.priority, colors)}
             colors={colors}
           />
-          <DetailRow icon="calendar_today" label="Start date" value={formatDate(task.startDate)} colors={colors} />
-          <DetailRow icon="calendar_today" label="Due date" value={formatDate(task.dueDate)} colors={colors} />
+          <DetailRow
+            icon="calendar_today"
+            label="Start date"
+            value={formatDate(task.startDate)}
+            colors={colors}
+          />
+          <DetailRow
+            icon="calendar_today"
+            label="Due date"
+            value={formatDate(task.dueDate)}
+            colors={colors}
+          />
           <DetailRow
             icon="schedule"
             label="Status"
@@ -234,12 +252,19 @@ export default function TaskDetailsScreen() {
         </SectionCard>
 
         <SectionCard icon="history" title="Activity" colors={colors}>
-          <ActivityRow label="Created" value={formatDateTime(task.createdAt)} colors={colors} />
-          <ActivityRow label="Last updated" value={formatDateTime(task.updatedAt)} colors={colors} />
+          <ActivityRow
+            label="Created"
+            value={formatDateTime(task.createdAt)}
+            colors={colors}
+          />
+          <ActivityRow
+            label="Last updated"
+            value={formatDateTime(task.updatedAt)}
+            colors={colors}
+          />
         </SectionCard>
-
-
       </ScrollView>
+
       <View
         style={[
           styles.actionBar,
@@ -265,16 +290,9 @@ export default function TaskDetailsScreen() {
           />
         </View>
       </View>
-      </View>
     </View>
   );
 }
-
-type SectionIcon = {
-  ios: string;
-  android: string;
-  web: string;
-};
 
 function SectionCard({
   icon,
@@ -304,10 +322,12 @@ function SectionCard({
         <View style={[styles.sectionIcon, { backgroundColor: colors.muted }]}>
           <AppIcon name={iconName} size={16} color={colors.accent} />
         </View>
+
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
           {title}
         </Text>
       </View>
+
       {children}
     </Card>
   );
@@ -347,6 +367,7 @@ function DetailRow({
           {label}
         </Text>
       </View>
+
       <Text
         style={[
           styles.detailValue,
@@ -380,8 +401,23 @@ function ActivityRow({
   );
 }
 
+function capitalize(value: string): string {
+  return value.charAt(0) + value.slice(1).toLowerCase();
+}
+
+function getPriorityTextColor(
+  priority: Task["priority"],
+  colors: ThemeColors,
+): string {
+  if (priority === "HIGH") return colors.destructive;
+  if (priority === "MEDIUM") return colors.accent;
+  return colors.success;
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: 20,
     paddingBottom: 24,
@@ -394,23 +430,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   screenTitle: {
     fontSize: 17,
     lineHeight: 22,
     fontWeight: "800",
   },
   summaryMain: {
-    flex: 1,
-    minWidth: 0,
-    paddingRight: 14,
     gap: 10,
   },
   title: {
@@ -423,15 +448,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: "700",
-  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    marginBottom: 12,
   },
   sectionIcon: {
     width: 36,
@@ -448,10 +469,9 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     lineHeight: 21,
-    paddingLeft: 46,
   },
   detailRow: {
-    minHeight: 38,
+    minHeight: 42,
     borderBottomWidth: 1,
     flexDirection: "row",
     alignItems: "center",
@@ -497,13 +517,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
   },
+  footerActions: {
+    gap: 8,
+  },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
+    paddingHorizontal: 20,
   },
-  stateText: { fontSize: typography.sm },
-  stateTitle: { fontSize: typography.xl, fontWeight: "700" },
-  link: { fontSize: typography.sm, fontWeight: "600" },
+  stateText: {
+    fontSize: typography.sm,
+  },
+  stateTitle: {
+    fontSize: typography.xl,
+    fontWeight: "700",
+  },
 });
