@@ -170,12 +170,24 @@ export default function DashboardScreen() {
     }, [refreshTasks]),
   );
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(
-    (task) => task.status === "COMPLETED",
-  ).length;
-  const pendingTasks = tasks.filter((task) => task.status === "PENDING").length;
-  const overdueTasks = tasks.filter((task) => isTaskOverdue(task)).length;
+  const { totalTasks, completedTasks, pendingTasks, overdueTasks } = useMemo(() => {
+    let completed = 0;
+    let pending = 0;
+    let overdue = 0;
+
+    for (const task of tasks) {
+      if (task.status === "COMPLETED") completed += 1;
+      if (task.status === "PENDING") pending += 1;
+      if (isTaskOverdue(task)) overdue += 1;
+    }
+
+    return {
+      totalTasks: tasks.length,
+      completedTasks: completed,
+      pendingTasks: pending,
+      overdueTasks: overdue,
+    };
+  }, [tasks]);
 
   const progress = totalTasks === 0 ? 0 : completedTasks / totalTasks;
 
