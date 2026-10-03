@@ -12,12 +12,14 @@ type TaskCardProps = {
   task: Task;
   onToggle: (status: TaskStatus) => void;
   onPress?: () => void;
+  toggleDisabled?: boolean;
 };
 
 export default function TaskCard({
   task,
   onToggle,
   onPress,
+  toggleDisabled = false,
 }: TaskCardProps) {
   const { colors } = useTheme();
   const completed = task.status === "COMPLETED";
@@ -28,6 +30,7 @@ export default function TaskCard({
       style={[
         styles.card,
         { backgroundColor: colors.card, borderColor: colors.border },
+        toggleDisabled && styles.disabled,
       ]}
     >
       <View style={styles.header}>
@@ -37,6 +40,7 @@ export default function TaskCard({
             onToggle(completed ? "PENDING" : "COMPLETED")
           }
           label=""
+          disabled={toggleDisabled}
         />
 
         <View style={styles.titleContainer}>
@@ -157,5 +161,8 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.82,
+  },
+  disabled: {
+    opacity: 0.65,
   },
 });
