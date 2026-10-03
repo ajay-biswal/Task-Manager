@@ -2,6 +2,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { AppIcon } from "@/components/ui/AppIcon";
 import { useTheme } from "@/theme/ThemeContext";
 
 type DateFieldProps = {
@@ -70,7 +71,7 @@ export function DateField({
         >
           {value ? formatDate(selectedDate) : "Select date"}
         </Text>
-        <Text style={[styles.icon, { color: colors.mutedForeground }]}>▣</Text>
+        <AppIcon name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }} size={18} color={colors.mutedForeground} />
       </Pressable>
 
       {error ? (
@@ -117,9 +118,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 11,
     fontWeight: "600",
-  },
-  icon: {
-    fontSize: 16,
   },
   error: {
     fontSize: 11,
