@@ -1,41 +1,34 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { AccessibilityState, StyleProp, ViewStyle } from "react-native";
 import type { ReactNode } from "react";
-
 import { useTheme } from "@/theme/ThemeContext";
 
 type CardProps = {
   children: ReactNode;
   onPress?: () => void;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityState?: AccessibilityState;
   variant?: "default" | "outlined" | "muted";
   padding?: "none" | "sm" | "md" | "lg";
   style?: StyleProp<ViewStyle>;
 };
 
-export default function Card({
-  children,
-  onPress,
-  variant = "default",
-  padding = "md",
-  style,
-}: CardProps) {
+export default function Card({ children, onPress, accessibilityLabel, accessibilityHint, accessibilityState, variant = "default", padding = "md", style }: CardProps) {
   const { colors } = useTheme();
-
   const cardStyle = [
-    styles.card,
-    styles[padding],
-    {
-      backgroundColor: variant === "muted" ? colors.muted : colors.card,
-      borderColor: colors.border,
-    },
-    variant === "outlined" && styles.outlined,
-    style,
+    styles.card, styles[padding],
+    { backgroundColor: variant === "muted" ? colors.muted : colors.card, borderColor: colors.border },
+    variant === "outlined" && styles.outlined, style,
   ];
 
   if (onPress) {
     return (
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={accessibilityState}
         onPress={onPress}
         style={({ pressed }) => [cardStyle, pressed && styles.pressed]}
       >
@@ -48,26 +41,11 @@ export default function Card({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  outlined: {
-    borderWidth: 1,
-  },
-  none: {
-    padding: 0,
-  },
-  sm: {
-    padding: 12,
-  },
-  md: {
-    padding: 16,
-  },
-  lg: {
-    padding: 20,
-  },
-  pressed: {
-    opacity: 0.82,
-  },
+  card: { borderRadius: 16, overflow: "hidden" },
+  outlined: { borderWidth: 1 },
+  none: { padding: 0 },
+  sm: { padding: 12 },
+  md: { padding: 16 },
+  lg: { padding: 20 },
+  pressed: { opacity: 0.82 },
 });
