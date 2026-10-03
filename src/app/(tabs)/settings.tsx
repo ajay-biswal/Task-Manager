@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useRouter } from "expo-router";
 import {
   Pressable,
   ScrollView,
@@ -13,15 +12,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { Dialog } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
-import { exportTasksToCsv } from "@/services/taskExport";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
 
 export default function SettingsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { tasks, clearTasks } = useTasks();
+  const { clearTasks } = useTasks();
   const { isDark, colors, toggleTheme } = useTheme();
   const [dialog, setDialog] = useState<{
     title: string;
@@ -150,14 +147,6 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-
-      <Dialog
-        visible={dialog !== null}
-        title={dialog?.title ?? ""}
-        message={dialog?.message}
-        actions={dialog?.actions ?? []}
-        onRequestClose={() => setDialog(null)}
-      />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
 
@@ -180,6 +169,14 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={dialog?.actions ?? []}
+        onRequestClose={() => setDialog(null)}
+      />
     </View>
   );
 }
