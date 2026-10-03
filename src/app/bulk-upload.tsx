@@ -1,4 +1,5 @@
 import { AppIcon } from "@/components/ui/AppIcon";
+import { Dialog } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
@@ -9,7 +10,6 @@ import { router } from "expo-router";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -186,6 +186,10 @@ export default function BulkUploadScreen() {
     duplicates: number;
     failed: number;
   } | null>(null);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   const fileSizeLabel = useMemo(() => {
     if (fileSize === null) return null;
@@ -342,25 +346,13 @@ export default function BulkUploadScreen() {
         failed: failedCount,
       });
 
-      Alert.alert(
-        "Import complete",
-        [
-          importedCount + " task(s) imported.",
-          duplicateCount > 0
-            ? duplicateCount + " duplicate task(s) skipped."
-            : null,
-          failedCount > 0 ? failedCount + " task(s) failed." : null,
-          validationErrors.length > 0
-            ? validationErrors.length +
-              " validation issue(s) skipped."
-            : null,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-      );
+
     } catch (error) {
       console.error("Failed to import tasks:", error);
-      Alert.alert("Import failed", "Unable to import the selected tasks.");
+      setDialog({
+        title: "Import failed",
+        message: "Unable to import the selected tasks. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -388,10 +380,16 @@ export default function BulkUploadScreen() {
 
       await FileSystem.writeAsStringAsync(fileUri, CSV_SAMPLE);
 
-      Alert.alert("Template saved", "The CSV template was saved successfully.");
+      setDialog({
+        title: "Template saved",
+        message: "The CSV template was saved successfully.",
+      });
     } catch (error) {
       console.error("Failed to save CSV template:", error);
-      Alert.alert("Template failed", "Unable to save the CSV template.");
+      setDialog({
+        title: "Template failed",
+        message: "Unable to save the CSV template. Please try again.",
+      });
     }
   }
 
@@ -734,6 +732,18 @@ export default function BulkUploadScreen() {
           <Text style={styles.primaryButtonText}>Back to Home</Text>
         </Pressable>
       ) : null}
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={[
+          {
+            label: "OK",
+            onPress: () => setDialog(null),
+          },
+        ]}
+        onRequestClose={() => setDialog(null)}
+      />
     </ScrollView>
   );
 }
