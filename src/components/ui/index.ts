@@ -7,3 +7,4 @@ export { default as Checkbox } from "./Checkbox";
 export { default as Divider } from "./Divider";
 export { default as EmptyState } from "./EmptyState";
 export { default as ScreenHeader } from "./ScreenHeader";
+export { DateField } from "./DateField";
