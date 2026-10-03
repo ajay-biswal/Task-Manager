@@ -21,8 +21,6 @@ function AppNavigator() {
         headerTitleStyle: { color: colors.foreground },
         contentStyle: { backgroundColor: colors.background },
         statusBarStyle: isDark ? "light" : "dark",
-        statusBarColor: colors.background,
-        navigationBarColor: colors.background,
       }}
     >
       <Stack.Screen
