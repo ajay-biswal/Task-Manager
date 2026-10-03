@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui";
+import Badge from "@/components/ui/Badge";
 import type { TaskPriority } from "@/types/task";
 
 type TaskPriorityBadgeProps = {
