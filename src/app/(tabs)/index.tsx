@@ -98,6 +98,13 @@ const stylesProgressRing = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  track: {
+    position: "absolute",
+    width: 124,
+    height: 124,
+    borderRadius: 62,
+    borderWidth: 11,
+  },
   center: {
     position: "absolute",
     width: 88,
@@ -743,13 +750,6 @@ function createStyles(
     },
     disabledAction: {
       opacity: 0.55,
-    },
-    track: {
-      position: "absolute",
-      width: 124,
-      height: 124,
-      borderRadius: 62,
-      borderWidth: 11,
     },
   });
 }
