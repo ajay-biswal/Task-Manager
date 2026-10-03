@@ -19,6 +19,9 @@ export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const loadTasks = useCallback(async () => {
     try {
@@ -48,6 +51,8 @@ export function useTasks() {
 
   const addTask = useCallback(
     async (task: Task) => {
+      setError(null);
+
       await createTask(database, task);
 
       setTasks((current) => {
@@ -65,6 +70,8 @@ export function useTasks() {
 
   const editTask = useCallback(
     async (task: Task) => {
+      setError(null);
+
       await updateTask(database, task);
 
       setTasks((current) =>
@@ -76,7 +83,18 @@ export function useTasks() {
 
   const removeTask = useCallback(
     async (id: string) => {
-      await deleteTask(database, id);
+      setError(null);
+      setPendingTaskIds((current) => new Set(current).add(id));
+
+      try {
+        await deleteTask(database, id);
+      } finally {
+        setPendingTaskIds((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+      }
 
       setTasks((current) => current.filter((item) => item.id !== id));
     },
@@ -85,9 +103,15 @@ export function useTasks() {
 
   const toggleTask = useCallback(
     async (id: string, status: TaskStatus) => {
-      await updateTaskStatus(database, id, status);
+      if (pendingTaskIds.has(id)) return;
 
-      setTasks((current) =>
+      setError(null);
+      setPendingTaskIds((current) => new Set(current).add(id));
+
+      try {
+        await updateTaskStatus(database, id, status);
+
+        setTasks((current) =>
         current.map((task) =>
           task.id === id
             ? {
@@ -97,9 +121,16 @@ export function useTasks() {
               }
             : task,
         ),
-      );
+        );
+      } finally {
+        setPendingTaskIds((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+      }
     },
-    [database],
+    [database, pendingTaskIds],
   );
 
   const clearTasks = useCallback(async () => {
@@ -125,5 +156,6 @@ export function useTasks() {
     clearTasks,
     findTask,
     refreshTasks: loadTasks,
+    isTaskPending: (id: string) => pendingTaskIds.has(id),
   };
 }
