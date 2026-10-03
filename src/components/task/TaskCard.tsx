@@ -1,39 +1,37 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Card, Checkbox } from "@/components/ui";
+import { Checkbox } from "@/components/ui";
 import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { useTheme } from "@/theme/ThemeContext";
-
-type TaskStatus = "pending" | "in_progress" | "completed";
-type TaskPriority = "low" | "medium" | "high";
+import type { Task, TaskStatus } from "@/types/task";
 
 type TaskCardProps = {
-  title: string;
-  description?: string;
-  completed: boolean;
-  status: TaskStatus;
-  priority: TaskPriority;
-  onToggle: (completed: boolean) => void;
+  task: Pick<Task, "title" | "description" | "priority" | "status">;
+  onToggle: (status: TaskStatus) => void;
   onPress?: () => void;
 };
 
 export default function TaskCard({
-  title,
-  description,
-  completed,
-  status,
-  priority,
+  task,
   onToggle,
   onPress,
 }: TaskCardProps) {
   const { colors } = useTheme();
+  const completed = task.status === "COMPLETED";
 
   const content = (
-    <Card padding="md">
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.card, borderColor: colors.border },
+      ]}
+    >
       <View style={styles.header}>
         <Checkbox
           checked={completed}
-          onChange={onToggle}
+          onChange={() =>
+            onToggle(completed ? "PENDING" : "COMPLETED")
+          }
           label=""
         />
 
@@ -46,25 +44,25 @@ export default function TaskCard({
               completed && styles.completedTitle,
             ]}
           >
-            {title}
+            {task.title}
           </Text>
 
-          {description ? (
+          {task.description ? (
             <Text
               numberOfLines={2}
               style={[styles.description, { color: colors.mutedForeground }]}
             >
-              {description}
+              {task.description}
             </Text>
           ) : null}
         </View>
       </View>
 
       <View style={styles.meta}>
-        <TaskStatusBadge status={status} />
-        <TaskPriorityBadge priority={priority} />
+        <TaskStatusBadge status={task.status} />
+        <TaskPriorityBadge priority={task.priority} />
       </View>
-    </Card>
+    </View>
   );
 
   if (!onPress) {
@@ -74,6 +72,7 @@ export default function TaskCard({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={"Open task " + task.title}
       onPress={onPress}
       style={({ pressed }) => [pressed && styles.pressed]}
     >
@@ -83,6 +82,11 @@ export default function TaskCard({
 }
 
 const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
