@@ -141,14 +141,23 @@ export default function TaskListScreen() {
     return result.filter((group) => group.tasks.length > 0);
   }, [filteredTasks]);
 
-  const listData = groups.flatMap((group) => [
-    { type: "header" as const, id: `header-${group.title}`, title: group.title, tasks: group.tasks },
-    ...group.tasks.map((task) => ({
-      type: "task" as const,
-      id: task.id,
-      task,
-    })),
-  ]);
+  const listData = useMemo(
+    () =>
+      groups.flatMap((group) => [
+        {
+          type: "header" as const,
+          id: `header-${group.title}`,
+          title: group.title,
+          tasks: group.tasks,
+        },
+        ...group.tasks.map((task) => ({
+          type: "task" as const,
+          id: task.id,
+          task,
+        })),
+      ]),
+    [groups],
+  );
 
   return (
     <View style={styles.container}>
