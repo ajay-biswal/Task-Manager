@@ -19,6 +19,7 @@ import {
   IconButton,
   Input,
   ScreenHeader,
+  type DialogAction,
 } from "@/components/ui";
 import {
   TaskCategorySelector,
