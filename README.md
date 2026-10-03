@@ -1,56 +1,157 @@
-# Welcome to your Expo app 👋
+# TaskFlow
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+TaskFlow is a modern React Native task-management app built with Expo and TypeScript. It is designed as a technical-assessment project with a focus on clean architecture, reusable UI, local persistence, validation, and a polished mobile experience.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Create, edit, view, complete, and delete tasks
+- Task priorities: Low, Medium, High
+- Task statuses: Pending, Completed
+- Start and due date validation
+- Dashboard with task progress and task statistics
+- Light and dark themes
+- Persistent local storage with SQLite
+- Draft preservation for unfinished task forms
+- CSV bulk import with row-level validation
+- Duplicate detection during CSV import
+- Partial-import handling
+- CSV template download and task export
+- Responsive layouts for smaller screens
+- Accessibility labels and loading/disabled states
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- React Native
+- Expo SDK 57
+- TypeScript
+- Expo Router
+- expo-sqlite
+- React Native DateTimePicker
+- Papa Parse
+- pnpm
 
-   ```bash
-   npx expo start
-   ```
+## Architecture
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+Screens
+  ↓
+Reusable UI components
+  ↓
+Hooks / application logic
+  ↓
+Repository layer
+  ↓
+SQLite
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### State and data flow
 
-### Other setup steps
+- Parent → child: props
+- Child → parent: callback props
+- Sibling components: shared state is lifted to their common parent
+- Theme: React Context
+- Persistent task data: SQLite via `useTasks()` and the repository layer
+- Unfinished New Task form: `TaskFormDraftContext`
+- Screen navigation: Expo Router route parameters
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+SQLite is the source of truth for task persistence. UI state is updated after successful database operations so the interface stays synchronized with stored data.
 
-## Learn more
+## Project Structure
 
-To learn more about developing your project with Expo, look at the following resources:
+```text
+src/
+├── app/                  # Expo Router screens
+├── components/
+│   ├── task/             # Task-specific components
+│   └── ui/               # Reusable UI primitives
+├── context/              # Application contexts
+├── database/             # SQLite initialization and repository
+├── hooks/                # Reusable application hooks
+├── services/             # Import/export services
+├── theme/                # Theme tokens and ThemeContext
+├── types/                # Shared TypeScript types
+└── utils/                # Validation and task utilities
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Bulk CSV Import
 
-## Join the community
+The CSV importer expects:
 
-Join our community of developers creating universal apps.
+```text
+id,title,description,category,priority,start_date,due_date,status
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Validation includes:
+
+- Required columns and task fields
+- Valid `YYYY-MM-DD` dates
+- Valid start/due date range
+- Valid priority and status values
+- Duplicate IDs inside the CSV
+- IDs that already exist in SQLite
+- Malformed CSV parsing
+- Partial failures during import
+
+Invalid rows are skipped while valid rows can still be imported.
+
+## Getting Started
+
+### Requirements
+
+- Node.js
+- pnpm
+- Android emulator/device or iOS simulator/device
+
+### Install
+
+```bash
+pnpm install
+```
+
+### Start
+
+```bash
+pnpm expo start
+```
+
+Useful commands:
+
+```bash
+pnpm expo start -c
+pnpm expo start --android
+pnpm expo start --ios
+pnpm expo start --web
+pnpm lint
+```
+
+## QA Coverage
+
+The current app has been manually tested for:
+
+- Task CRUD flows
+- Navigation and back behavior
+- Draft persistence
+- Form reset after successful creation
+- SQLite persistence
+- Light/dark theme behavior
+- CSV validation and error handling
+- Duplicate CSV IDs
+- Existing database duplicates
+- Mixed valid/invalid CSV rows
+- Large CSV imports, including a 500-row test file
+
+## Assessment Notes
+
+The project favors:
+
+- Reusable components over duplicated UI
+- Type-safe data models
+- Separation between UI, state, and persistence
+- Explicit validation and user-facing error states
+- Local-first persistence without requiring a backend
+- Consistent visual design
+- Accessibility labels for interactive controls
+
+## License
+
+This project is a technical-assessment application.
