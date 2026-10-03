@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Button, Card, IconButton } from "@/components/ui";
+import { Button, Card, Dialog, IconButton } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
@@ -39,6 +38,15 @@ export default function TaskDetailsScreen() {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+    actions?: Array<{
+      label: string;
+      variant?: "default" | "cancel" | "danger";
+      onPress: () => void | Promise<void>;
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     if (!taskId) {
@@ -78,7 +86,6 @@ export default function TaskDetailsScreen() {
 
   async function handleToggle() {
     if (!task) return;
-
     const nextStatus =
       task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
@@ -91,31 +98,48 @@ export default function TaskDetailsScreen() {
       });
     } catch (error) {
       console.error("Failed to update task status:", error);
-      Alert.alert("Update failed", "Unable to update the task status.");
+      setDialog({
+        title: "Update failed",
+        message: "Unable to update the task status. Please try again.",
+        actions: [{ label: "OK", onPress: () => setDialog(null) }],
+      });
     }
   }
 
   function handleDelete() {
     if (!task) return;
 
-    Alert.alert("Delete task", `Delete "${task.title}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            setDeleting(true);
-            await removeTask(task.id);
-            router.back();
-          } catch (error) {
-            console.error("Failed to delete task:", error);
-            setDeleting(false);
-            Alert.alert("Delete failed", "Unable to delete the task.");
-          }
+    setDialog({
+      title: "Delete task",
+      message: `Delete "${task.title}"?`,
+      actions: [
+        {
+          label: "Cancel",
+          variant: "cancel",
+          onPress: () => setDialog(null),
         },
-      },
-    ]);
+        {
+          label: "Delete",
+          variant: "danger",
+          onPress: async () => {
+            setDialog(null);
+            try {
+              setDeleting(true);
+              await removeTask(task.id);
+              router.back();
+            } catch (error) {
+              console.error("Failed to delete task:", error);
+              setDeleting(false);
+              setDialog({
+                title: "Delete failed",
+                message: "Unable to delete the task. Please try again.",
+                actions: [{ label: "OK", onPress: () => setDialog(null) }],
+              });
+            }
+          },
+        },
+      ],
+    });
   }
 
   function handleEdit() {
@@ -290,6 +314,16 @@ export default function TaskDetailsScreen() {
           />
         </View>
       </View>
+
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={
+          dialog?.actions ?? [{ label: "OK", onPress: () => setDialog(null) }]
+        }
+        onRequestClose={() => setDialog(null)}
+      />
     </View>
   );
 }
