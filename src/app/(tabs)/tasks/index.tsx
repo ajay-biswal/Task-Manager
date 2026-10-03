@@ -259,6 +259,8 @@ export default function TaskListScreen() {
             ) : (
               <TaskCard
                 task={item.task}
+                toggleDisabled={isTaskPending(task.id)}
+                toggleDisabled={isTaskPending(item.task.id)}
                 onToggle={(status) => {
                   toggleTask(item.task.id, status).catch((error) => {
                     console.error("Failed to update task status:", error);
