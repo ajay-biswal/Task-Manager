@@ -10,12 +10,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { Button, Input } from "@/components/ui";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
@@ -261,13 +261,33 @@ export default function TaskFormScreen() {
             ]}
           >
             <View style={styles.labelRow}>
-              <FieldLabel colors={colors} required>
-                Title
-              </FieldLabel>
+              <FieldLabel colors={colors}>Description</FieldLabel>
               <Text style={[styles.counter, { color: colors.mutedForeground }]}>
-                {form.title.length}/100
+                {form.description.length}/500
               </Text>
             </View>
+
+            <Input
+              value={form.description}
+              onChangeText={(value) => updateField("description", value)}
+              placeholder="Add some context (optional)..."
+              multiline
+              numberOfLines={4}
+              maxLength={500}
+            />
+
+          </View>
+
+            <Input
+              value={form.title}
+              onChangeText={(value) => updateField("title", value)}
+              placeholder="What needs to be done?"
+              error={errors.title}
+              maxLength={100}
+              returnKeyType="next"
+            />
+
+          </View>
 
             <View
               style={[
@@ -587,25 +607,12 @@ export default function TaskFormScreen() {
             </View>
           </View>
 
-          <Pressable
+          <Button
+            title={isEditMode ? "Update Task" : "Create Task"}
             onPress={handleSave}
+            loading={saving}
             disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={isEditMode ? "Update task" : "Create task"}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              { backgroundColor: colors.accent },
-              pressed && styles.pressed,
-            ]}
-          >
-            {saving ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.primaryButtonText}>
-                {isEditMode ? "Update Task" : "Create Task"}
-              </Text>
-            )}
-          </Pressable>
+          />
 
         </View>
       </ScrollView>
