@@ -5,7 +5,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +13,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
-import { Button, DateField, Input } from "@/components/ui";
+import {
+  Button,
+  DateField,
+  IconButton,
+  Input,
+  ScreenHeader,
+} from "@/components/ui";
 import {
   TaskCategorySelector,
   TaskPrioritySelector,
@@ -189,63 +194,53 @@ export default function TaskFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => {
-              if (!isEditMode && returnTo === "dashboard") {
-                router.replace("/");
-                return;
+        <ScreenHeader
+          title={isEditMode ? "Edit Task" : "New Task"}
+          subtitle="Add a task and keep things on track."
+          left={
+            <IconButton
+              icon={
+                <AppIcon
+                  name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+                  size={22}
+                  color={colors.foreground}
+                />
               }
+              onPress={() => {
+                if (!isEditMode && returnTo === "dashboard") {
+                  router.replace("/");
+                  return;
+                }
 
-              router.back();
-            }}
-            hitSlop={10}
-            style={[
-              styles.backButton,
-              { backgroundColor: colors.card, borderColor: colors.border },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <AppIcon
-              name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
-              size={22}
-              color={colors.foreground}
-            />
-          </Pressable>
-
-          <View style={styles.headerText}>
-            <Text style={[styles.title, { color: colors.foreground }]}>
-              {isEditMode ? "Edit Task" : "New Task"}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-              Add a task and keep things on track.
-            </Text>
-          </View>
-
-          <Pressable
-            onPress={() => router.push("/bulk-upload")}
-            disabled={saving}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel="Bulk upload tasks"
-            style={({ pressed }) => [
-              styles.bulkHeaderButton,
-              { backgroundColor: colors.card, borderColor: colors.border },
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppIcon
-              name={{
-                ios: "square.and.arrow.down",
-                android: "upload_file",
-                web: "upload_file",
+                router.back();
               }}
-              size={20}
-              color={colors.accent}
+              accessibilityLabel="Go back"
+              variant="ghost"
+              size="md"
+              disabled={saving}
             />
-          </Pressable>
-        </View>
+          }
+          right={
+            <IconButton
+              icon={
+                <AppIcon
+                  name={{
+                    ios: "square.and.arrow.down",
+                    android: "upload_file",
+                    web: "upload_file",
+                  }}
+                  size={20}
+                  color={colors.accent}
+                />
+              }
+              onPress={() => router.push("/bulk-upload")}
+              accessibilityLabel="Bulk upload tasks"
+              variant="ghost"
+              size="md"
+              disabled={saving}
+            />
+          }
+        />
 
         <View style={styles.form}>
           <View
@@ -376,7 +371,8 @@ export default function TaskFormScreen() {
             />
 
             {!isEditMode ? (
-              <Pressable
+              <Button
+                title="Clear"
                 onPress={() => {
                   Alert.alert(
                     "Clear form",
@@ -395,25 +391,9 @@ export default function TaskFormScreen() {
                     ],
                   );
                 }}
+                variant="secondary"
                 disabled={saving}
-                style={({ pressed }) => [
-                  styles.clearButton,
-                  { borderColor: colors.border },
-                  pressed && styles.pressed,
-                  saving && styles.disabled,
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Clear task form"
-              >
-                <Text
-                  style={[
-                    styles.clearButtonText,
-                    { color: colors.destructive },
-                  ]}
-                >
-                  Clear
-                </Text>
-              </Pressable>
+              />
             ) : null}
           </View>
         </View>
@@ -440,49 +420,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  header: {
-    minHeight: 72,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-
-  backButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  headerText: {
-    flex: 1,
-    marginLeft: 14,
-  },
-
-  bulkHeaderButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  title: {
-    fontSize: 22,
-    lineHeight: 27,
-    fontWeight: "800",
-    letterSpacing: -0.3,
-  },
-
-  subtitle: {
-    marginTop: 3,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-
   form: {
     gap: 12,
   },
@@ -490,24 +427,6 @@ const styles = StyleSheet.create({
   actions: {
     gap: 10,
     marginTop: 4,
-  },
-
-  clearButton: {
-    minHeight: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-
-  clearButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  disabled: {
-    opacity: 0.45,
   },
 
   fieldCard: {
