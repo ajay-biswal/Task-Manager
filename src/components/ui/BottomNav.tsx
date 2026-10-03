@@ -36,9 +36,10 @@ export function BottomNav() {
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors, isDark);
 
-  // Detail and form screens use the full screen so their actions are never
-  // covered by the floating tab bar.
-  const isTaskSubscreen =\n    pathname.startsWith("/tasks/") || pathname === "/bulk-upload";
+  // Detail, form, and bulk-upload screens use the full screen so their
+  // actions are never covered by the floating tab bar.
+  const isTaskSubscreen =
+    pathname.startsWith("/tasks/") || pathname === "/bulk-upload";
 
   if (isTaskSubscreen) {
     return null;
@@ -147,7 +148,6 @@ function createStyles(colors: ThemeColors, isDark: boolean) {
 
     item: {
       width: "20%",
-      height: 66,
       height: 66,
       alignItems: "center",
       justifyContent: "center",
