@@ -54,4 +54,4 @@ export const colors = {
   },
 } as const;
 
-export type ThemeColors = typeof colors.light;
+export type ThemeColors = { [K in keyof typeof colors.light]: string };
