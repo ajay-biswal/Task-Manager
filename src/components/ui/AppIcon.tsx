@@ -5,7 +5,7 @@ interface AppIconProps {
   name: {
     ios: string;
     android: string;
-    web?: string;
+    web: string;
   };
   size?: number;
   color: ColorValue;
