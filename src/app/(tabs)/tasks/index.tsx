@@ -123,10 +123,10 @@ export default function TaskListScreen() {
   }, [tasks, filter, search, sortBy]);
 
   const groups = useMemo(() => {
-    const result: Array<{
+    const result: {
       title: "Overdue" | "Today" | "Tomorrow" | "Later";
       tasks: Task[];
-    }> = [
+    }[] = [
       { title: "Overdue", tasks: [] },
       { title: "Today", tasks: [] },
       { title: "Tomorrow", tasks: [] },
