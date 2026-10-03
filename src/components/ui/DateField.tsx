@@ -7,6 +7,7 @@ import { useTheme } from "@/theme/ThemeContext";
 
 type DateFieldProps = {
   label: string;
+  required?: boolean;
   value: string;
   error?: string;
   minimumDate?: Date;
@@ -37,6 +38,7 @@ function toISODate(date: Date): string {
 
 export function DateField({
   label,
+  required = false,
   value,
   error,
   minimumDate,
@@ -48,7 +50,10 @@ export function DateField({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.mutedForeground }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.mutedForeground }]}>
+        {label}
+        {required ? <Text style={{ color: colors.destructive }}> *</Text> : null}
+      </Text>
 
       <Pressable
         onPress={() => setShowPicker(true)}
