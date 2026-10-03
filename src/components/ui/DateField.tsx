@@ -2,16 +2,15 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 
-interface DateFieldProps {
+type DateFieldProps = {
   label: string;
   value: string;
   error?: string;
   minimumDate?: Date;
   onChange: (value: string) => void;
-}
+};
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-IN", {
@@ -22,12 +21,9 @@ function formatDate(date: Date): string {
 }
 
 function parseDate(value: string): Date {
-  if (!value) {
-    return new Date();
-  }
+  if (!value) return new Date();
 
   const [year, month, day] = value.split("-").map(Number);
-
   return new Date(year, month - 1, day);
 }
 
@@ -35,7 +31,6 @@ function toISODate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-
   return `${year}-${month}-${day}`;
 }
 
@@ -48,29 +43,39 @@ export function DateField({
 }: DateFieldProps) {
   const { colors } = useTheme();
   const [showPicker, setShowPicker] = useState(false);
-
   const selectedDate = parseDate(value);
-
-  function handleDismiss() {
-    setShowPicker(false);
-  }
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.mutedForeground }]}>{label}</Text>
 
       <Pressable
         onPress={() => setShowPicker(true)}
-        style={[styles.field, { borderColor: colors.input, backgroundColor: colors.background }, error ? { borderColor: colors.destructive } : null]}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${value ? formatDate(selectedDate) : "Select date"}`}
+        style={[
+          styles.field,
+          {
+            backgroundColor: colors.input,
+            borderColor: error ? colors.destructive : colors.border,
+          },
+        ]}
       >
-        <Text style={[styles.value, { color: colors.foreground }, !value ? { color: colors.mutedForeground } : null]}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.value,
+            { color: value ? colors.foreground : colors.mutedForeground },
+          ]}
+        >
           {value ? formatDate(selectedDate) : "Select date"}
         </Text>
-
         <Text style={[styles.icon, { color: colors.mutedForeground }]}>▣</Text>
       </Pressable>
 
-      {error ? <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text> : null}
+      {error ? (
+        <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+      ) : null}
 
       {showPicker ? (
         <DateTimePicker
@@ -83,7 +88,7 @@ export function DateField({
             onChange(toISODate(date));
             setShowPicker(false);
           }}
-          onDismiss={handleDismiss}
+          onDismiss={() => setShowPicker(false)}
         />
       ) : null}
     </View>
@@ -92,18 +97,32 @@ export function DateField({
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.sm,
+    flex: 1,
+    gap: 6,
   },
-
   label: {
-    fontSize: typography.sm,
-    fontWeight: "500",  },
-
+    fontSize: 11,
+    fontWeight: "600",
+  },
   field: {
-    minHeight: 46,
-    borderWidth: 1,    borderRadius: 10,
-    paddingHorizontal: spacing.md,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 11,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",  },
+    gap: 7,
+  },
+  value: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  icon: {
+    fontSize: 16,
+  },
+  error: {
+    fontSize: 11,
+    lineHeight: 15,
+  },
 });
