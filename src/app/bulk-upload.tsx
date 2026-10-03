@@ -5,7 +5,7 @@ import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeColors } from "@/theme";
 import { File, Paths } from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
-import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
@@ -355,31 +355,30 @@ export default function BulkUploadScreen() {
 
   async function handleDownloadTemplate() {
     try {
-      const file = new File(
-        Paths.cache,
-        "taskflow-csv-template-" +
-          new Date().toISOString().slice(0, 10) +
-          ".csv",
-      );
+      const permission =
+        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-      file.write(CSV_SAMPLE);
-
-      if (!(await Sharing.isAvailableAsync())) {
-        Alert.alert(
-          "Sharing unavailable",
-          "CSV template sharing is not available on this device.",
-        );
+      if (!permission.granted) {
         return;
       }
 
-      await Sharing.shareAsync(file.uri, {
-        mimeType: "text/csv",
-        dialogTitle: "Download TaskFlow CSV template",
-        UTI: "public.comma-separated-values-text",
-      });
+      const fileName =
+        "taskflow-csv-template-" +
+        new Date().toISOString().slice(0, 10) +
+        ".csv";
+
+      const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+        permission.directoryUri,
+        fileName,
+        "text/csv",
+      );
+
+      await FileSystem.writeAsStringAsync(fileUri, CSV_SAMPLE);
+
+      Alert.alert("Template saved", "The CSV template was saved successfully.");
     } catch (error) {
-      console.error("Failed to create CSV template:", error);
-      Alert.alert("Template failed", "Unable to create the CSV template.");
+      console.error("Failed to save CSV template:", error);
+      Alert.alert("Template failed", "Unable to save the CSV template.");
     }
   }
 
@@ -515,22 +514,6 @@ export default function BulkUploadScreen() {
             </Pressable>
           </View>
         ) : null}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>CSV Example</Text>
-        <Text style={styles.sectionSubtitle}>
-          Use this format when preparing your task file.
-        </Text>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.exampleScroll}
-          contentContainerStyle={styles.exampleContent}
-        >
-          <Text style={styles.exampleText}>{CSV_SAMPLE}</Text>
-        </ScrollView>
       </View>
 
       <Pressable
@@ -687,7 +670,7 @@ export default function BulkUploadScreen() {
         </View>
       ) : null}
 
-      {fileName && validRows.length > 0 ? (
+      {fileName && validRows.length > 0 && !importSummary ? (
         <Pressable
           onPress={handleImport}
           disabled={loading}
@@ -712,6 +695,30 @@ export default function BulkUploadScreen() {
           <Text style={styles.primaryButtonText}>
             {loading ? "Importing..." : "Import " + validRows.length + " Tasks"}
           </Text>
+        </Pressable>
+      ) : null}
+
+      {importSummary ? (
+        <Pressable
+          onPress={() => router.replace("/")}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            styles.importButton,
+            pressed && styles.pressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Back to Home"
+        >
+          <AppIcon
+            name={{
+              ios: "house.fill",
+              android: "home",
+              web: "home",
+            }}
+            size={19}
+            color={colors.primaryForeground}
+          />
+          <Text style={styles.primaryButtonText}>Back to Home</Text>
         </Pressable>
       ) : null}
     </ScrollView>
@@ -875,34 +882,6 @@ function createStyles(
       marginTop: 2,
       fontSize: typography.xs,
       color: colors.mutedForeground,
-    },
-    section: {
-      gap: spacing.xs,
-    },
-    sectionTitle: {
-      fontSize: typography.md,
-      fontWeight: "700",
-      color: colors.foreground,
-    },
-    sectionSubtitle: {
-      fontSize: typography.xs,
-      color: colors.mutedForeground,
-    },
-    exampleScroll: {
-      marginTop: spacing.xs,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 14,
-      backgroundColor: isDark ? "#11151B" : colors.muted,
-    },
-    exampleContent: {
-      padding: spacing.md,
-    },
-    exampleText: {
-      fontSize: 10,
-      lineHeight: 17,
-      color: colors.foreground,
-      fontFamily: "monospace",
     },
     notesCard: {
       borderWidth: 1,
