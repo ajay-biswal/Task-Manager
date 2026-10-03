@@ -4,9 +4,11 @@ import { Checkbox } from "@/components/ui";
 import { TaskPriorityBadge, TaskStatusBadge } from "@/components/task";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task, TaskStatus } from "@/types/task";
+import { formatShortDate } from "@/utils/dateUtils";
+import { isTaskOverdue } from "@/utils/taskUtils";
 
 type TaskCardProps = {
-  task: Pick<Task, "title" | "description" | "priority" | "status">;
+  task: Task;
   onToggle: (status: TaskStatus) => void;
   onPress?: () => void;
 };
@@ -18,6 +20,7 @@ export default function TaskCard({
 }: TaskCardProps) {
   const { colors } = useTheme();
   const completed = task.status === "COMPLETED";
+  const overdue = isTaskOverdue(task);
 
   const content = (
     <View
@@ -55,6 +58,26 @@ export default function TaskCard({
               {task.description}
             </Text>
           ) : null}
+
+          <View style={styles.detailRow}>
+            <Text
+              numberOfLines={1}
+              style={[styles.detail, { color: colors.mutedForeground }]}
+            >
+              {task.category}
+            </Text>
+            <Text style={[styles.separator, { color: colors.mutedForeground }]}>
+              ·
+            </Text>
+            <Text
+              style={[
+                styles.detail,
+                { color: overdue ? colors.destructive : colors.mutedForeground },
+              ]}
+            >
+              Due {formatShortDate(task.dueDate)}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -109,6 +132,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 13,
     lineHeight: 18,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  detail: {
+    flexShrink: 1,
+    fontSize: 11,
+  },
+  separator: {
+    marginHorizontal: 5,
+    fontSize: 11,
   },
   meta: {
     flexDirection: "row",
