@@ -17,7 +17,6 @@ import type { ThemeColors } from "@/theme";
 import { spacing, typography } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
 import type { Task, TaskPriority } from "@/types/task";
-import { formatShortDate } from "@/utils/dateUtils";
 import { isTaskOverdue } from "@/utils/taskUtils";
 
 type TaskFilter = "ALL" | "PENDING" | "COMPLETED" | "OVERDUE";
@@ -56,17 +55,6 @@ function getDayGroup(
   }
 
   return "Later";
-}
-
-function getCategoryColor(category: string, colors: ThemeColors): string {
-  const normalized = category.trim().toLowerCase();
-
-  if (normalized === "development") return "#8B5CF6";
-  if (normalized === "review") return "#22C55E";
-  if (normalized === "learning") return "#F5C542";
-  if (normalized === "personal") return colors.accent;
-
-  return colors.accent;
 }
 
 export default function TaskListScreen() {
@@ -147,16 +135,6 @@ export default function TaskListScreen() {
 
     return result.filter((group) => group.tasks.length > 0);
   }, [filteredTasks]);
-
-  function handleToggle(task: Task) {
-    const nextStatus =
-      task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
-
-    toggleTask(task.id, nextStatus).catch((error) => {
-      console.error("Failed to update task status:", error);
-      Alert.alert("Update failed", "Unable to update the task status.");
-    });
-  }
 
   const listData = groups.flatMap((group) => [
     { type: "header" as const, id: `header-${group.title}`, title: group.title, tasks: group.tasks },
