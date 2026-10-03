@@ -273,8 +273,8 @@ export default function DashboardScreen() {
             value={pendingTasks}
             label="Pending"
             icon={{ ios: "clock.fill", android: "schedule", web: "schedule" }}
-            background={isDark ? "#171713" : "#FFF9EC"}
-            iconBackground={isDark ? "#25220F" : "#FFF0D7"}
+            background={isDark ? "#171A16" : "#FFF9EC"}
+            iconBackground={isDark ? "#282515" : "#FFF0D7"}
             iconColor={isDark ? "#F59E0B" : "#F59E0B"}
             colors={colors}
           />
@@ -287,8 +287,8 @@ export default function DashboardScreen() {
               android: "check_circle",
               web: "check_circle",
             }}
-            background={isDark ? "#0C1D17" : "#F3FBF5"}
-            iconBackground={isDark ? "#0B2B1D" : "#DDF8E2"}
+            background={isDark ? "#101B15" : "#F3FBF5"}
+            iconBackground={isDark ? "#153521" : "#DDF8E2"}
             iconColor={colors.success}
             colors={colors}
           />
@@ -301,8 +301,8 @@ export default function DashboardScreen() {
               android: "error",
               web: "error",
             }}
-            background={isDark ? "#211117" : "#FFF3F5"}
-            iconBackground={isDark ? "#30151D" : "#FFE1E5"}
+            background={isDark ? "#201418" : "#FFF3F5"}
+            iconBackground={isDark ? "#351922" : "#FFE1E5"}
             iconColor={colors.destructive}
             colors={colors}
           />
@@ -467,7 +467,7 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
     content: {
       paddingHorizontal: 21,
       paddingTop: topInset,
-      paddingBottom: 132,
+      paddingBottom: 180,
     },
     hero: {
       height: compact ? 224 : 238,
