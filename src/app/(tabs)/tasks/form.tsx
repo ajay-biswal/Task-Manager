@@ -386,22 +386,27 @@ export default function TaskFormScreen() {
               <Button
                 title="Clear"
                 onPress={() => {
-                  Alert.alert(
-                    "Clear form",
-                    "Clear all entered task details?",
-                    [
-                      { text: "Cancel", style: "cancel" },
+                  setDialog({
+                    title: "Clear form",
+                    message: "Clear all entered task details?",
+                    actions: [
                       {
-                        text: "Clear",
-                        style: "destructive",
+                        label: "Cancel",
+                        variant: "cancel",
+                        onPress: () => setDialog(null),
+                      },
+                      {
+                        label: "Clear",
+                        variant: "danger",
                         onPress: () => {
                           clearDraft();
                           setForm(initialForm);
                           setErrors({});
+                          setDialog(null);
                         },
                       },
                     ],
-                  );
+                  });
                 }}
                 variant="secondary"
                 disabled={saving}
