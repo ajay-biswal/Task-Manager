@@ -398,7 +398,7 @@ export default function BulkUploadScreen() {
     >
       <View style={styles.topBar}>
         <Pressable
-          onPress={() => router.replace("/")}
+          onPress={() => router.navigate("/")}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
           accessibilityRole="button"
           accessibilityLabel="Go back"
