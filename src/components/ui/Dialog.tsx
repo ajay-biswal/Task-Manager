@@ -1,4 +1,5 @@
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
 import { useTheme } from "@/theme/ThemeContext";
 
 export type DialogAction = {
@@ -24,6 +25,19 @@ export default function Dialog({
   onRequestClose,
 }: DialogProps) {
   const { colors } = useTheme();
+  const [activeAction, setActiveAction] = useState<string | null>(null);
+
+  async function handleAction(action: DialogAction) {
+    if (activeAction !== null || action.disabled) return;
+
+    setActiveAction(action.label);
+
+    try {
+      await action.onPress();
+    } finally {
+      setActiveAction(null);
+    }
+  }
 
   return (
     <Modal
@@ -67,15 +81,18 @@ export default function Dialog({
               return (
                 <Pressable
                   key={action.label}
-                  onPress={action.onPress}
-                  disabled={action.disabled}
+                  onPress={() => handleAction(action)}
+                  disabled={action.disabled || activeAction !== null}
                   accessibilityRole="button"
                   accessibilityLabel={action.label}
-                  accessibilityState={{ disabled: action.disabled }}
+                  accessibilityState={{
+                    disabled: action.disabled || activeAction !== null,
+                    busy: activeAction === action.label,
+                  }}
                   style={({ pressed }) => [
                     styles.action,
                     pressed && !action.disabled && styles.pressed,
-                    action.disabled && styles.disabled,
+                    (action.disabled || activeAction !== null) && styles.disabled,
                   ]}
                 >
                   <Text style={[styles.actionText, { color: actionColor }]}>
