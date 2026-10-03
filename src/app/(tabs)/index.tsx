@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/AppIcon";
+import { TaskCard } from "@/components/task";
 import { useTasks } from "@/hooks/useTasks";
 import type { ThemeColors } from "@/theme";
 import { useTheme } from "@/theme/ThemeContext";
@@ -159,7 +160,7 @@ function StatCard({
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { tasks, loading, error, refreshTasks } = useTasks();
+  const { tasks, loading, error, refreshTasks, toggleTask } = useTasks();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -368,37 +369,20 @@ export default function DashboardScreen() {
         ) : (
           <View style={styles.taskList}>
             {todaysTasks.slice(0, 3).map((task) => (
-              <Pressable
+              <TaskCard
                 key={task.id}
+                task={task}
+                onToggle={(status) => {
+                  toggleTask(task.id, status).catch((err) => {
+                    console.error("Failed to update task status:", err);
+                    Alert.alert(
+                      "Update failed",
+                      "Unable to update the task status.",
+                    );
+                  });
+                }}
                 onPress={() => router.push(`/tasks/${task.id}`)}
-                style={({ pressed }) => [
-                  styles.taskCard,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.taskDot,
-                    {
-                      backgroundColor:
-                        task.status === "COMPLETED"
-                          ? colors.success
-                          : colors.accent,
-                    },
-                  ]}
-                />
-
-                <View style={styles.taskCopy}>
-                  <Text style={styles.taskTitle} numberOfLines={1}>
-                    {task.title}
-                  </Text>
-                  <Text style={styles.taskMeta} numberOfLines={1}>
-                    {task.category} · {task.priority.toLowerCase()}
-                  </Text>
-                </View>
-
-                
-              </Pressable>
+              />
             ))}
           </View>
         )}
