@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Checkbox } from "@/components/ui";
+import Checkbox from "@/components/ui/Checkbox";
 import TaskPriorityBadge from "@/components/task/TaskPriorityBadge";
 import TaskStatusBadge from "@/components/task/TaskStatusBadge";
 import { useTheme } from "@/theme/ThemeContext";
