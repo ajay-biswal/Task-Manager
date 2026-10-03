@@ -380,22 +380,6 @@ function ActivityRow({
   );
 }
 
-function capitalize(value: string): string {
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
-
-function getPriorityTextColor(priority: Task["priority"], colors: ThemeColors): string {
-  if (priority === "HIGH") return colors.destructive;
-  if (priority === "MEDIUM") return "#F59E0B";
-  return colors.accent;
-}
-
-function getPriorityBackground(priority: Task["priority"], colors: ThemeColors): string {
-  if (priority === "HIGH") return colors.destructive + "18";
-  if (priority === "MEDIUM") return "#F59E0B18";
-  return colors.accent + "18";
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: {
@@ -410,7 +394,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  topIconButton: {
+
     width: 46,
     height: 46,
     borderRadius: 23,
@@ -439,7 +423,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  priorityText: {
+
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "700",
