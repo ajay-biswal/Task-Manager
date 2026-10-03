@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,6 +15,7 @@ import { AppIcon } from "@/components/ui/AppIcon";
 import {
   Button,
   DateField,
+  Dialog,
   IconButton,
   Input,
   ScreenHeader,
@@ -76,6 +76,10 @@ export default function TaskFormScreen() {
   const [errors, setErrors] = useState<TaskValidationErrors>({});
   const [loadingTask, setLoadingTask] = useState(Boolean(taskId));
   const [saving, setSaving] = useState(false);
+  const [dialog, setDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   const isEditMode = Boolean(taskId);
 
@@ -147,7 +151,10 @@ export default function TaskFormScreen() {
         const existingTask = await findTask(taskId);
 
         if (!existingTask) {
-          Alert.alert("Task not found", "This task no longer exists.");
+          setDialog({
+            title: "Task not found",
+            message: "This task no longer exists.",
+          });
           return;
         }
 
@@ -166,7 +173,10 @@ export default function TaskFormScreen() {
       router.back();
     } catch (error) {
       console.error("Failed to save task:", error);
-      Alert.alert("Save failed", "Unable to save the task. Please try again.");
+      setDialog({
+        title: "Save failed",
+        message: "Unable to save the task. Please try again.",
+      });
     } finally {
       setSaving(false);
     }
@@ -402,6 +412,18 @@ export default function TaskFormScreen() {
       </ScrollView>
 
 
+      <Dialog
+        visible={dialog !== null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        actions={[
+          {
+            label: "OK",
+            onPress: () => setDialog(null),
+          },
+        ]}
+        onRequestClose={() => setDialog(null)}
+      />
     </KeyboardAvoidingView>
   );
 }
