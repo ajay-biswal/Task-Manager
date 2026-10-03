@@ -22,7 +22,6 @@ describe("date utilities", () => {
   it("formats an ISO date-time value", () => {
     const result = formatDateTime("2026-10-03T10:30:00.000Z");
 
-    expect(result).toMatch(/03 Oct 2026/);
-    expect(result).toMatch(/10|11|12/);
+    expect(result).toMatch(/^03 Oct 2026, \d{2}:\d{2} (am|pm)$/i);
   });
 });
