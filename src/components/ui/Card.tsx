@@ -47,7 +47,7 @@ export default function Card({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [pressed && styles.pressed]}
+      style={({ pressed }) => [style, pressed && styles.pressed]}
     >
       {content}
     </Pressable>
