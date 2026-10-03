@@ -741,6 +741,9 @@ function createStyles(
     pressed: {
       opacity: 0.72,
     },
+    disabledAction: {
+      opacity: 0.55,
+    },
     track: {
       position: "absolute",
       width: 124,
