@@ -146,6 +146,13 @@ function StatCard({
       ]}
     >
       <View style={[styles.statIcon, { backgroundColor: iconBackground }]}>
+        <AppIcon name={icon} size={21} color={iconColor} />
+      </View>
+
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+
+      
     </View>
   );
 }
@@ -207,20 +214,17 @@ export default function DashboardScreen() {
             </View>
 
             <View style={styles.headerActions}>
+
               <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/tasks",
-                    params: { focusSearch: "1" },
-                  })
-                }
+                onPress={() => router.push("/settings")}
                 style={({ pressed }) => [
                   styles.headerButton,
                   pressed && styles.pressed,
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Search tasks"
+                accessibilityLabel="Open settings"
               >
+                
         </View>
 
         <View style={styles.statsRow}>
@@ -312,6 +316,7 @@ export default function DashboardScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Add a new task"
               >
+                
               </Pressable>
             ))}
           </View>
@@ -329,6 +334,7 @@ export default function DashboardScreen() {
             accessibilityLabel="Bulk import tasks"
           >
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#17243A" : "#E4EFFD" }]}>
+              
           </Pressable>
 
           <Pressable
@@ -349,6 +355,7 @@ export default function DashboardScreen() {
             accessibilityLabel="Export tasks"
           >
             <View style={[styles.quickActionIcon, { backgroundColor: isDark ? "#16301F" : "#DDF8E2" }]}>
+              
           </Pressable>
         </View>
       </ScrollView>
@@ -655,47 +662,41 @@ function createStyles(colors: ThemeColors, topInset = 0, screenWidth = 390, isDa
       color: colors.mutedForeground,
     },
     quickActions: {
-      flexDirection: "row",
       gap: 12,
       marginTop: 22,
     },
     quickActionCard: {
-      flex: 1,
-      minHeight: 112,
+      minHeight: 86,
       borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
+      flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
-      paddingHorizontal: 10,
-      paddingVertical: 12,
+      paddingHorizontal: 16,
+      gap: 13,
     },
     quickActionIcon: {
-      width: 46,
-      height: 46,
-      borderRadius: 14,
+      width: 52,
+      height: 52,
+      borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 8,
     },
     quickActionCopy: {
-      alignItems: "center",
-      width: "100%",
+      flex: 1,
     },
     quickActionTitle: {
-      fontSize: 15,
-      lineHeight: 20,
+      fontSize: 17,
+      lineHeight: 22,
       fontWeight: "800",
       color: colors.foreground,
-      textAlign: "center",
     },
     quickActionSubtitle: {
       marginTop: 2,
-      fontSize: 11,
-      lineHeight: 15,
+      fontSize: 13,
+      lineHeight: 18,
       fontWeight: "500",
       color: colors.mutedForeground,
-      textAlign: "center",
     },
     pressed: {
       opacity: 0.72,
