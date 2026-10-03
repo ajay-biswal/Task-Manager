@@ -283,7 +283,6 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.fieldCard,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <View style={styles.labelRow}>
@@ -318,7 +317,6 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.section,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <FieldLabel colors={colors} required>Priority</FieldLabel>
@@ -331,7 +329,6 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.section,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <FieldLabel colors={colors} required>Schedule</FieldLabel>
@@ -366,7 +363,6 @@ export default function TaskFormScreen() {
           <View
             style={[
               styles.section,
-              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
             <FieldLabel colors={colors}>Status</FieldLabel>
