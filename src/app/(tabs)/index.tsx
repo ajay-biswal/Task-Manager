@@ -153,7 +153,7 @@ function StatCard({
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { tasks, loading, error, refreshTasks, toggleTask } = useTasks();
+  const { tasks, loading, error, refreshTasks, toggleTask, isTaskPending } = useTasks();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -332,6 +332,7 @@ export default function DashboardScreen() {
               <TaskCard
                 key={task.id}
                 task={task}
+                toggleDisabled={isTaskPending(task.id)}
                 onToggle={(status) => {
                   toggleTask(task.id, status).catch((err) => {
                     console.error("Failed to update task status:", err);
